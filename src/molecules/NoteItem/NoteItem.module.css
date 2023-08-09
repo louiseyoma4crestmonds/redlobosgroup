@@ -1,0 +1,31 @@
+.noteItemContainer {
+  @apply p-4 border rounded-lg border-[#E1E1E1];
+}
+
+.noteItemSummaryText {
+  @apply mb-6 text-sm leading-7;
+}
+
+.noteItemFooter {
+  @apply flex justify-between items-center;
+}
+
+.noteItemFooter .timeStamp {
+  @apply text-crest-sub-text text-sm;
+}
+
+.noteItemFooter .actions {
+  @apply flex space-x-5;
+}
+
+.noteItemFooter .actionBtn {
+  @apply text-sm;
+}
+
+.noteItemFooter .actionBtnView {
+  @apply text-crest-purple;
+}
+
+.noteItemFooter .actionBtnDelete {
+  @apply text-crest-red;
+}

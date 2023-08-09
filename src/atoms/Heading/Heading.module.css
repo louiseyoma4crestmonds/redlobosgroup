@@ -1,0 +1,37 @@
+.heading {
+  @apply font-bold;
+}
+
+/* Modes */
+.headingDark {
+  @apply text-white;
+}
+
+.headingLight {
+  @apply text-black;
+}
+
+/* Variants */
+.headingXxl {
+  @apply text-[38px];
+}
+
+.headingXl {
+  @apply text-[28px];
+}
+
+.headingLg {
+  @apply text-[22px];
+}
+
+.headingMd {
+  @apply text-[18px];
+}
+
+.headingSm {
+  @apply text-[16px];
+}
+
+.headingXs {
+  @apply text-[14px];
+}

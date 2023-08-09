@@ -1,0 +1,19 @@
+.navLink {
+  @apply flex items-center mb-7;
+}
+
+.navLink svg {
+  @apply fill-crest-sub-text;
+}
+
+.navLink:hover .navLinkText,
+.navLink:hover svg,
+.navLinkActive,
+.navLinkActive .navLinkText,
+.navLinkActive svg {
+  @apply text-crest-red fill-crest-red ease-in-out duration-300;
+}
+
+.navLinkText {
+  @apply ml-3 text-crest-sub-text;
+}

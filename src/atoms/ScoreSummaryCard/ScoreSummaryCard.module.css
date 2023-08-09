@@ -1,0 +1,15 @@
+.scoreCardContainer {
+  @apply flex;
+}
+
+.scoreCardBadge {
+  @apply flex items-start mr-2;
+}
+
+.scoreCardContent {
+  @apply flex flex-col;
+}
+
+.scoreCardContent .scoreCardTitle {
+  @apply text-crest-sub-text text-sm;
+}

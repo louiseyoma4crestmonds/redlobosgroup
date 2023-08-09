@@ -1,0 +1,16 @@
+.progressStatusContainer {
+  @apply px-5 py-2 rounded-full;
+}
+
+/* Statuses */
+.progressStatusNotStated {
+  @apply bg-crest-sub-text/[0.2] text-crest-black;
+}
+
+.progressStatusInProgress {
+  @apply bg-crest-red/[0.2] text-crest-red;
+}
+
+.progressStatusCompleted {
+  @apply bg-crest-green/[0.2] text-crest-green;
+}

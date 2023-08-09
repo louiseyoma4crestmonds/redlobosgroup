@@ -1,0 +1,23 @@
+.userProfileMenuContainer {
+  @apply flex relative;
+}
+
+.userProfileMenuToggle {
+  @apply flex justify-center ml-1 z-10;
+}
+
+.userProfileMenuToggleButtonIcon {
+  @apply ml-2 w-4 h-4 transform duration-200;
+}
+
+.userProfileMenuToggleButtonIconOpen {
+  @apply rotate-180;
+}
+
+.userProfileDropdownMenu {
+  @apply hidden origin-top-left absolute -right-2 mt-9 w-56 rounded-md shadow-2xl bg-white z-10;
+}
+
+.userProfileDropdownMenuOpen {
+  @apply block transform transition duration-75 ease-in-out;
+}

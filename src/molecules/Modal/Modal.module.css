@@ -1,0 +1,7 @@
+.modal {
+  @apply absolute top-0 right-0 left-0 bottom-0 flex justify-center items-center;
+}
+
+.modalContent {
+  @apply flex flex-col items-center justify-center z-50;
+}

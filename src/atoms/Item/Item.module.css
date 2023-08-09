@@ -1,0 +1,11 @@
+.itemWrapper {
+  @apply p-4 mb-5 border border-[#E5E5E5] rounded-xl;
+}
+
+a.itemWrapper {
+  @apply block hover:shadow duration-300 ease-in-out hover:-mx-1 hover:mb-5;
+}
+
+.itemWrapper:last-child {
+  @apply mb-0;
+}

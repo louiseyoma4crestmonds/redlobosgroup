@@ -1,0 +1,21 @@
+.btn {
+  @apply inline-flex items-center px-6 py-3 rounded-lg font-medium ease-in-out duration-300;
+}
+
+.btn:disabled,
+.btn:disabled:hover {
+  @apply cursor-not-allowed bg-gray-50 text-gray-200;
+}
+.btn:disabled:hover {
+  @apply animate-shake;
+}
+
+/* Button Widths */
+.btnFull {
+  @apply w-full;
+}
+
+/* Button Varients */
+.btnPrimary {
+  @apply bg-gold text-white;
+}

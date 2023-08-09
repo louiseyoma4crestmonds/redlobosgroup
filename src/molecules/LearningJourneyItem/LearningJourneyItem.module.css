@@ -1,0 +1,15 @@
+.learningJourneyItemContainer {
+  @apply flex justify-between;
+}
+
+.learningJourneyItemContent {
+  @apply flex items-center;
+}
+
+.learningJourneyItemContent .itemNumber {
+  @apply flex rounded-full text-crest-red bg-[#FFDDC4] w-10 h-10 text-lg items-center justify-center;
+}
+
+.learningJourneyItemContent .itemTitle {
+  @apply ml-7 text-lg font-medium;
+}

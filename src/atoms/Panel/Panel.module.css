@@ -1,0 +1,17 @@
+.panelWrapper {
+  @apply flex relative lg:flex-col bg-white rounded-xl p-5 w-full;
+}
+
+@screen desktop {
+  .panelWrapper {
+    @apply p-5;
+  }
+}
+
+.panelHasShadow {
+  @apply drop-shadow-lg;
+}
+
+.panelDeepBlue {
+  @apply bg-crest-deep-blue text-white;
+}
