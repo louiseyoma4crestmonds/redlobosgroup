@@ -3,6 +3,14 @@
 @tailwind utilities;
 
 @font-face {
+  font-family: "Vidaloka", serif;
+  src: local("Vidaloka Regular"), local("VidalokaRegular"),
+    url("/fonts/VidalokaRegular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
   font-family: GT Walsheim Pro;
   src: local("GT Walsheim Pro Regular"), local("GTWalsheimProRegular"),
     url("/fonts/GTWalsheimProRegular.woff2") format("woff2"),
@@ -35,6 +43,6 @@
 @layer base {
   html {
     position: relative;
-    font-family: GT Walsheim Pro, sans-serif;
+    font-family: Vidaloka, serif;
   }
 }

@@ -7,6 +7,7 @@ const customColors = {
   footerBg: "#212529",
   gold: "#BD9A68",
   green1: "#F9FAF1",
+  gray1: "#6c757d",
 };
 
 module.exports = {
@@ -30,6 +31,7 @@ module.exports = {
         redLobosFooterBackground: customColors.footerBg,
         gold: customColors.gold,
         green1: customColors.green1,
+        gray1: customColors.gray1,
       },
       keyframes: {
         shake: {

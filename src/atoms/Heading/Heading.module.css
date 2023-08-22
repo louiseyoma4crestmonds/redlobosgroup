@@ -13,25 +13,25 @@
 
 /* Variants */
 .headingXxl {
-  @apply text-[38px];
+  @apply text-[28px] tablet:text-[32px];
 }
 
 .headingXl {
-  @apply text-[28px];
+  @apply text-[22px] tablet:text-[28px];
 }
 
 .headingLg {
-  @apply text-[22px];
+  @apply text-[18px] tablet:text-[22px];
 }
 
 .headingMd {
-  @apply text-[18px];
+  @apply text-[16px] tablet:text-[18px];
 }
 
 .headingSm {
-  @apply text-[16px];
+  @apply text-[14px] tablet:text-[16px];
 }
 
 .headingXs {
-  @apply text-[14px];
+  @apply text-[12px] tablet:text-[14px];
 }

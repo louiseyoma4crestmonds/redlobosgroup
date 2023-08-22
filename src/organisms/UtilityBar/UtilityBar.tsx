@@ -13,9 +13,12 @@ import twitter from "../../../public/twitter.png";
 import instagram from "../../../public/instagram.png";
 import linkedin from "../../../public/linkedin.png";
 import facebook from "../../../public/facebook.png";
+import { useRouter } from "next/router";
 
 function UtilityBar(): JSX.Element {
+  const router = useRouter();
   const [showMobileNavBar, setShowMobileNavBar] = useState(false);
+  const [showAboutDropdown, setShowAboutDropdown] = useState(false);
   const slideInRightAnimation = keyframes`${slideInRight}`;
 
   const SlideInRightDiv = styled.div`
@@ -49,31 +52,70 @@ function UtilityBar(): JSX.Element {
                 </Heading>
               </div>
             </div>
-            <div className="px-6 py-2 border-b cursor-pointer flex justify-between">
+            <div
+              className="px-6 py-2 border-b cursor-pointer flex justify-between"
+              onClick={() => {
+                router.push({ pathname: "/" });
+              }}
+            >
               <div className="self-center">HOME</div>
               <div className="self-center">
+                {/*
                 <FontAwesomeIcon
                   icon={faAngleDown}
                   style={{ fontSize: 20, color: "#BD9A68" }}
                 />
+                */}
               </div>
             </div>
-            <div className="px-6 py-2 border-b cursor-pointer flex justify-between">
-              <div className="self-center">ABOUT</div>
-              <div className="self-center">
-                <FontAwesomeIcon
-                  icon={faAngleDown}
-                  style={{ fontSize: 20, color: "#BD9A68" }}
-                />
+            <div>
+              <div
+                className="px-6 py-2 border-b cursor-pointer flex justify-between"
+                onClick={() => {
+                  setShowAboutDropdown(!showAboutDropdown);
+                }}
+              >
+                <div className="self-center">ABOUT</div>
+                <div className="self-center">
+                  <FontAwesomeIcon
+                    icon={faAngleDown}
+                    style={{ fontSize: 20, color: "#BD9A68" }}
+                  />
+                </div>
+              </div>
+              <div className={showAboutDropdown ? "" : "hidden"}>
+                <div
+                  className="cursor-pointer py-2 border-b pl-12"
+                  onClick={() => {
+                    router.push({ pathname: "/overview" });
+                  }}
+                >
+                  Overview
+                </div>
+                <div
+                  className="cursor-pointer py-2 border-b pl-12"
+                  onClick={() => {
+                    router.push({ pathname: "/mission" });
+                  }}
+                >
+                  Mission
+                </div>
               </div>
             </div>
-            <div className="px-6 py-2 border-b cursor-pointer flex justify-between">
+            <div
+              className="px-6 py-2 border-b cursor-pointer flex justify-between"
+              onClick={() => {
+                router.push({ pathname: "/contact" });
+              }}
+            >
               <div className="self-center">CONTACTS</div>
               <div className="self-center">
+                {/*
                 <FontAwesomeIcon
                   icon={faAngleDown}
                   style={{ fontSize: 20, color: "#BD9A68" }}
                 />
+                */}
               </div>
             </div>
             <div className="px-6 mt-6 flex justify-between">
