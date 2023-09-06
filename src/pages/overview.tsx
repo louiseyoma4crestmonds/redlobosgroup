@@ -1,14 +1,13 @@
 import Image from "next/image";
+import { useRouter } from "next/router";
 import styled, { keyframes } from "styled-components";
-import { slideInRight, slideInLeft, zoomIn } from "react-animations";
+import { zoomIn } from "react-animations";
 import { useEffect, useState } from "react";
 import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
-import Button from "@/atoms/Button";
 import Footer from "@/organisms/Footer";
 import logo from "../../public/logo.gif";
 import testimony1 from "../../public/testimonial1.jpg";
-import { useRouter } from "next/router";
 
 function Overview(): JSX.Element {
   const router = useRouter();
@@ -58,6 +57,9 @@ function Overview(): JSX.Element {
             <div className="flex gap-2 place-content-center">
               <div
                 className="cursor-pointer"
+                tabIndex={0}
+                role="button"
+                onKeyDown={() => {}}
                 onClick={() => {
                   router.push({ pathname: "/" });
                 }}

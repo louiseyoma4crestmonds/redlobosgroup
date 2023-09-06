@@ -1,11 +1,10 @@
 import Image from "next/image";
-
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import styled, { keyframes } from "styled-components";
 import { slideInRight, slideInLeft, zoomIn } from "react-animations";
 import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
-import Button from "@/atoms/Button";
 import Footer from "@/organisms/Footer";
 import logo from "../../public/logo.gif";
 import mission from "../../public/mission.jpg";
@@ -13,7 +12,6 @@ import vision from "../../public/vision.jpg";
 import firstSittingRoom from "../../public/firstSittingRoom.png";
 import commercialDevelopment from "../../public/commercialDevelopment.jpg";
 import industrialDevelopment from "../../public/industrialDevelopment.jpg";
-import { useRouter } from "next/router";
 
 function Mission(): JSX.Element {
   const router = useRouter();
@@ -40,7 +38,7 @@ function Mission(): JSX.Element {
         setIntroPage(false);
       }, 5000);
     }
-  });
+  }, [setIntroPage]);
 
   return (
     <div>
@@ -70,6 +68,9 @@ function Mission(): JSX.Element {
             <div className="flex gap-2 place-content-center">
               <div
                 className="cursor-pointer"
+                tabIndex={0}
+                role="button"
+                onKeyDown={() => {}}
                 onClick={() => {
                   router.push({ pathname: "/" });
                 }}
@@ -198,14 +199,17 @@ function Mission(): JSX.Element {
                     ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel ipsium
                     lorel ipsium
                   </p>
-                  <p
+                  <div
                     className="text-gold mt-6 cursor-pointer"
+                    tabIndex={0}
+                    role="button"
+                    onKeyDown={() => {}}
                     onClick={() => {
                       router.push({ pathname: "/mission" });
                     }}
                   >
                     LEARN MORE
-                  </p>
+                  </div>
                 </div>
               </div>
               <div className="space-y-4">
@@ -228,14 +232,17 @@ function Mission(): JSX.Element {
                     ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel ipsium
                     lorel ipsium
                   </p>
-                  <p
+                  <div
                     className="text-gold mt-6 cursor-pointer"
+                    tabIndex={0}
+                    role="button"
+                    onKeyDown={() => {}}
                     onClick={() => {
                       router.push({ pathname: "/mission" });
                     }}
                   >
                     LEARN MORE
-                  </p>
+                  </div>
                 </div>
               </div>
               <div className="space-y-4">
@@ -258,14 +265,17 @@ function Mission(): JSX.Element {
                     ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel ipsium
                     lorel ipsium
                   </p>
-                  <p
+                  <div
                     className="text-gold mt-6 cursor-pointer"
+                    tabIndex={0}
+                    role="button"
+                    onKeyDown={() => {}}
                     onClick={() => {
                       router.push({ pathname: "/mission" });
                     }}
                   >
                     LEARN MORE
-                  </p>
+                  </div>
                 </div>
               </div>
             </div>

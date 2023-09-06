@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useRouter } from "next/router";
 import Image from "next/image";
 import styled, { keyframes } from "styled-components";
 import { slideInRight } from "react-animations";
@@ -13,7 +14,6 @@ import twitter from "../../../public/twitter.png";
 import instagram from "../../../public/instagram.png";
 import linkedin from "../../../public/linkedin.png";
 import facebook from "../../../public/facebook.png";
-import { useRouter } from "next/router";
 
 function UtilityBar(): JSX.Element {
   const router = useRouter();
@@ -54,6 +54,9 @@ function UtilityBar(): JSX.Element {
             </div>
             <div
               className="px-6 py-2 border-b cursor-pointer flex justify-between"
+              tabIndex={0}
+              role="button"
+              onKeyDown={() => {}}
               onClick={() => {
                 router.push({ pathname: "/" });
               }}
@@ -71,6 +74,9 @@ function UtilityBar(): JSX.Element {
             <div>
               <div
                 className="px-6 py-2 border-b cursor-pointer flex justify-between"
+                tabIndex={0}
+                role="button"
+                onKeyDown={() => {}}
                 onClick={() => {
                   setShowAboutDropdown(!showAboutDropdown);
                 }}
@@ -86,6 +92,9 @@ function UtilityBar(): JSX.Element {
               <div className={showAboutDropdown ? "" : "hidden"}>
                 <div
                   className="cursor-pointer py-2 border-b pl-12"
+                  tabIndex={0}
+                  role="button"
+                  onKeyDown={() => {}}
                   onClick={() => {
                     router.push({ pathname: "/overview" });
                   }}
@@ -94,6 +103,9 @@ function UtilityBar(): JSX.Element {
                 </div>
                 <div
                   className="cursor-pointer py-2 border-b pl-12"
+                  tabIndex={0}
+                  role="button"
+                  onKeyDown={() => {}}
                   onClick={() => {
                     router.push({ pathname: "/mission" });
                   }}
@@ -104,6 +116,9 @@ function UtilityBar(): JSX.Element {
             </div>
             <div
               className="px-6 py-2 border-b cursor-pointer flex justify-between"
+              tabIndex={0}
+              role="button"
+              onKeyDown={() => {}}
               onClick={() => {
                 router.push({ pathname: "/contact" });
               }}

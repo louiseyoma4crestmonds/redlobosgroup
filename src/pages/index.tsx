@@ -1,7 +1,7 @@
 import Image from "next/image";
 import styled, { keyframes } from "styled-components";
 import { slideInRight, slideInLeft, zoomIn } from "react-animations";
-
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
@@ -15,8 +15,6 @@ import commercialDevelopment from "../../public/commercialDevelopment.jpg";
 import industrialDevelopment from "../../public/industrialDevelopment.jpg";
 import firstImage from "../../public/firstImage.jpg";
 import secondImage from "../../public/secondImage.jpg";
-
-import { useRouter } from "next/router";
 
 function Home(): JSX.Element {
   const router = useRouter();
@@ -43,7 +41,7 @@ function Home(): JSX.Element {
         setIntroPage(false);
       }, 3000);
     }
-  });
+  }, [introPage]);
 
   return (
     <div>
@@ -51,7 +49,7 @@ function Home(): JSX.Element {
       <div className={!introPage ? "hidden" : ""}>
         <div className="w-screen h-screen flex place-content-center bg-redLobosBackground">
           <div className="self-center">
-            <Image width={500} height={500} src={logo} />
+            <Image alt="logo" width={500} height={500} src={logo} />
           </div>
         </div>
       </div>
@@ -65,6 +63,7 @@ function Home(): JSX.Element {
         {/* END OF UTILITY BAR */}
 
         <div className="px-6 bg-green1 tablet:px-28">
+          {/* eslint-disable jsx-a11y/media-has-caption */}
           <audio autoPlay>
             <source src="/audio.mp3" type="audio/ogg" />
             <source src="/audio.mp3" type="audio/mpeg" />
@@ -109,6 +108,9 @@ function Home(): JSX.Element {
                     >
                       <span
                         className="w-full text-center"
+                        tabIndex={0}
+                        role="button"
+                        onKeyDown={() => {}}
                         onClick={() => {
                           router.push({ pathname: "/mission" });
                         }}
@@ -167,14 +169,17 @@ function Home(): JSX.Element {
                         Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium
                         Lorel ipsium lorel ipsium
                       </p>
-                      <p
+                      <div
                         className="text-gold mt-6 cursor-pointer"
+                        tabIndex={0}
+                        role="button"
+                        onKeyDown={() => {}}
                         onClick={() => {
                           router.push({ pathname: "/mission" });
                         }}
                       >
                         LEARN MORE
-                      </p>
+                      </div>
                     </div>
                   </div>
                   <div className="space-y-4">
@@ -199,14 +204,17 @@ function Home(): JSX.Element {
                         Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium
                         Lorel ipsium lorel ipsium
                       </p>
-                      <p
+                      <div
                         className="text-gold mt-6 cursor-pointer"
+                        tabIndex={0}
+                        role="button"
+                        onKeyDown={() => {}}
                         onClick={() => {
                           router.push({ pathname: "/mission" });
                         }}
                       >
                         LEARN MORE
-                      </p>
+                      </div>
                     </div>
                   </div>
                   <div className="space-y-4">
@@ -231,14 +239,17 @@ function Home(): JSX.Element {
                         Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium
                         Lorel ipsium lorel ipsium
                       </p>
-                      <p
+                      <div
                         className="text-gold mt-6 cursor-pointer"
+                        tabIndex={0}
+                        role="button"
+                        onKeyDown={() => {}}
                         onClick={() => {
                           router.push({ pathname: "/mission" });
                         }}
                       >
                         LEARN MORE
-                      </p>
+                      </div>
                     </div>
                   </div>
                 </div>

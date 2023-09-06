@@ -55,6 +55,9 @@ function Footer(): JSX.Element {
           <div className="mt-6 text-gray1 space-y-4">
             <div
               className="cursor-pointer"
+              tabIndex={0}
+              role="button"
+              onKeyDown={() => {}}
               onClick={() => {
                 router.push({ pathname: "/mission" });
               }}
