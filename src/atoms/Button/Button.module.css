@@ -15,7 +15,11 @@
   @apply w-full;
 }
 
-/* Button Varients */
+/* Button Variants */
 .btnPrimary {
-  @apply bg-gold text-white;
+  @apply bg-gold text-white hover:bg-black hover:text-white;
+}
+
+.btnSecondary {
+  @apply bg-green1 text-gold border border-gold hover:bg-gold hover:text-white;
 }

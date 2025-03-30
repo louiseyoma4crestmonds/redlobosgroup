@@ -82,7 +82,7 @@ function Home(): JSX.Element {
                   <ZoomInDiv>
                     <Heading Tag="h1" variant="lg">
                       <span className="text-center">
-                        QUICK WAY TO FIND YOUR NEW PROPERTY & NEW FUTURE
+                        SERVICE ACCOMMODATION & PROPERTY DEVELOPMENT
                       </span>
                     </Heading>
                   </ZoomInDiv>
@@ -91,9 +91,10 @@ function Home(): JSX.Element {
                 <div>
                   <ZoomInDiv>
                     <p className="text-gray1 leading-8">
-                      Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel
-                      ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel ipsium
-                      lorel ipsium
+                      Red Lobos group ltd provides accommodation for long and
+                      short business trips, tourist, families, English Summer
+                      holiday school for students, tailored holiday experience,
+                      relocators.
                     </p>
                   </ZoomInDiv>
                 </div>
@@ -103,7 +104,7 @@ function Home(): JSX.Element {
                       variant="primary"
                       width="full"
                       onClick={() => {
-                        router.push({ pathname: "/mission" });
+                        router.push({ pathname: "/properties" });
                       }}
                     >
                       <span
@@ -112,10 +113,10 @@ function Home(): JSX.Element {
                         role="button"
                         onKeyDown={() => {}}
                         onClick={() => {
-                          router.push({ pathname: "/mission" });
+                          router.push({ pathname: "/properties" });
                         }}
                       >
-                        LEARN MORE
+                        BOOK NOW
                       </span>
                     </Button>
                   </div>
@@ -159,15 +160,17 @@ function Home(): JSX.Element {
                     <div>
                       <Heading Tag="h1" variant="md">
                         <span className="text-center">
-                          RESIDENTIAL DEVELOPMENT
+                          SERVICE ACCOMODATION
                         </span>
                       </Heading>
                     </div>
                     <div>
                       <p className="text-[#9B9B9B] leading-8">
-                        Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium
-                        Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium
-                        Lorel ipsium lorel ipsium
+                        Looking for a comfortable and hassle-free stay? Our
+                        luxury service accommodations offer the perfect blend of
+                        home comfort and hotel convenience—whether you are
+                        traveling for business, a short getaway, or an extended
+                        stay.
                       </p>
                       <div
                         className="text-gold mt-6 cursor-pointer"
@@ -193,16 +196,15 @@ function Home(): JSX.Element {
                     </div>
                     <div>
                       <Heading Tag="h1" variant="md">
-                        <span className="text-center">
-                          COMMERCIAL DEVELOPMENT
-                        </span>
+                        <span className="text-center">PROPERTY MANAGEMENT</span>
                       </Heading>
                     </div>
                     <div>
                       <p className="text-[#9B9B9B] leading-8">
-                        Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium
-                        Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium
-                        Lorel ipsium lorel ipsium
+                        Own a property? Let us handle the hard work while you
+                        enjoy the rewards! Our expert property management
+                        services ensure your investment is profitable,
+                        stress-free, and well-maintained.
                       </p>
                       <div
                         className="text-gold mt-6 cursor-pointer"
@@ -228,16 +230,17 @@ function Home(): JSX.Element {
                     </div>
                     <div>
                       <Heading Tag="h1" variant="md">
-                        <span className="text-center">
-                          INDUSTRIAL DEVELOPMENT
-                        </span>
+                        <span className="text-center">ADD ON SERVICES</span>
                       </Heading>
                     </div>
                     <div>
                       <p className="text-[#9B9B9B] leading-8">
-                        Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium
-                        Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium
-                        Lorel ipsium lorel ipsium
+                        Our add-on services include romantic dinner and
+                        Valentine stay setups for an intimate experience,
+                        professional content creation and podcast production,
+                        beautifully curated proposal setups for the perfect Yes,
+                        and fun paint & sip events for a creative and relaxing
+                        time.
                       </p>
                       <div
                         className="text-gold mt-6 cursor-pointer"
