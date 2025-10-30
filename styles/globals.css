@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("../fonts/VidalokaRegular.ttf");
+  font-weight: bold;
+  font-style: normal;
+}
+
+@layer base {
+  html {
+    position: relative;
+    font-family: Montserrat;
+  }
+}

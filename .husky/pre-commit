@@ -1,0 +1,34 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+yarn lint-staged
+
+echo '🏗👷🏼 Styling, testing and building your code before committing.'
+
+yarn check-types ||
+(
+  echo '🙈 Failed type checking, please fix the errors above and try again.'
+  false;
+)
+
+yarn check-format ||
+(
+  echo '🤮 Looks like your styling sucks, Prettier check failed, run yarn format, then try again.'
+  false;
+)
+
+yarn check-lint ||
+(
+  echo '💩 Looks like you need to brush up on your code standards, make the recommended changes above and then try again.'
+  false;
+)
+
+echo '✅ Codes looking good...running build'
+
+yarn build ||
+(
+  echo '🃏 Looks like your build failed, please fix the errors above and try again.'
+  false;
+)
+
+echo '🎉 Build complete, committing now...'

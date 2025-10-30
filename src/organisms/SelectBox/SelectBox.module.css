@@ -1,0 +1,44 @@
+/* Width Styling*/
+.normalWidth {
+  @apply w-[498px];
+}
+.fullWidth {
+  @apply w-full;
+}
+.middleWidth {
+  @apply w-11/12;
+}
+
+/* Variant Styling*/
+.selectVariant {
+  @apply self-center z-50 cursor-pointer w-full h-full text-xs  rounded px-4 py-2  outline-none;
+}
+
+.label {
+  @apply text-sm font-bold text-black;
+}
+
+.dropSouth {
+  @apply self-center;
+}
+
+/* select variant styling */
+.selectBlock {
+  @apply h-full w-full text-xs font-bold border rounded tablet:text-sm;
+}
+
+.selectValue {
+  @apply self-center font-normal text-xs font-bold;
+}
+
+.selectInput {
+  @apply px-3 self-center  h-full flex justify-between place-content-center;
+}
+
+.selectOptionsBlock {
+  @apply w-full z-10 self-center h-auto relative overflow-y-auto  rounded bg-white border border-black shadow-md text-sm font-normal;
+}
+
+.selectOptions {
+  @apply border-b py-2 px-4 cursor-pointer self-center font-normal;
+}

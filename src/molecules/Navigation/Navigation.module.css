@@ -1,0 +1,31 @@
+.navigationContainer {
+  @apply bg-white py-6;
+}
+
+@screen desktop {
+  .navigationContainer {
+    @apply flex flex-col justify-between px-8 pb-8 pt-16 fixed left-0 top-0 bottom-0 bg-white h-screen w-[290px];
+  }
+}
+
+.navigationBrand {
+  @apply block w-[140px] h-[32px];
+}
+
+.sidebarContainer {
+  @apply hidden;
+}
+
+@screen desktop {
+  .sidebarContainer {
+    @apply flex flex-col justify-between px-8 pb-8 pt-16 fixed left-0 top-0 bottom-0 bg-white h-screen w-[290px];
+  }
+}
+
+.sidebarBrand {
+  @apply ml-2 mb-16;
+}
+
+.sidebarPrimaryNav {
+  @apply flex flex-col;
+}

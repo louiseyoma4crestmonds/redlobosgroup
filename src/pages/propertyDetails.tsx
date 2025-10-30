@@ -1,0 +1,231 @@
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { getPropertyAmenities, getPropertyImages } from "./api";
+import UtilityBar from "@/organisms/UtilityBar";
+import Heading from "@/atoms/Heading";
+import Footer from "@/organisms/Footer";
+import logo from "../../public/logoAnimation.gif";
+import Button from "@/atoms/Button";
+import ReserveScheduler from "@/organisms/ReserveScheduler";
+import Calendar from "@/organisms/Calendar";
+
+function PropertyDetails(): JSX.Element {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const [events, setEvents] = useState([]);
+  const [amenities, setAmenities] = useState([]);
+  const [images, setImages] = useState([]);
+  const [introPage, setIntroPage] = useState<boolean>(true);
+  const [showCalendar, setShowCalendar] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (introPage) {
+      setIntroPage(true);
+      setTimeout(() => {
+        setIntroPage(false);
+      }, 5000);
+    }
+  });
+
+  useEffect(() => {
+    if (router.query.id) {
+      getPropertyAmenities(router.query.id).then((response: any) => {
+        setAmenities(response.data.data[0]);
+      });
+      getPropertyImages(router.query.id).then((response: any) => {
+        setImages(response.data.data[0]);
+      });
+    }
+  }, [router.query.id]);
+
+  useEffect(() => {
+    if (session) {
+      fetch("/api/calendar")
+        .then((res) => res.json())
+        .then((data) => setEvents(data));
+    }
+  }, [session]);
+
+  return (
+    <div>
+      {/* LOGO LOADING SCREEN */}
+      <div className={!introPage ? "hidden" : ""}>
+        <div className="w-screen h-screen flex place-content-center bg-green1">
+          <div className="self-center">
+            <Image width={200} height={200} src={logo} />
+          </div>
+        </div>
+      </div>
+      {/* END OF LOGO LOADING SCREEN */}
+
+      <div className={introPage ? "hidden" : ""}>
+        {/* UTILITY BAR */}
+        <div>
+          <UtilityBar activeLink="PROPERTIES" />
+        </div>
+        {/* END OF UTILITY BAR */}
+
+        <div className="px-6 bg-green1 space-y-4">
+          <div className="text-center pt-12 space-y-3 bg-green1">
+            <div>
+              <Heading Tag="h1" variant="xxl">
+                <span className="text-center">PROPERTY DETAILS</span>
+              </Heading>
+            </div>
+            <div className="flex gap-2 place-content-center">
+              <div
+                className="cursor-pointer"
+                tabIndex={0}
+                role="button"
+                onKeyDown={() => {}}
+                onClick={() => {
+                  router.push({ pathname: "/" });
+                }}
+              >
+                HOME
+              </div>
+              <div> &gt;</div>
+              <div className="text-gray1">OVERVIEW</div>
+            </div>
+          </div>
+
+          {/*
+            {events.map((calendarEvent: any) => (
+              <div key={calendarEvent.id}>- {calendarEvent.summary}</div>
+            ))}
+            <iframe
+              src="https://calendar.google.com/calendar/embed?src=b3VpbWFzZ2xvYmFsQGdtYWlsLmNvbQ&ctz=UTC"
+              style={{ border: "0", width: "80%", height: "80vh" }}
+              title="nby"
+            />
+            */}
+          <div className="w-full flex flex-col laptop:flex-row desktop:flex-row phone:gap-y-4 gap-x-4">
+            <div className="basis-3/6 phone:w-full">
+              {images.map((image: any) => (
+                <div>
+                  {image.primary ? (
+                    <div
+                      style={{
+                        backgroundImage: "url(" + image.image + ")",
+                        backgroundRepeat: "no-repeat",
+                        backgroundSize: "cover",
+                        backgroundPositionX: "center",
+                      }}
+                      className="h-[300px] laptop:h-[420px] desktop:h-[420px] tablet:h-[420px]"
+                    />
+                  ) : (
+                    ""
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="basis-3/6 grid grid-cols grid-cols-2  gap-4">
+              {images.map((image: any, index: number) => (
+                <div className={image.primary ? "hidden" : ""}>
+                  {image.primary === false && index < 5 ? (
+                    <div>
+                      <div className="basis-3/6 h-[204px]">
+                        <div
+                          style={{
+                            backgroundImage: "url(" + image.image + ")",
+                            backgroundRepeat: "no-repeat",
+                            backgroundSize: "cover",
+                            backgroundPositionX: "center",
+                          }}
+                          className="h-full p-4"
+                        ></div>
+                      </div>
+                    </div>
+                  ) : (
+                    ""
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="w-full flex flex-row-reverse ">
+            <div className="w-full desktop:w-1/4 laptop:w-1/4 tablet:w-1/4">
+              <Button variant="primary" width="full">
+                <span className="w-full text-center">SHOW ALL PHOTOS</span>
+              </Button>
+            </div>
+          </div>
+          <div>
+            <div className="text-black">Tourist Best Find in Portsmouth</div>
+            <div className="text-black">
+              2 Guests - 1 Bedroom - 1 Bath - Water Heater{" "}
+            </div>
+          </div>
+          <hr />
+          <div className="py-4 w-full flex tablet:gap-x-12 desktop:gap-x-12 laptop:gap-x-12 tablet:flex-row desktop:flex-row laptop:flex-row phone:flex-col phone:gap-y-8">
+            <div className="space-y-4 basis-full tablet:basis-4/6 laptop:basis-4/6 desktop:basis-4/6">
+              <div>Description</div>
+
+              <div className="space-y-6">
+                <div>
+                  The Tourist best find in portsmouth is on the hills of england
+                  is the ideal retreat for romantics and nature lovers. On just
+                  25 m², a cozy atmosphere awaits you with a bedroom, a small
+                  kitchen and a dining area. Enjoy the stunning ocean view from
+                  your covered terrace, just a meter from the mountains.
+                  Children are very welcome and restaurants and shopping are in
+                  the immediate vicinity. Experience unforgettable moments on
+                  the Wa ...
+                </div>
+                <div className="w-full desktop:w-1/4 laptop:w-1/4 tablet:w-1/4">
+                  <Button variant="secondary" width="full">
+                    <span className="w-full text-center">SHOW MORE</span>
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-4 basis-full tablet:basis-2/6 laptop:basis-2/6 desktop:basis-2/6">
+              <div>What this place offers</div>
+              <div className="grid grid-cols-2">
+                {amenities.map((amenity: any) => (
+                  <div>
+                    <div className="flex gap-x-2">
+                      <div className="self-center">
+                        <Image
+                          src={amenity ? amenity.image : ""}
+                          width={20}
+                          height={20}
+                        />
+                      </div>
+                      <div className="self-center">{amenity.label.name}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <hr />
+          <div className="w-full flex place-content-center">
+            <div
+              className="w-full tablet:w-2/4 desktop:w-2/4 laptop:w-2/4"
+              onClick={() => {
+                setShowCalendar(true);
+              }}
+            >
+              <ReserveScheduler />
+            </div>
+          </div>
+          <hr />
+          <div className="space-y-4 p-4">
+            <div>Where you will be</div>
+            <div>d</div>
+            <div className="rounded-lg">c</div>
+          </div>
+        </div>
+        <div>
+          <Calendar isOpen={showCalendar} closeCalendar={setShowCalendar} />
+        </div>
+      </div>
+      <Footer />
+    </div>
+  );
+}
+
+export default PropertyDetails;

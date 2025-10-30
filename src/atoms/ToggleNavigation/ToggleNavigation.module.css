@@ -1,0 +1,48 @@
+.toggleNavigation {
+  @apply absolute left-0 top-0 cursor-pointer m-auto w-[30px] h-[31px] bg-red-50;
+}
+
+@screen desktop {
+  .toggleNavigation {
+    @apply hidden;
+  }
+}
+
+.toggleNavigationTrigger {
+  @apply hidden;
+}
+
+.toggleNavigationTrigger:checked ~ .toggleNavigationMenu {
+  background: transparent;
+}
+.toggleNavigationTrigger:checked ~ .toggleNavigationMenu:after,
+.toggleNavigationTrigger:checked ~ .toggleNavigationMenu:before {
+  transition: top 300ms 50ms ease, transform 300ms 350ms ease;
+  top: 0;
+}
+.toggleNavigationTrigger:checked ~ .toggleNavigationMenu:before {
+  transform: rotate(45deg);
+}
+.toggleNavigationTrigger:checked ~ .toggleNavigationMenu:after {
+  transform: rotate(-45deg);
+}
+
+.toggleNavigationMenu {
+  @apply bg-crest-black w-[30px] h-[3px] relative before:content-[''] after:content-[''];
+  transition: background 10ms 300ms ease;
+  transform: translateY(14px);
+}
+
+.toggleNavigationMenu:before,
+.toggleNavigationMenu:after {
+  @apply absolute h-[3px] w-[30px] bg-crest-black;
+  transition: top 300ms 350ms ease, transform 300ms 50ms ease;
+}
+
+.toggleNavigationMenu:before {
+  @apply top-[-9px];
+}
+
+.toggleNavigationMenu:after {
+  @apply top-[9px];
+}
