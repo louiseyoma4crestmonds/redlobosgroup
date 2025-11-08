@@ -1,6 +1,7 @@
 import BookedIcon from "@/atoms/Icons/Booked";
 import { format } from "date-fns";
 
+/*
 interface CalendarEvent {
   id: string;
   price: number;
@@ -10,24 +11,26 @@ interface CalendarEvent {
   booked_by: {};
   property: {};
 }
+  */
 
 interface DateCellProps {
   date: Date;
-  event?: any;
+  event: any;
   isCurrentMonth: boolean;
   isLastInRow: boolean;
   onSelect: () => void;
 }
 
-export function CalendarCell({
+export default function CalendarCell({
   date,
   event,
-  isCurrentMonth,
-  isLastInRow,
+  isCurrentMonth = false,
+  isLastInRow = false,
   onSelect,
 }: DateCellProps) {
   const dayNumber = format(date, "d");
 
+  /*
   const getPriceColor = (price?: number) => {
     if (!price) return "text-neutral-800";
     if (price === 50000) return "text-primary"; // Premium rate - blue
@@ -39,6 +42,7 @@ export function CalendarCell({
     if (!price) return null;
     return `$${(price / 100).toFixed(0)}`;
   };
+  */
 
   const cellClasses = [
     "min-h-20 md:min-h-24 p-2 md:p-3",
@@ -54,6 +58,9 @@ export function CalendarCell({
     <div
       className={cellClasses}
       onClick={isCurrentMonth ? onSelect : undefined}
+      role="button"
+      tabIndex={0}
+      onKeyDown={isCurrentMonth ? onSelect : undefined}
       data-testid={`cell-date-${format(date, "yyyy-MM-dd")}`}
     >
       <div className="flex items-start justify-between">
@@ -69,7 +76,7 @@ export function CalendarCell({
           {dayNumber}
         </div>
         {event?.is_booked && isCurrentMonth && (
-          <i className="fas fa-bed text-neutral-400 text-xs" title="Booked"></i>
+          <i className="fas fa-bed text-neutral-400 text-xs" title="Booked" />
         )}
       </div>
 

@@ -1,5 +1,3 @@
-import { calendarEvents } from "src/pages/api/shared";
-import CalendarCell from "../CalendarCell";
 import {
   startOfMonth,
   endOfMonth,
@@ -9,6 +7,7 @@ import {
   format,
   isSameMonth,
 } from "date-fns";
+import CalendarCell from "../CalendarCell";
 
 interface CalendarEvent {
   id: string;
@@ -29,7 +28,7 @@ interface CalendarGridProps {
 
 const WEEKDAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
-export function CalendarGrid({
+export default function CalendarGrid({
   currentDate,
   events,
   isLoading,
@@ -90,24 +89,21 @@ export function CalendarGrid({
       </div>
 
       {/* Calendar weeks */}
-      {weeks.map((week, weekIndex) => (
-        <div
-          key={weekIndex}
-          className="grid grid-cols-7 border-b border-neutral-200 last:border-b-0"
-        >
+      {weeks.map((week) => (
+        <div className="grid grid-cols-7 border-b border-neutral-200 last:border-b-0">
           {week.map((day, dayIndex) => {
             const dateStr = format(day, "yyyy-MM-dd");
             const event = eventMap.get(dateStr);
-            const isCurrentMonth = isSameMonth(day, currentDate);
-            const isLastInRow = dayIndex === 6;
+            // const isCurrentMonth = isSameMonth(day, currentDate);
+            // const isLastInRow = dayIndex === 6;
 
             return (
               <CalendarCell
                 key={dateStr}
                 date={day}
-                event={event ? event : []}
-                isCurrentMonth={isCurrentMonth}
-                isLastInRow={isLastInRow}
+                event={event ?? []}
+                isCurrentMonth={isSameMonth(day, currentDate)}
+                isLastInRow={dayIndex === 6}
                 onSelect={() => onDateSelect(dateStr)}
               />
             );

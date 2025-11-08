@@ -61,7 +61,7 @@ function Contacts(): JSX.Element {
               <div className="text-gray1">CONTACT</div>
             </div>
           </div>
-          
+
           <div className="text-center py-12 space-y-3 bg-green1">
             <div className="text-gold">MAIN OFFICE</div>
             <div className="uppercase font-bold">

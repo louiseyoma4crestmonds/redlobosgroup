@@ -1,8 +1,6 @@
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import styled, { keyframes } from "styled-components";
-import { slideInRight, slideInLeft, zoomIn } from "react-animations";
 import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
 import Footer from "@/organisms/Footer";
@@ -16,20 +14,6 @@ import industrialDevelopment from "../../public/industrialDevelopment.jpg";
 function About(): JSX.Element {
   const router = useRouter();
   const [introPage, setIntroPage] = useState<boolean>(true);
-
-  const slideInRightAnimation = keyframes`${slideInRight}`;
-  const slideInLeftAnimation = keyframes`${slideInLeft}`;
-  const zoomInAnimation = keyframes`${zoomIn}`;
-
-  const SlideInRightDiv = styled.div`
-    animation: 3s ${slideInRightAnimation};
-  `;
-  const SlideInLeftDiv = styled.div`
-    animation: 3s ${slideInLeftAnimation};
-  `;
-  const ZoomInDiv = styled.div`
-    animation: 3s ${zoomInAnimation};
-  `;
 
   useEffect(() => {
     if (introPage) {
@@ -92,31 +76,25 @@ function About(): JSX.Element {
             </div>
             <div className="self-center basis-6/12 tablet:px-8 text-center">
               <div className="mt-8 space-y-3">
-                <ZoomInDiv>
-                  <p>OUR MISSION</p>
-                </ZoomInDiv>
+                <p>OUR MISSION</p>
 
-                <ZoomInDiv>
-                  <Heading Tag="h1" variant="xl">
-                    <span className="text-gold">
-                      TO BE THE MOST TRUSTED NAME IN REAL ESTATE GLOBALLY
-                    </span>
-                  </Heading>
-                </ZoomInDiv>
+                <Heading Tag="h1" variant="xl">
+                  <span className="text-gold">
+                    TO BE THE MOST TRUSTED NAME IN REAL ESTATE GLOBALLY
+                  </span>
+                </Heading>
 
                 <div className="text-gray1 leading-8 text-left tablet:text-center ">
-                  <ZoomInDiv>
-                    <p>
-                      Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel
-                      ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel ipsium
-                      lorel ipsium
-                    </p>
-                    <p>
-                      Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel
-                      ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel ipsium
-                      lorel ipsium
-                    </p>
-                  </ZoomInDiv>
+                  <p>
+                    Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel
+                    ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel ipsium
+                    lorel ipsium
+                  </p>
+                  <p>
+                    Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel
+                    ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel ipsium
+                    lorel ipsium
+                  </p>
                 </div>
               </div>
             </div>
@@ -132,31 +110,25 @@ function About(): JSX.Element {
             </div>
             <div className="self-center basis-6/12 tablet:px-8 text-center">
               <div className="mt-8 space-y-3">
-                <ZoomInDiv>
-                  <p>OUR VISION</p>
-                </ZoomInDiv>
+                <p>OUR VISION</p>
 
-                <ZoomInDiv>
-                  <Heading Tag="h1" variant="xl">
-                    <span className="text-gold">
-                      CREATING A GREAT TOMORROW FOR EVERYONE
-                    </span>
-                  </Heading>
-                </ZoomInDiv>
+                <Heading Tag="h1" variant="xl">
+                  <span className="text-gold">
+                    CREATING A GREAT TOMORROW FOR EVERYONE
+                  </span>
+                </Heading>
 
                 <div className="text-gray1 leading-8 text-left tablet:text-center ">
-                  <ZoomInDiv>
-                    <p>
-                      Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel
-                      ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel ipsium
-                      lorel ipsium
-                    </p>
-                    <p>
-                      Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel
-                      ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel ipsium
-                      lorel ipsium
-                    </p>
-                  </ZoomInDiv>
+                  <p>
+                    Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel
+                    ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel ipsium
+                    lorel ipsium
+                  </p>
+                  <p>
+                    Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel
+                    ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel ipsium
+                    lorel ipsium
+                  </p>
                 </div>
               </div>
             </div>

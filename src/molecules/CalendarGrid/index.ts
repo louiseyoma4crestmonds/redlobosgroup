@@ -1,3 +1,3 @@
-import { CalendarGrid } from "./CalendarGrid";
+import CalendarGrid from "./CalendarGrid";
 
 export default CalendarGrid;

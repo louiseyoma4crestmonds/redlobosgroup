@@ -1,3 +1,4 @@
+import { StaticImageData } from "next/image";
 import romantic from "../../public/romantic-dinner.jpg";
 import professional from "../../public/podcast-studio.jpg";
 import proposal from "../../public/proposal-setup.jpg";
@@ -6,7 +7,6 @@ import details_romantic from "../../public/details-romantic.png";
 import details_content from "../../public/home-studio.webp";
 import details_proposal from "../../public/proposal-setup-2.jpg";
 import details_paint_sip from "../../public/Paint+and+sip+slider.jpg";
-import { StaticImageData } from "next/image";
 
 export interface AddOnBrief {
   id: number;

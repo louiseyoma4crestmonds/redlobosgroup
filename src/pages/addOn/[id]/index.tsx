@@ -1,38 +1,31 @@
 import { useRouter } from "next/router";
-import { addOnDetails } from "../../../data/addOnData";
+
 import Image from "next/image";
 import Heading from "@/atoms/Heading";
 import Footer from "@/organisms/Footer";
 import { useEffect, useState } from "react";
 import UtilityBar from "@/organisms/UtilityBar";
-import logo from "../../../../public/logoAnimation.gif";
 import BookingCard from "@/molecules/BookingCard/BookingCard";
+import { addOnDetails } from "../../../data/addOnData";
+import logo from "../../../../public/logoAnimation.gif";
 
-
-const AddOnDetailsPage = () => {
+export function AddOnDetailsPage(): JSX.Element {
   const router = useRouter();
   const { id } = router.query;
   const [introPage, setIntroPage] = useState<boolean>(true);
 
-
-
   useEffect(() => {
     if (introPage) {
       setIntroPage(true);
-      const timer = setTimeout(() => setIntroPage(false), 5000);
-    return () => clearTimeout(timer);
+      setTimeout(() => setIntroPage(false), 5000);
     }
   });
 
-  const service = addOnDetails.find(
-    (item) => item.id === Number(id)
-  );
-
-  if(!service) return
+  const service = addOnDetails.find((item) => item.id === Number(id));
 
   return (
     <div className="bg-green1 min-h-screen">
-           {/* LOGO LOADING SCREEN */}
+      {/* LOGO LOADING SCREEN */}
       <div className={!introPage ? "hidden" : ""}>
         <div className="w-screen h-screen flex place-content-center bg-green1">
           <div className="self-center">
@@ -50,29 +43,31 @@ const AddOnDetailsPage = () => {
         {/* END OF UTILITY BAR */}
       </div>
 
-
       <div className="px-6 tablet:p-20 space-y-8">
         <div className="mb-8 space-y-8">
-            <Heading
-                Tag="h1"
-                variant="sxl"
-                className="phone:w-full tablet:w-3/4 mx-auto text-center font-[400] text-7xl phone:text-4xl leading-normal"
-            >
-              {service?.title.toUpperCase()}
-            </Heading>
-            <p className="text-red-600 text-center tablet:text-3xl phone:text-xl">{service?.subtitle_text}</p>
+          <Heading
+            Tag="h1"
+            variant="sxl"
+            className="phone:w-full tablet:w-3/4 mx-auto text-center font-[400] text-7xl phone:text-4xl leading-normal"
+          >
+            {service?.title.toUpperCase()}
+          </Heading>
+          <p className="text-red-600 text-center tablet:text-3xl phone:text-xl">
+            {service?.subtitle_text}
+          </p>
         </div>
 
-          <Image
-            src={service?.image}
-            alt={service?.title}
-            className="w-full object-cover rounded-2xl shadow-lg"
-          />
-        
+        <Image
+          src={service?.image || ""}
+          alt={service?.title}
+          className="w-full object-cover rounded-2xl shadow-lg"
+        />
 
         <div className="space-y-2">
-            <Heading Tag="h3" className="text-center">DESCRIPTION</Heading>
-            <p className="tablet:text-xl phone:text-sm">{service?.description}</p>
+          <Heading Tag="h3" className="text-center">
+            DESCRIPTION
+          </Heading>
+          <p className="tablet:text-xl phone:text-sm">{service?.description}</p>
         </div>
       </div>
 
@@ -82,6 +77,6 @@ const AddOnDetailsPage = () => {
       <Footer />
     </div>
   );
-};
+}
 
 export default AddOnDetailsPage;

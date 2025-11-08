@@ -15,7 +15,6 @@ import commercialDevelopment from "../../public/commercialDevelopment.jpg";
 import industrialDevelopment from "../../public/industrialDevelopment.jpg";
 import firstImage from "../../public/firstImage.jpg";
 import secondImage from "../../public/secondImage.jpg";
-import Calendar from "@/organisms/Calendar";
 
 function Home(): JSX.Element {
   const router = useRouter();

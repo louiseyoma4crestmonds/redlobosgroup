@@ -28,6 +28,7 @@
   ],
   "rules": {
     "react/jsx-uses-react": "off",
+    "no-nested-ternary": "off",
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "off",
     "react/jsx-props-no-spreading": "off",

@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Button from "@/atoms/Button";
 
 interface CalendarHeaderProps {
@@ -7,7 +7,7 @@ interface CalendarHeaderProps {
   onGoToToday: () => void;
 }
 
-export function CalendarHeader({
+export default function CalendarHeader({
   currentDate,
   onNavigateMonth,
   onGoToToday,

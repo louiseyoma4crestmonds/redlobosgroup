@@ -1,24 +1,18 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-// import the icons you need
-import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
 import Backdrop from "@/atoms/Backdrop";
-
-//Import Logo
+import styles from "./UtilityBar.module.css";
+import { UtilityBarProps } from "./UtilityBar.types";
+import instagram from "../../../public/instagram.png";
 import logo from "../../../public/redlobosLogo.png";
 import close from "../../../public/close.png";
-
-import styles from "./UtilityBar.module.css";
-import instagram from "../../../public/instagram.png";
-import { UtilityBarProps } from "./UtilityBar.types";
 
 function UtilityBar(props: UtilityBarProps): JSX.Element {
   const { activeLink = "HOME" } = props;
   const router = useRouter();
   const [showMobileNavBar, setShowMobileNavBar] = useState(false);
-  const [showAboutDropdown, setShowAboutDropdown] = useState(false);
+  // const [showAboutDropdown, setShowAboutDropdown] = useState(false);
   const navigationLinks = ["HOME", "ABOUT", "PROPERTIES", "CONTACTS"];
 
   return (

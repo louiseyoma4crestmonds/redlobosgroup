@@ -6,7 +6,7 @@ import { slideInRight, slideInLeft, zoomIn } from "react-animations";
 import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
 import Footer from "@/organisms/Footer";
-import logo from "../../public/logo.gif";
+import logo from "public/logoAnimation.gif";
 import mission from "../../public/mission.jpg";
 import vision from "../../public/vision.jpg";
 import firstSittingRoom from "../../public/firstSittingRoom.png";
@@ -55,7 +55,7 @@ function Mission(): JSX.Element {
       <div className={introPage ? "hidden" : ""}>
         {/* UTILITY BAR */}
         <div>
-          <UtilityBar />
+          <UtilityBar activeLink="mission" />
         </div>
         {/* END OF UTILITY BAR */}
         <div className="px-6 bg-green1 space-y-12">

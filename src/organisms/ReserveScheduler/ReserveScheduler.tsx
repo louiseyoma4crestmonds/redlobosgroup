@@ -1,9 +1,9 @@
 import Button from "@/atoms/Button";
-import { useRouter } from "next/router";
+
 import SelectBox from "../SelectBox";
 
 function ReserveScheduler(): JSX.Element {
-  const router = useRouter();
+  // const router = useRouter();
   return (
     <div className="border border-gray rounded-lg shadow-md p-6">
       <div className="space-y-4">

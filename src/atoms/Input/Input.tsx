@@ -1,17 +1,16 @@
 import { InputProps } from "./Input.types";
 
-function Input({
-  type = "text",
-  placeholder,
-  variant = "transparent",
-  size = "medium",
-  icon,
-  disabled = false,
-  className,
-  getInputedValue,
-  onChange,
-  ...props
-}): React.FC<InputProps> {
+function Input(props: InputProps): JSX.Element {
+  const {
+    placeholder,
+    icon,
+    type,
+    disabled,
+    getInputedValue,
+    variant = "default",
+    size = "large",
+    className,
+  } = props;
   const variantClasses = {
     default: "border border-gray-300  focus:ring-1 focus:ring-green1",
     outlined: "border-2 border-green1  focus:ring-1 focus:ring-green1",
@@ -37,7 +36,6 @@ function Input({
             getInputedValue(events.target.value);
           }}
           className={`rounded-md text-lg text-gray-500 outline-none transition-all ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
-          {...props}
         />
       </div>
     </div>
@@ -52,13 +50,12 @@ function Input({
         getInputedValue(events.target.value);
       }}
       className={`rounded-md text-lg text-gray-500 outline-none transition-all ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
-      {...props}
     />
   );
 
   if (!icon) return withoutIcon;
 
   return withIcon;
-};
+}
 
-export default Input
+export default Input;

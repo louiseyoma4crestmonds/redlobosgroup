@@ -2,19 +2,19 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { getPropertyAmenities, getPropertyImages } from "./api";
 import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
 import Footer from "@/organisms/Footer";
-import logo from "../../public/logoAnimation.gif";
 import Button from "@/atoms/Button";
 import ReserveScheduler from "@/organisms/ReserveScheduler";
 import Calendar from "@/organisms/Calendar";
+import { getPropertyAmenities, getPropertyImages } from "./api";
+import logo from "../../public/logoAnimation.gif";
 
 function PropertyDetails(): JSX.Element {
   const router = useRouter();
   const { data: session } = useSession();
-  const [events, setEvents] = useState([]);
+  const [eventz, setEvents] = useState([]);
   const [amenities, setAmenities] = useState([]);
   const [images, setImages] = useState([]);
   const [introPage, setIntroPage] = useState<boolean>(true);
@@ -39,6 +39,8 @@ function PropertyDetails(): JSX.Element {
       });
     }
   }, [router.query.id]);
+
+  console.log(eventz);
 
   useEffect(() => {
     if (session) {
@@ -108,7 +110,7 @@ function PropertyDetails(): JSX.Element {
                   {image.primary ? (
                     <div
                       style={{
-                        backgroundImage: "url(" + image.image + ")",
+                        backgroundImage: `url("${image.image}")`,
                         backgroundRepeat: "no-repeat",
                         backgroundSize: "cover",
                         backgroundPositionX: "center",
@@ -129,13 +131,13 @@ function PropertyDetails(): JSX.Element {
                       <div className="basis-3/6 h-[204px]">
                         <div
                           style={{
-                            backgroundImage: "url(" + image.image + ")",
+                            backgroundImage: `url("${image.image}")`,
                             backgroundRepeat: "no-repeat",
                             backgroundSize: "cover",
                             backgroundPositionX: "center",
                           }}
                           className="h-full p-4"
-                        ></div>
+                        />
                       </div>
                     </div>
                   ) : (
@@ -205,6 +207,11 @@ function PropertyDetails(): JSX.Element {
           <div className="w-full flex place-content-center">
             <div
               className="w-full tablet:w-2/4 desktop:w-2/4 laptop:w-2/4"
+              role="button"
+              tabIndex={0}
+              onKeyDown={() => {
+                setShowCalendar(true);
+              }}
               onClick={() => {
                 setShowCalendar(true);
               }}

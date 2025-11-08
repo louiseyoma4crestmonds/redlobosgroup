@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import CalendarGrid from "@/molecules/CalendarGrid";
 import CalendarHeader from "@/molecules/CalendarHeader";
-import { getPropertyEvents } from "../../pages/api";
 import BookedIcon from "@/atoms/Icons/Booked";
 import Modal from "@/molecules/Modal";
+import { getPropertyEvents } from "../../pages/api";
 
 export type CalendarProps = {
   isOpen: boolean;
@@ -21,11 +21,17 @@ export default function Calendar(props: CalendarProps) {
 
   const [propertyEvents, setPropertyEvents] = useState<any>([]);
 
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedDate(null);
+  };
+
   useEffect(() => {
     getPropertyEvents(1).then((response: any) => {
       console.log(response.data.data[0]);
       setPropertyEvents(response.data.data[0]);
     });
+    console.log(selectedDate, isModalOpen, closeModal);
   }, []);
 
   const navigateMonth = (direction: "prev" | "next") => {
@@ -45,11 +51,6 @@ export default function Calendar(props: CalendarProps) {
   const handleDateSelect = (date: string) => {
     setSelectedDate(date);
     setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedDate(null);
   };
 
   return (
@@ -91,7 +92,7 @@ export default function Calendar(props: CalendarProps) {
             </div>
           </div>
 
-          {/*<DateModal
+          {/* <DateModal
           isOpen={isModalOpen}
           onClose={closeModal}
           selectedDate={selectedDate}
