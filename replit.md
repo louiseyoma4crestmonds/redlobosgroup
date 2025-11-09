@@ -4,6 +4,34 @@ This is a Next.js-based property rental and booking platform for Red Lobos Group
 
 ## Recent Changes
 
+**November 9, 2025 - Interactive Booking Calendar**
+- **BookingCalendar Component:**
+  - Created new compact BookingCalendar molecule component for date selection
+  - Replaced HTML date inputs with interactive visual calendar in booking modal
+  - Month navigation with previous/next buttons
+  - Users click to select check-in date, then check-out date
+  - Visual feedback for selected dates with gold highlighting
+  - Date range highlighting between check-in and check-out dates
+  
+- **Booking Restrictions:**
+  - Prevents selection of past dates (only today and future dates allowed)
+  - Prevents selection of booked dates (fetched from property events API)
+  - Booked and unavailable dates shown in grey with visual indicators
+  - Past dates are non-clickable and greyed out
+  
+- **User Experience:**
+  - Compact calendar design that fits well in booking modal
+  - Legend showing selected, in-range, and unavailable dates
+  - Date summary card displays selected check-in and check-out dates
+  - Fetches property-specific availability when booking modal opens
+  - Smooth re-selection flow: clicking new date after range completion resets checkout
+
+- **Technical Implementation:**
+  - Uses date-fns for date manipulation and validation
+  - Try-catch guards for safe date parsing
+  - Null-safe callbacks to prevent crashes during date reset
+  - Event map for efficient availability lookups
+
 **November 9, 2025 - Photo Gallery and Description Modal Features**
 - **Photo Gallery Page:**
   - Created new `/photoGallery` route to display all property photos
@@ -77,7 +105,7 @@ Preferred communication style: Simple, everyday language.
 
 **Component Architecture**
 - Atoms: Basic UI elements (Button, Heading, Input, Panel, Icons, Backdrop)
-- Molecules: Composite components (AddOnCard, BookingCard, CalendarCell, CalendarGrid, Modal)
+- Molecules: Composite components (AddOnCard, BookingCard, BookingCalendar, CalendarCell, CalendarGrid, Modal)
 - Organisms: Complex components (UtilityBar, Footer, Calendar, ReserveScheduler, SelectBox)
 - Layouts: Page-level structure components
 
