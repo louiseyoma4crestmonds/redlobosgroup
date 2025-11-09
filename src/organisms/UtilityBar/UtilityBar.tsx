@@ -41,6 +41,7 @@ function UtilityBar(props: UtilityBarProps): JSX.Element {
 
           {navigationLinks.map((navigationLink: string) => (
             <div
+              key={navigationLink}
               tabIndex={0}
               role="button"
               onKeyDown={() => {}}
@@ -79,6 +80,7 @@ function UtilityBar(props: UtilityBarProps): JSX.Element {
               <div className="flex gap-x-12 text-lg font-bold">
                 {navigationLinks.map((navigationLink: string) => (
                   <div
+                    key={navigationLink}
                     tabIndex={0}
                     role="button"
                     onKeyDown={() => {}}

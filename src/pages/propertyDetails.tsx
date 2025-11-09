@@ -7,9 +7,10 @@ import Heading from "@/atoms/Heading";
 import Footer from "@/organisms/Footer";
 import Button from "@/atoms/Button";
 import Modal from "@/molecules/Modal";
+import BookingCalendar from "@/molecules/BookingCalendar";
 import ReserveScheduler from "@/organisms/ReserveScheduler";
 import Calendar from "@/organisms/Calendar";
-import { getPropertyAmenities, getPropertyImages } from "./api";
+import { getPropertyAmenities, getPropertyImages, getPropertyEvents } from "./api";
 import logo from "../../public/logoAnimation.gif";
 
 function PropertyDetails(): JSX.Element {
@@ -22,6 +23,11 @@ function PropertyDetails(): JSX.Element {
   const [showCalendar, setShowCalendar] = useState<boolean>(false);
   const [showDescriptionModal, setShowDescriptionModal] =
     useState<boolean>(false);
+  const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
+  const [checkInDate, setCheckInDate] = useState<string | null>(null);
+  const [checkOutDate, setCheckOutDate] = useState<string | null>(null);
+  const [guestCount, setGuestCount] = useState<string>("1");
+  const [propertyEvents, setPropertyEvents] = useState<any>([]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -51,6 +57,34 @@ function PropertyDetails(): JSX.Element {
         .then((data) => setEvents(data));
     }
   }, [session]);
+
+  const handleBookNowClick = () => {
+    setShowBookingModal(true);
+    
+    if (router.query.id) {
+      getPropertyEvents(router.query.id).then((response: any) => {
+        setPropertyEvents(response.data.data[0] || []);
+      });
+    }
+  };
+
+  const handleCloseBookingModal = () => {
+    setShowBookingModal(false);
+    setCheckInDate(null);
+    setCheckOutDate(null);
+    setGuestCount("1");
+    setPropertyEvents([]);
+  };
+
+  const handleMakeReservation = () => {
+    console.log("Reservation Details:", {
+      propertyId: router.query.id,
+      checkIn: checkInDate,
+      checkOut: checkOutDate,
+      guests: guestCount,
+    });
+    handleCloseBookingModal();
+  };
 
   return (
     <div>
@@ -222,19 +256,24 @@ function PropertyDetails(): JSX.Element {
             </div>
           </div>
           <hr />
-          <div className="w-full flex place-content-center">
-            <div
-              className="w-full tablet:w-2/4 desktop:w-2/4 laptop:w-2/4"
-              role="button"
-              tabIndex={0}
-              onKeyDown={() => {
-                setShowCalendar(true);
-              }}
-              onClick={() => {
-                setShowCalendar(true);
-              }}
-            >
-              <ReserveScheduler />
+          <div className="w-full flex place-content-center gap-4 py-8">
+            <div className="w-full tablet:w-2/4 desktop:w-2/4 laptop:w-2/4">
+              <Button
+                variant="primary"
+                width="full"
+                onClick={handleBookNowClick}
+              >
+                <span className="w-full text-center">MAKE RESERVATION</span>
+              </Button>
+            </div>
+            <div className="w-full tablet:w-2/4 desktop:w-2/4 laptop:w-2/4">
+              <Button
+                variant="secondary"
+                width="full"
+                onClick={() => setShowCalendar(true)}
+              >
+                <span className="w-full text-center">VIEW CALENDAR</span>
+              </Button>
             </div>
           </div>
           <hr />
@@ -314,6 +353,71 @@ function PropertyDetails(): JSX.Element {
             >
               CLOSE
             </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal isOpen={showBookingModal} onClose={handleCloseBookingModal}>
+        <div className="space-y-6 p-6 max-w-2xl mx-auto">
+          <div className="text-center">
+            <Heading Tag="h2" variant="lg">
+              <span>Book Your Stay</span>
+            </Heading>
+            <p className="text-gray1 mt-2">Tourist Best Find in Portsmouth</p>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Select Check-in and Check-out Dates
+              </label>
+              <BookingCalendar
+                events={propertyEvents}
+                checkInDate={checkInDate}
+                checkOutDate={checkOutDate}
+                onCheckInSelect={(date) => setCheckInDate(date)}
+                onCheckOutSelect={(date) => setCheckOutDate(date)}
+              />
+            </div>
+
+            {checkInDate && checkOutDate && (
+              <div className="bg-green1 p-4 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm text-gray-600">Check-in</p>
+                    <p className="font-semibold">{checkInDate}</p>
+                  </div>
+                  <div className="text-gray-400">→</div>
+                  <div>
+                    <p className="text-sm text-gray-600">Check-out</p>
+                    <p className="font-semibold">{checkOutDate}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Number of Guests
+              </label>
+              <input
+                type="number"
+                min="1"
+                value={guestCount}
+                onChange={(e) => setGuestCount(e.target.value)}
+                className="w-full rounded-md border border-gray-300 py-3 px-4 text-lg text-gray-700 outline-none focus:ring-1 focus:ring-gold"
+              />
+            </div>
+
+            <div className="pt-2">
+              <Button
+                variant="primary"
+                width="full"
+                onClick={handleMakeReservation}
+              >
+                MAKE RESERVATION
+              </Button>
+            </div>
           </div>
         </div>
       </Modal>
