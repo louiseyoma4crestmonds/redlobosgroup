@@ -4,6 +4,33 @@ This is a Next.js-based property rental and booking platform for Red Lobos Group
 
 ## Recent Changes
 
+**November 9, 2025 - Property Location Map and Google SSO Integration**
+- **Property Map Integration:**
+  - Installed React Leaflet mapping library for interactive maps
+  - Created PropertyMap molecule component using OpenStreetMap tiles (free, no API key)
+  - Integrated map into property details page "Where you will be" section
+  - Map displays property location with marker and popup showing property name/address
+  - Added getPropertyDetails API function to fetch coordinates from backend
+  - Error-resilient implementation: Always displays map with fallback Portsmouth coordinates (50.8198, -1.0880) when API fails or coordinates missing
+  - Used dynamic import to avoid SSR issues with Leaflet
+  
+- **Google Single Sign-On (SSO):**
+  - Enhanced UtilityBar navigation to show authentication status
+  - Desktop navigation: "SIGN IN" button when not authenticated, shows user's first name and "SIGN OUT" button when logged in
+  - Mobile navigation: Same authentication controls in hamburger menu
+  - Made "SIGN IN" button clickable - navigates to existing /signIn page
+  - "SIGN OUT" button calls next-auth signOut() function
+  - Session state managed via NextAuth.js with GoogleProvider
+  - Uses existing environment variables (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET)
+  - Works across entire app via NextAuth SessionProvider wrapper
+
+- **Technical Implementation:**
+  - PropertyMap accepts latitude, longitude, propertyName, and address props
+  - Type checking ensures response is object before accessing data
+  - Multiple fallback paths guarantee map always renders
+  - useSession hook detects authentication state in real-time
+  - Consistent user experience across desktop and mobile viewports
+
 **November 9, 2025 - Property Details Page Booking Functionality**
 - **Booking Modal Integration:**
   - Added "MAKE RESERVATION" button on property details page
