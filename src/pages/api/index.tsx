@@ -36,3 +36,12 @@ export async function getPropertyEvents(property_id: any) {
 
   return response;
 }
+
+export async function getPropertyDetails(property_id: any) {
+  const response = await axios
+    .get(`${endpointUrl}/server/property/${property_id}`, {})
+    .then((res: any) => res)
+    .catch((err: any) => err.message);
+
+  return response;
+}

@@ -2,6 +2,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import dynamic from "next/dynamic";
 import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
 import Footer from "@/organisms/Footer";
@@ -10,8 +11,13 @@ import Modal from "@/molecules/Modal";
 import BookingCalendar from "@/molecules/BookingCalendar";
 import ReserveScheduler from "@/organisms/ReserveScheduler";
 import Calendar from "@/organisms/Calendar";
-import { getPropertyAmenities, getPropertyImages, getPropertyEvents } from "./api";
+import { getPropertyAmenities, getPropertyImages, getPropertyEvents, getPropertyDetails } from "./api";
 import logo from "../../public/logoAnimation.gif";
+
+const PropertyMap = dynamic(() => import("@/molecules/PropertyMap"), {
+  ssr: false,
+  loading: () => <div className="w-full h-96 bg-gray-100 rounded-lg flex items-center justify-center">Loading map...</div>,
+});
 
 function PropertyDetails(): JSX.Element {
   const router = useRouter();
@@ -28,6 +34,8 @@ function PropertyDetails(): JSX.Element {
   const [checkOutDate, setCheckOutDate] = useState<string | null>(null);
   const [guestCount, setGuestCount] = useState<string>("1");
   const [propertyEvents, setPropertyEvents] = useState<any>([]);
+  const [propertyDetails, setPropertyDetails] = useState<any>(null);
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -45,6 +53,30 @@ function PropertyDetails(): JSX.Element {
       getPropertyImages(router.query.id).then((response: any) => {
         setImages(response.data.data);
       });
+      getPropertyDetails(router.query.id)
+        .then((response: any) => {
+          if (
+            response &&
+            typeof response === "object" &&
+            response.data &&
+            response.data.data
+          ) {
+            const property = response.data.data[0] || response.data.data;
+            setPropertyDetails(property);
+            
+            if (property.latitude && property.longitude) {
+              setCoordinates({
+                lat: parseFloat(property.latitude),
+                lng: parseFloat(property.longitude),
+              });
+              return;
+            }
+          }
+          setCoordinates({ lat: 50.8198, lng: -1.0880 });
+        })
+        .catch(() => {
+          setCoordinates({ lat: 50.8198, lng: -1.0880 });
+        });
     }
   }, [router.isReady, router.query.id]);
 
@@ -278,9 +310,20 @@ function PropertyDetails(): JSX.Element {
           </div>
           <hr />
           <div className="space-y-4 p-4">
-            <div>Where you will be</div>
-            <div>d</div>
-            <div className="rounded-lg">c</div>
+            <div className="text-xl font-semibold">Where you will be</div>
+            <div className="text-gray-600">
+              KALA SD, QS - Portsmouth, England
+            </div>
+            <div className="rounded-lg">
+              {coordinates && (
+                <PropertyMap
+                  latitude={coordinates.lat}
+                  longitude={coordinates.lng}
+                  propertyName="Tourist Best Find in Portsmouth"
+                  address="KALA SD, QS"
+                />
+              )}
+            </div>
           </div>
         </div>
         <div>

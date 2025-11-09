@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
+import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
 import Backdrop from "@/atoms/Backdrop";
 import styles from "./UtilityBar.module.css";
@@ -11,8 +12,8 @@ import close from "../../../public/close.png";
 function UtilityBar(props: UtilityBarProps): JSX.Element {
   const { activeLink = "HOME" } = props;
   const router = useRouter();
+  const { data: session } = useSession();
   const [showMobileNavBar, setShowMobileNavBar] = useState(false);
-  // const [showAboutDropdown, setShowAboutDropdown] = useState(false);
   const navigationLinks = ["HOME", "ABOUT", "PROPERTIES", "CONTACTS"];
 
   return (
@@ -59,6 +60,34 @@ function UtilityBar(props: UtilityBarProps): JSX.Element {
               {navigationLink}
             </div>
           ))}
+          
+          {session ? (
+            <div className="py-4 border-b pl-8">
+              <div className="text-sm mb-2">
+                Hi, {session.user?.name?.split(" ")[0]}
+              </div>
+              <div
+                tabIndex={0}
+                role="button"
+                onKeyDown={() => {}}
+                onClick={() => signOut()}
+                className="cursor-pointer text-gold font-bold"
+              >
+                SIGN OUT
+              </div>
+            </div>
+          ) : (
+            <div
+              tabIndex={0}
+              role="button"
+              onKeyDown={() => {}}
+              onClick={() => router.push("/signIn")}
+              className="cursor-pointer py-4 border-b pl-8 text-gold font-bold"
+            >
+              SIGN IN
+            </div>
+          )}
+          
           <div className="px-6 mt-6 flex justify-between">
             <div>
               <div className="self-center border p-4 cursor-pointer">
@@ -116,9 +145,34 @@ function UtilityBar(props: UtilityBarProps): JSX.Element {
             <div className="h-1 w-6 bg-gold" />
           </div>
           <div className=" w-2/6 text-right self-center laptop:inline-block desktop:inline-block tablet:inline-block  phone:hidden">
-            <div className="text-lg ">
-              <div className="cursor-pointer text-gold">SIGN IN</div>
-            </div>
+            {session ? (
+              <div className="flex gap-x-4 items-center justify-end">
+                <div className="text-sm font-medium">
+                  Hi, {session.user?.name?.split(" ")[0]}
+                </div>
+                <div
+                  className="cursor-pointer text-gold text-lg font-bold"
+                  tabIndex={0}
+                  role="button"
+                  onKeyDown={() => {}}
+                  onClick={() => signOut()}
+                >
+                  SIGN OUT
+                </div>
+              </div>
+            ) : (
+              <div className="text-lg ">
+                <div
+                  className="cursor-pointer text-gold font-bold"
+                  tabIndex={0}
+                  role="button"
+                  onKeyDown={() => {}}
+                  onClick={() => router.push("/signIn")}
+                >
+                  SIGN IN
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
