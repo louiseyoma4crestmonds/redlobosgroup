@@ -4,6 +4,23 @@ This is a Next.js-based property rental and booking platform for Red Lobos Group
 
 ## Recent Changes
 
+**November 9, 2025 - Landing Page and Booking Modal Updates**
+- **Landing Page Improvements:**
+  - Removed enquiry form section from landing page
+  - Updated "BOOK NOW" button to redirect to /properties page instead of /addOn page
+  - Streamlined user journey for property bookings
+  
+- **Property Listing Page - Booking Modal:**
+  - Added interactive booking modal that appears when users click "BOOK NOW"
+  - Modal includes form fields for:
+    - Check-in date (date picker)
+    - Check-out date (date picker)
+    - Number of guests (numeric input)
+  - "Make Reservation" button to submit booking details
+  - Modal closes and resets form after reservation
+  - Booking data is logged to console (ready for backend integration)
+  - Fixed React key prop warning in property listings
+
 **November 9, 2025 - Vercel to Replit Migration**
 - Migrated project from Vercel to Replit environment
 - Updated development and production scripts to bind to port 5000 with 0.0.0.0 host

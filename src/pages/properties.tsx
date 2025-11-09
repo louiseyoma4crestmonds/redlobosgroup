@@ -5,6 +5,7 @@ import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
 import Footer from "@/organisms/Footer";
 import Button from "@/atoms/Button";
+import Modal from "@/molecules/Modal";
 import logo from "../../public/logoAnimation.gif";
 import testimony1 from "../../public/property1.jpg";
 import { getProperties } from "./api";
@@ -13,18 +14,45 @@ function Properties(): JSX.Element {
   const router = useRouter();
   const [introPage, setIntroPage] = useState<boolean>(true);
   const [properties, setProperties] = useState<any>([]);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedProperty, setSelectedProperty] = useState<any>(null);
+  const [checkInDate, setCheckInDate] = useState<string>("");
+  const [checkOutDate, setCheckOutDate] = useState<string>("");
+  const [guestCount, setGuestCount] = useState<string>("1");
 
   useEffect(() => {
-    if (introPage) {
-      setIntroPage(true);
-      setTimeout(() => {
-        setIntroPage(false);
-      }, 5000);
-    }
+    const timer = setTimeout(() => {
+      setIntroPage(false);
+    }, 5000);
+
     getProperties().then((response: any) => {
       setProperties(response.data.data[0]);
     });
-  });
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleBookNowClick = (property: any) => {
+    setSelectedProperty(property);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setCheckInDate("");
+    setCheckOutDate("");
+    setGuestCount("1");
+  };
+
+  const handleMakeReservation = () => {
+    console.log("Reservation Details:", {
+      property: selectedProperty,
+      checkIn: checkInDate,
+      checkOut: checkOutDate,
+      guests: guestCount,
+    });
+    handleCloseModal();
+  };
 
   return (
     <div>
@@ -71,7 +99,7 @@ function Properties(): JSX.Element {
 
           <div>
             {properties.map((property: any) => (
-              <div className="flex flex-col tablet:pt-0 tablet:flex-row tablet:justify-between tablet:gap-x-6 tablet:px-24">
+              <div key={property.id} className="flex flex-col tablet:pt-0 tablet:flex-row tablet:justify-between tablet:gap-x-6 tablet:px-24">
                 <div className="self-center basis-4/12">
                   <Image className="rounded-2xl" src={testimony1} />
                 </div>
@@ -86,12 +114,7 @@ function Properties(): JSX.Element {
                     <div className="flex gap-x-4">
                       <div>
                         <Button
-                          onClick={() => {
-                            router.push({
-                              pathname: "/propertyDetails",
-                              query: { id: property.id },
-                            });
-                          }}
+                          onClick={() => handleBookNowClick(property)}
                           variant="primary"
                         >
                           BOOK NOW
@@ -119,6 +142,68 @@ function Properties(): JSX.Element {
         </div>
       </div>
       <Footer />
+
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
+        <div className="space-y-6 p-4">
+          <div className="text-center">
+            <Heading Tag="h2" variant="lg">
+              <span>Book Your Stay</span>
+            </Heading>
+            {selectedProperty && (
+              <p className="text-gray1 mt-2">{selectedProperty.name}</p>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Check-in Date
+              </label>
+              <input
+                type="date"
+                value={checkInDate}
+                onChange={(e) => setCheckInDate(e.target.value)}
+                className="w-full rounded-md border border-gray-300 py-3 px-4 text-lg text-gray-700 outline-none focus:ring-1 focus:ring-gold"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Check-out Date
+              </label>
+              <input
+                type="date"
+                value={checkOutDate}
+                onChange={(e) => setCheckOutDate(e.target.value)}
+                className="w-full rounded-md border border-gray-300 py-3 px-4 text-lg text-gray-700 outline-none focus:ring-1 focus:ring-gold"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Number of Guests
+              </label>
+              <input
+                type="number"
+                min="1"
+                value={guestCount}
+                onChange={(e) => setGuestCount(e.target.value)}
+                className="w-full rounded-md border border-gray-300 py-3 px-4 text-lg text-gray-700 outline-none focus:ring-1 focus:ring-gold"
+              />
+            </div>
+
+            <div className="pt-4">
+              <Button
+                variant="primary"
+                width="full"
+                onClick={handleMakeReservation}
+              >
+                MAKE RESERVATION
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
