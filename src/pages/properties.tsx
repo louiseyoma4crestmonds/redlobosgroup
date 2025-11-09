@@ -6,9 +6,10 @@ import Heading from "@/atoms/Heading";
 import Footer from "@/organisms/Footer";
 import Button from "@/atoms/Button";
 import Modal from "@/molecules/Modal";
+import BookingCalendar from "@/molecules/BookingCalendar";
 import logo from "../../public/logoAnimation.gif";
 import testimony1 from "../../public/property1.jpg";
-import { getProperties } from "./api";
+import { getProperties, getPropertyEvents } from "./api";
 
 function Properties(): JSX.Element {
   const router = useRouter();
@@ -16,9 +17,10 @@ function Properties(): JSX.Element {
   const [properties, setProperties] = useState<any>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedProperty, setSelectedProperty] = useState<any>(null);
-  const [checkInDate, setCheckInDate] = useState<string>("");
-  const [checkOutDate, setCheckOutDate] = useState<string>("");
+  const [checkInDate, setCheckInDate] = useState<string | null>(null);
+  const [checkOutDate, setCheckOutDate] = useState<string | null>(null);
   const [guestCount, setGuestCount] = useState<string>("1");
+  const [propertyEvents, setPropertyEvents] = useState<any>([]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -35,13 +37,18 @@ function Properties(): JSX.Element {
   const handleBookNowClick = (property: any) => {
     setSelectedProperty(property);
     setIsModalOpen(true);
+    
+    getPropertyEvents(property.id).then((response: any) => {
+      setPropertyEvents(response.data.data[0] || []);
+    });
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setCheckInDate("");
-    setCheckOutDate("");
+    setCheckInDate(null);
+    setCheckOutDate(null);
     setGuestCount("1");
+    setPropertyEvents([]);
   };
 
   const handleMakeReservation = () => {
@@ -144,7 +151,7 @@ function Properties(): JSX.Element {
       <Footer />
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-        <div className="space-y-6 p-4">
+        <div className="space-y-6 p-6 max-w-2xl mx-auto">
           <div className="text-center">
             <Heading Tag="h2" variant="lg">
               <span>Book Your Stay</span>
@@ -154,30 +161,35 @@ function Properties(): JSX.Element {
             )}
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Check-in Date
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Select Check-in and Check-out Dates
               </label>
-              <input
-                type="date"
-                value={checkInDate}
-                onChange={(e) => setCheckInDate(e.target.value)}
-                className="w-full rounded-md border border-gray-300 py-3 px-4 text-lg text-gray-700 outline-none focus:ring-1 focus:ring-gold"
+              <BookingCalendar
+                events={propertyEvents}
+                checkInDate={checkInDate}
+                checkOutDate={checkOutDate}
+                onCheckInSelect={(date) => setCheckInDate(date)}
+                onCheckOutSelect={(date) => setCheckOutDate(date)}
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Check-out Date
-              </label>
-              <input
-                type="date"
-                value={checkOutDate}
-                onChange={(e) => setCheckOutDate(e.target.value)}
-                className="w-full rounded-md border border-gray-300 py-3 px-4 text-lg text-gray-700 outline-none focus:ring-1 focus:ring-gold"
-              />
-            </div>
+            {checkInDate && checkOutDate && (
+              <div className="bg-green1 p-4 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm text-gray-600">Check-in</p>
+                    <p className="font-semibold">{checkInDate}</p>
+                  </div>
+                  <div className="text-gray-400">→</div>
+                  <div>
+                    <p className="text-sm text-gray-600">Check-out</p>
+                    <p className="font-semibold">{checkOutDate}</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -192,7 +204,7 @@ function Properties(): JSX.Element {
               />
             </div>
 
-            <div className="pt-4">
+            <div className="pt-2">
               <Button
                 variant="primary"
                 width="full"
