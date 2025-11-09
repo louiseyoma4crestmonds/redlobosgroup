@@ -4,6 +4,34 @@ This is a Next.js-based property rental and booking platform for Red Lobos Group
 
 ## Recent Changes
 
+**November 9, 2025 - Stripe Payment Integration**
+- **Secure Payment Processing:**
+  - Installed Stripe packages (stripe v19.3.0, @stripe/stripe-js v8.3.0)
+  - Created `/api/stripe/create-checkout-session` endpoint for payment processing
+  - Integrated Stripe Checkout into booking flow on both properties listing and property details pages
+  - Server-side pricing validation prevents client-side price tampering
+  - Property pricing map: Property 1 ($500), Property 2 ($450), Property 3 ($600)
+  
+- **Payment Flow:**
+  - User fills booking modal with check-in/check-out dates and guest count
+  - Clicks "MAKE RESERVATION" button
+  - Server creates Stripe checkout session with validated pricing
+  - User redirected to Stripe hosted checkout page
+  - After successful payment: redirected to success page with transaction details
+  - If cancelled: redirected to cancel page with retry option
+  
+- **Success and Cancel Pages:**
+  - Created `/payment/success` page showing payment confirmation and transaction ID
+  - Created `/payment/cancel` page allowing users to retry or browse properties
+  - Both pages follow project design patterns (loading screen, navigation, footer)
+  
+- **Security Features:**
+  - All payment amounts determined server-side using PROPERTY_PRICING map
+  - Client cannot tamper with pricing - amount not accepted from frontend
+  - Stripe secret key used only on server-side
+  - Booking metadata (property ID, dates, guests) stored in Stripe session for tracking
+  - Uses Stripe environment variables: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, STRIPE_SECRET_KEY
+
 **November 9, 2025 - Property Location Map and Google SSO Integration**
 - **Property Map Integration:**
   - Installed React Leaflet mapping library for interactive maps
