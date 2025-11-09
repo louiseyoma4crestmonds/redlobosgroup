@@ -25,6 +25,7 @@
     "@fortawesome/free-regular-svg-icons": "^6.4.2",
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
+    "@stripe/stripe-js": "^8.3.0",
     "@tanstack/react-query": "^5.84.1",
     "@types/leaflet": "^1.9.21",
     "@types/react-animations": "^1.0.0",
@@ -45,6 +46,7 @@
     "react-animations": "^1.0.0",
     "react-dom": "^18.2.0",
     "react-leaflet": "^5.0.0",
+    "stripe": "^19.3.0",
     "styled-components": "^6.0.7",
     "usehooks-ts": "^2.6.0",
     "zod": "^4.0.15"

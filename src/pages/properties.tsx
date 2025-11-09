@@ -51,14 +51,34 @@ function Properties(): JSX.Element {
     setPropertyEvents([]);
   };
 
-  const handleMakeReservation = () => {
-    console.log("Reservation Details:", {
-      property: selectedProperty,
-      checkIn: checkInDate,
-      checkOut: checkOutDate,
-      guests: guestCount,
-    });
-    handleCloseModal();
+  const handleMakeReservation = async () => {
+    try {
+      const response = await fetch("/api/stripe/create-checkout-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          propertyId: selectedProperty?.id,
+          propertyName: selectedProperty?.name || "Property Reservation",
+          checkIn: checkInDate,
+          checkOut: checkOutDate,
+          guests: guestCount,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error("Checkout error:", data.message);
+        alert("Failed to create checkout session. Please try again.");
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+      alert("An error occurred. Please try again.");
+    }
   };
 
   return (

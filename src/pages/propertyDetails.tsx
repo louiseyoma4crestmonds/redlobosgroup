@@ -108,14 +108,34 @@ function PropertyDetails(): JSX.Element {
     setPropertyEvents([]);
   };
 
-  const handleMakeReservation = () => {
-    console.log("Reservation Details:", {
-      propertyId: router.query.id,
-      checkIn: checkInDate,
-      checkOut: checkOutDate,
-      guests: guestCount,
-    });
-    handleCloseBookingModal();
+  const handleMakeReservation = async () => {
+    try {
+      const response = await fetch("/api/stripe/create-checkout-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          propertyId: router.query.id,
+          propertyName: "Tourist Best Find in Portsmouth",
+          checkIn: checkInDate,
+          checkOut: checkOutDate,
+          guests: guestCount,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error("Checkout error:", data.message);
+        alert("Failed to create checkout session. Please try again.");
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+      alert("An error occurred. Please try again.");
+    }
   };
 
   return (
