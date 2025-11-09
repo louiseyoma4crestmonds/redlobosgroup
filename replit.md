@@ -4,6 +4,26 @@ This is a Next.js-based property rental and booking platform for Red Lobos Group
 
 ## Recent Changes
 
+**November 9, 2025 - Photo Gallery and Description Modal Features**
+- **Photo Gallery Page:**
+  - Created new `/photoGallery` route to display all property photos
+  - Implemented mixed grid layout (Pinterest-style) with varying image heights
+  - Fetches full image array from API and renders all property images
+  - Added router guards to prevent navigation with undefined property IDs
+  - "SHOW ALL PHOTOS" button on property details page navigates to gallery
+  
+- **Property Description Modal:**
+  - Added "SHOW MORE" button to expand truncated property descriptions
+  - Modal displays full property description text
+  - Implemented using existing Modal molecule component pattern
+  - Close button (X icon) to dismiss modal
+
+- **Technical Improvements:**
+  - Fixed image data handling to store full arrays instead of single elements
+  - Added `router.isReady` checks before accessing query parameters
+  - Disabled navigation buttons until router is ready to prevent errors
+  - Proper useEffect dependency arrays to prevent hook warnings
+
 **November 9, 2025 - Landing Page and Booking Modal Updates**
 - **Landing Page Improvements:**
   - Removed enquiry form section from landing page
