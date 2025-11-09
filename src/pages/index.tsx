@@ -7,11 +7,10 @@ import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
 import Button from "@/atoms/Button";
 import Footer from "@/organisms/Footer";
+import AddOnCard from "@/molecules/AddOnCard/AddOnCard";
+import { addOnBrief } from "../data/addOnData";
 import logo from "../../public/logoAnimation.gif";
 import arrowDown from "../../public/arrowDown.gif";
-import firstSittingRoom from "../../public/firstSittingRoom.png";
-import commercialDevelopment from "../../public/commercialDevelopment.jpg";
-import industrialDevelopment from "../../public/industrialDevelopment.jpg";
 import firstImage from "../../public/firstImage.jpg";
 import secondImage from "../../public/secondImage.jpg";
 
@@ -103,7 +102,7 @@ function Home(): JSX.Element {
                       variant="primary"
                       width="full"
                       onClick={() => {
-                        router.push({ pathname: "/addOn" });
+                        router.push({ pathname: "/properties" });
                       }}
                     >
                       <span
@@ -112,7 +111,7 @@ function Home(): JSX.Element {
                         role="button"
                         onKeyDown={() => {}}
                         onClick={() => {
-                          router.push({ pathname: "/addOn" });
+                          router.push({ pathname: "/properties" });
                         }}
                       >
                         BOOK NOW
@@ -132,177 +131,33 @@ function Home(): JSX.Element {
             </div>
 
             <div className="spce-y-8">
-              <div className=" py-8 space-y-6">
+              <div className="py-8 space-y-6">
                 <div className="tablet:flex tablet:place-content-center">
                   <div className="w-full space-y-4 tablet:w-8/12">
-                    <div>WHAT WE DO</div>
+                    <div>OUR ADD-ON SERVICES</div>
                     <div>
                       <Heading Tag="h1" variant="lg">
                         <span className="text-center">
-                          CREATING A GREAT TOMORROW FOR EVERYONE
+                          ENHANCE YOUR EXPERIENCE WITH OUR SPECIAL SERVICES
                         </span>
                       </Heading>
                     </div>
                   </div>
                 </div>
 
-                <div className="py-16 space-y-16 tablet:flex tablet:gap-x-4 tablet:space-y-0 ">
-                  <div className="space-y-4">
-                    <div>
-                      <Image
-                        className="rounded-full"
-                        width={200}
-                        height={200}
-                        src={firstSittingRoom}
+                <div className="py-16 space-y-16">
+                  {addOnBrief?.map(({ image, description, btn_text, id }) => (
+                    <div key={id}>
+                      <AddOnCard
+                        src={image}
+                        des={description}
+                        id={id}
+                        btnText={btn_text}
                       />
                     </div>
-                    <div>
-                      <Heading Tag="h1" variant="md">
-                        <span className="text-center">
-                          SERVICE ACCOMODATION
-                        </span>
-                      </Heading>
-                    </div>
-                    <div>
-                      <p className="text-[#9B9B9B] leading-8">
-                        Looking for a comfortable and hassle-free stay? Our
-                        luxury service accommodations offer the perfect blend of
-                        home comfort and hotel convenience—whether you are
-                        traveling for business, a short getaway, or an extended
-                        stay.
-                      </p>
-                      <div
-                        className="text-gold mt-6 cursor-pointer"
-                        tabIndex={0}
-                        role="button"
-                        onKeyDown={() => {}}
-                        onClick={() => {
-                          router.push({ pathname: "/mission" });
-                        }}
-                      >
-                        LEARN MORE
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <div>
-                      <Image
-                        className="rounded-full"
-                        width={200}
-                        height={200}
-                        src={commercialDevelopment}
-                      />
-                    </div>
-                    <div>
-                      <Heading Tag="h1" variant="md">
-                        <span className="text-center">PROPERTY MANAGEMENT</span>
-                      </Heading>
-                    </div>
-                    <div>
-                      <p className="text-[#9B9B9B] leading-8">
-                        Own a property? Let us handle the hard work while you
-                        enjoy the rewards! Our expert property management
-                        services ensure your investment is profitable,
-                        stress-free, and well-maintained.
-                      </p>
-                      <div
-                        className="text-gold mt-6 cursor-pointer"
-                        tabIndex={0}
-                        role="button"
-                        onKeyDown={() => {}}
-                        onClick={() => {
-                          router.push({ pathname: "/mission" });
-                        }}
-                      >
-                        LEARN MORE
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <div>
-                      <Image
-                        className="rounded-full"
-                        width={200}
-                        height={200}
-                        src={industrialDevelopment}
-                      />
-                    </div>
-                    <div>
-                      <Heading Tag="h1" variant="md">
-                        <span className="text-center">ADD ON SERVICES</span>
-                      </Heading>
-                    </div>
-                    <div>
-                      <p className="text-[#9B9B9B] leading-8">
-                        Our add-on services include romantic dinner and
-                        Valentine stay setups for an intimate experience,
-                        professional content creation and podcast production,
-                        beautifully curated proposal setups for the perfect Yes,
-                        and fun paint & sip events for a creative and relaxing
-                        time.
-                      </p>
-                      <div
-                        className="text-gold mt-6 cursor-pointer"
-                        tabIndex={0}
-                        role="button"
-                        onKeyDown={() => {}}
-                        onClick={() => {
-                          router.push({ pathname: "/mission" });
-                        }}
-                      >
-                        LEARN MORE
-                      </div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
-              {/* ENQUIRY SECTION */}
-              <div className="bg-white rounded-lg py-8 px-4 space-y-4 tablet:p-24">
-                <div>QUICK ENQUIRY</div>
-                <div>
-                  <Heading Tag="h1" variant="md">
-                    <span className="text-center">
-                      DO YOU HAVE ANY QUESTION? WE ARE GLAD TO CONSULT YOU AS
-                      SOON AS POSSIBLE.
-                    </span>
-                  </Heading>
-                </div>
-                <div className="flex flex-col space-y-4 tablet:space-y-0 tablet:flex-row place-content-center gap-x-4">
-                  <div className="">
-                    <input
-                      className="rounded border border-black py-2 px-4 outline-none"
-                      placeholder="Your name"
-                    />
-                  </div>
-
-                  <div className="">
-                    <input
-                      className="rounded border border-black py-2 px-4 outline-none"
-                      placeholder="Phone number"
-                    />
-                  </div>
-                </div>
-
-                <div className="w-full flex place-content-center">
-                  <div className="w-3/5 tablet:w-1/5">
-                    <Button variant="primary" width="full">
-                      <span className="w-full text-center">SUBMIT</span>
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="flex gap-2 text-left tablet:place-content-center">
-                  <div>
-                    <input type="checkbox" />
-                  </div>
-                  <div>
-                    I accept{" "}
-                    <span className="font-bold">Terms & Conditions</span> for
-                    processing personal data
-                  </div>
-                </div>
-              </div>
-              {/* END ENQUIRY SECTION */}
             </div>
           </div>
         </div>
