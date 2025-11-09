@@ -10,7 +10,6 @@ import Footer from "@/organisms/Footer";
 import logo from "../../public/logoAnimation.gif";
 import arrowDown from "../../public/arrowDown.gif";
 import firstSittingRoom from "../../public/firstSittingRoom.png";
-import testimony1 from "../../public/testimonial1.jpg";
 import commercialDevelopment from "../../public/commercialDevelopment.jpg";
 import industrialDevelopment from "../../public/industrialDevelopment.jpg";
 import firstImage from "../../public/firstImage.jpg";
@@ -253,77 +252,6 @@ function Home(): JSX.Element {
                       >
                         LEARN MORE
                       </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="py- space-y-6">
-                <div className="tablet:flex tablet:place-content-center">
-                  <div className="w-full space-y-4 tablet:w-8/12">
-                    <div>TESTIMONIALS</div>
-                    <div>
-                      <Heading Tag="h1" variant="lg">
-                        <span className="text-center">
-                          TRUSTED BY THOUSANDS OF OUR CUSTOMERS
-                        </span>
-                      </Heading>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="py-16 space-y-16 tablet:flex tablet:gap-x-4 tablet:space-y-0 tablet:px-24 ">
-                  <div>
-                    <Image
-                      className="rounded-full"
-                      width={100}
-                      height={100}
-                      src={testimony1}
-                    />
-
-                    <div className="border rounded-lg p-4">
-                      <p className="text-sm text-[#9B9B9B] leading-8">
-                        <span className="text-4xl text-gold">,,</span>
-                        Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium
-                        Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium
-                        Lorel ipsium lorel ipsium
-                        <span className="text-4xl text-gold">,,</span>
-                      </p>
-                    </div>
-                  </div>
-                  <div>
-                    <Image
-                      className="rounded-full"
-                      width={100}
-                      height={100}
-                      src={testimony1}
-                    />
-
-                    <div className="border rounded-lg p-4">
-                      <p className="text-sm text-[#9B9B9B] leading-8">
-                        <span className="text-4xl text-gold">,,</span>
-                        Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium
-                        Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium
-                        Lorel ipsium lorel ipsium
-                        <span className="text-4xl text-gold">,,</span>
-                      </p>
-                    </div>
-                  </div>
-                  <div>
-                    <Image
-                      className="rounded-full"
-                      width={100}
-                      height={100}
-                      src={testimony1}
-                    />
-
-                    <div className="border rounded-lg p-4">
-                      <p className="text-sm text-[#9B9B9B] leading-8">
-                        <span className="text-4xl text-gold">,,</span>
-                        Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium
-                        Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium
-                        Lorel ipsium lorel ipsium
-                        <span className="text-4xl text-gold">,,</span>
-                      </p>
                     </div>
                   </div>
                 </div>
