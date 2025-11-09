@@ -6,6 +6,7 @@ import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
 import Footer from "@/organisms/Footer";
 import Button from "@/atoms/Button";
+import Modal from "@/molecules/Modal";
 import ReserveScheduler from "@/organisms/ReserveScheduler";
 import Calendar from "@/organisms/Calendar";
 import { getPropertyAmenities, getPropertyImages } from "./api";
@@ -19,26 +20,27 @@ function PropertyDetails(): JSX.Element {
   const [images, setImages] = useState([]);
   const [introPage, setIntroPage] = useState<boolean>(true);
   const [showCalendar, setShowCalendar] = useState<boolean>(false);
+  const [showDescriptionModal, setShowDescriptionModal] =
+    useState<boolean>(false);
 
   useEffect(() => {
-    if (introPage) {
-      setIntroPage(true);
-      setTimeout(() => {
-        setIntroPage(false);
-      }, 5000);
-    }
-  });
+    const timer = setTimeout(() => {
+      setIntroPage(false);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
-    if (router.query.id) {
+    if (router.isReady && router.query.id) {
       getPropertyAmenities(router.query.id).then((response: any) => {
         setAmenities(response.data.data[0]);
       });
       getPropertyImages(router.query.id).then((response: any) => {
-        setImages(response.data.data[0]);
+        setImages(response.data.data);
       });
     }
-  }, [router.query.id]);
+  }, [router.isReady, router.query.id]);
 
   console.log(eventz);
 
@@ -105,8 +107,8 @@ function PropertyDetails(): JSX.Element {
             */}
           <div className="w-full flex flex-col laptop:flex-row desktop:flex-row phone:gap-y-4 gap-x-4">
             <div className="basis-3/6 phone:w-full">
-              {images.map((image: any) => (
-                <div>
+              {images.map((image: any, index: number) => (
+                <div key={index}>
                   {image.primary ? (
                     <div
                       style={{
@@ -125,7 +127,7 @@ function PropertyDetails(): JSX.Element {
             </div>
             <div className="basis-3/6 grid grid-cols grid-cols-2  gap-4">
               {images.map((image: any, index: number) => (
-                <div className={image.primary ? "hidden" : ""}>
+                <div key={index} className={image.primary ? "hidden" : ""}>
                   {image.primary === false && index < 5 ? (
                     <div>
                       <div className="basis-3/6 h-[204px]">
@@ -149,7 +151,19 @@ function PropertyDetails(): JSX.Element {
           </div>
           <div className="w-full flex flex-row-reverse ">
             <div className="w-full desktop:w-1/4 laptop:w-1/4 tablet:w-1/4">
-              <Button variant="primary" width="full">
+              <Button
+                variant="primary"
+                width="full"
+                disabled={!router.isReady || !router.query.id}
+                onClick={() => {
+                  if (router.query.id) {
+                    router.push({
+                      pathname: "/photoGallery",
+                      query: { id: router.query.id },
+                    });
+                  }
+                }}
+              >
                 <span className="w-full text-center">SHOW ALL PHOTOS</span>
               </Button>
             </div>
@@ -177,7 +191,11 @@ function PropertyDetails(): JSX.Element {
                   the Wa ...
                 </div>
                 <div className="w-full desktop:w-1/4 laptop:w-1/4 tablet:w-1/4">
-                  <Button variant="secondary" width="full">
+                  <Button
+                    variant="secondary"
+                    width="full"
+                    onClick={() => setShowDescriptionModal(true)}
+                  >
                     <span className="w-full text-center">SHOW MORE</span>
                   </Button>
                 </div>
@@ -186,8 +204,8 @@ function PropertyDetails(): JSX.Element {
             <div className="space-y-4 basis-full tablet:basis-2/6 laptop:basis-2/6 desktop:basis-2/6">
               <div>What this place offers</div>
               <div className="grid grid-cols-2">
-                {amenities.map((amenity: any) => (
-                  <div>
+                {amenities.map((amenity: any, index: number) => (
+                  <div key={index}>
                     <div className="flex gap-x-2">
                       <div className="self-center">
                         <Image
@@ -231,6 +249,74 @@ function PropertyDetails(): JSX.Element {
         </div>
       </div>
       <Footer />
+
+      <Modal
+        isOpen={showDescriptionModal}
+        onClose={() => setShowDescriptionModal(false)}
+      >
+        <div className="space-y-6 p-4 max-w-3xl">
+          <div className="text-center">
+            <Heading Tag="h2" variant="lg">
+              <span>Full Property Description</span>
+            </Heading>
+          </div>
+
+          <div className="space-y-4 text-gray-700 leading-7">
+            <div className="font-semibold text-black text-xl">
+              Tourist Best Find in Portsmouth
+            </div>
+
+            <div>
+              The Tourist best find in portsmouth is on the hills of England is
+              the ideal retreat for romantics and nature lovers. On just 25 m²,
+              a cozy atmosphere awaits you with a bedroom, a small kitchen and
+              a dining area. Enjoy the stunning ocean view from your covered
+              terrace, just a meter from the mountains.
+            </div>
+
+            <div>
+              Children are very welcome and restaurants and shopping are in the
+              immediate vicinity. Experience unforgettable moments on the
+              waterfront of Portsmouth, where relaxation and adventure go hand
+              in hand.
+            </div>
+
+            <div>
+              This charming property offers the perfect blend of comfort and
+              natural beauty. Wake up to breathtaking views of the English
+              countryside and enjoy your morning coffee on the private terrace.
+              The compact yet thoughtfully designed space ensures you have
+              everything you need for a memorable stay.
+            </div>
+
+            <div>
+              <strong>Perfect for:</strong>
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>Romantic getaways</li>
+                <li>Solo travelers seeking tranquility</li>
+                <li>Nature enthusiasts</li>
+                <li>Families with children</li>
+              </ul>
+            </div>
+
+            <div>
+              <strong>Nearby attractions:</strong> Explore local restaurants,
+              shopping centers, hiking trails, and scenic viewpoints all within
+              easy reach of this beautiful property.
+            </div>
+          </div>
+
+          <div className="pt-4">
+            <Button
+              variant="primary"
+              width="full"
+              onClick={() => setShowDescriptionModal(false)}
+            >
+              CLOSE
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
