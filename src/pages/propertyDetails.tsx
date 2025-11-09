@@ -14,7 +14,7 @@ import Calendar from "@/organisms/Calendar";
 import { getPropertyAmenities, getPropertyImages, getPropertyEvents, getPropertyDetails } from "./api";
 import logo from "../../public/logoAnimation.gif";
 
-const PropertyMap = dynamic(() => import("@/molecules/PropertyMap"), {
+const PropertyMap = dynamic(() => import("@/molecules/PropertyMap").then(mod => mod.default), {
   ssr: false,
   loading: () => <div className="w-full h-96 bg-gray-100 rounded-lg flex items-center justify-center">Loading map...</div>,
 });
