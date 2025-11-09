@@ -4,6 +4,25 @@ This is a Next.js-based property rental and booking platform for Red Lobos Group
 
 ## Recent Changes
 
+**November 9, 2025 - Property Details Page Booking Functionality**
+- **Booking Modal Integration:**
+  - Added "MAKE RESERVATION" button on property details page
+  - Opens interactive booking modal with calendar date selection
+  - Fetches property-specific availability when modal opens
+  - Replaces previous ReserveScheduler component for better UX
+  
+- **Booking Flow:**
+  - Users select check-in and check-out dates from visual calendar
+  - Enter number of guests via numeric input
+  - Click "MAKE RESERVATION" to submit booking
+  - Reservation details logged to console (ready for backend integration)
+  - Modal closes and resets all state after submission
+  
+- **Additional Improvements:**
+  - Added "VIEW CALENDAR" button to access existing calendar view
+  - Fixed React key prop warning in UtilityBar component
+  - Consistent booking experience across properties and property details pages
+
 **November 9, 2025 - Interactive Booking Calendar**
 - **BookingCalendar Component:**
   - Created new compact BookingCalendar molecule component for date selection
