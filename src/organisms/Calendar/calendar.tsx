@@ -3,7 +3,7 @@ import CalendarGrid from "@/molecules/CalendarGrid";
 import CalendarHeader from "@/molecules/CalendarHeader";
 import BookedIcon from "@/atoms/Icons/Booked";
 import Modal from "@/molecules/Modal";
-import { getPropertyEvents } from "../../pages/api";
+import { getPropertyEvents } from "../../api";
 
 export type CalendarProps = {
   isOpen: boolean;
@@ -15,9 +15,6 @@ export default function Calendar(props: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(true);
-
-  // const year = currentDate.getFullYear();
-  // const month = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
 
   const [propertyEvents, setPropertyEvents] = useState<any>([]);
 
@@ -91,12 +88,6 @@ export default function Calendar(props: CalendarProps) {
               </div>
             </div>
           </div>
-
-          {/* <DateModal
-          isOpen={isModalOpen}
-          onClose={closeModal}
-          selectedDate={selectedDate}
-        /> */}
         </div>
       </div>
     </Modal>

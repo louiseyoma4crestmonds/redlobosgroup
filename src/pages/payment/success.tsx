@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import Image from "next/image";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import UtilityBar from "@/organisms/UtilityBar";
 import Footer from "@/organisms/Footer";
 import Heading from "@/atoms/Heading";
 import Button from "@/atoms/Button";
-import logo from "../../../public/logoAnimation.gif";
 
 function PaymentSuccess(): JSX.Element {
-  const router = useRouter();
-  const { session_id } = router.query;
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const session_id = searchParams.get("session_id");
   const [introPage, setIntroPage] = useState<boolean>(true);
 
   useEffect(() => {
@@ -25,7 +24,7 @@ function PaymentSuccess(): JSX.Element {
       <div className={!introPage ? "hidden" : ""}>
         <div className="w-screen h-screen flex place-content-center bg-green1">
           <div className="self-center">
-            <Image width={200} height={200} src={logo} alt="Logo" />
+            <img width={200} height={200} src="/logoAnimation.gif" alt="Logo" />
           </div>
         </div>
       </div>
@@ -57,10 +56,12 @@ function PaymentSuccess(): JSX.Element {
 
             <div className="space-y-4 text-gray-700">
               <p className="text-lg">
-                Thank you for your reservation. Your payment has been processed successfully.
+                Thank you for your reservation. Your payment has been processed
+                successfully.
               </p>
               <p>
-                A confirmation email has been sent to your email address with all the booking details.
+                A confirmation email has been sent to your email address with
+                all the booking details.
               </p>
               {session_id && (
                 <p className="text-sm text-gray-500">
@@ -73,14 +74,14 @@ function PaymentSuccess(): JSX.Element {
               <Button
                 variant="primary"
                 width="full"
-                onClick={() => router.push("/properties")}
+                onClick={() => navigate("/properties")}
               >
                 BROWSE MORE PROPERTIES
               </Button>
               <Button
                 variant="secondary"
                 width="full"
-                onClick={() => router.push("/")}
+                onClick={() => navigate("/")}
               >
                 GO TO HOME
               </Button>

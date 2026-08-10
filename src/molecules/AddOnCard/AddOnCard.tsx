@@ -1,23 +1,22 @@
-import Image, { StaticImageData } from "next/image";
 import React from "react";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 import Button from "@/atoms/Button";
 import Heading from "@/atoms/Heading";
 
 interface AddOnCardProps {
   id: number;
-  src: string | StaticImageData;
+  src: string;
   des: string;
   btnText: string;
 }
 
 function AddOnCard(props: AddOnCardProps): JSX.Element {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { src, des, btnText, id } = props;
 
   return (
     <div className="grid gap-5 tablet:gap-20 justify-center items-center tablet:grid-cols-2">
-      <Image
+      <img
         src={src}
         alt="Add-on Service"
         width={400}
@@ -33,7 +32,7 @@ function AddOnCard(props: AddOnCardProps): JSX.Element {
         <Button
           variant="primary"
           width="full"
-          onClick={() => router.push(`/addOn/${id}`)}
+          onClick={() => navigate(`/addOn/${id}`)}
         >
           <span className="w-full text-center" tabIndex={0} role="button">
             {btnText}

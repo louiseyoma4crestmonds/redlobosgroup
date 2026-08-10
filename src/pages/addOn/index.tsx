@@ -1,15 +1,13 @@
-import Image from "next/image";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import UtilityBar from "@/organisms/UtilityBar";
 import Footer from "@/organisms/Footer";
 import Heading from "@/atoms/Heading";
 import AddOnCard from "@/molecules/AddOnCard/AddOnCard";
 import { addOnBrief } from "../../data/addOnData";
-import logo from "../../../public/logoAnimation.gif";
 
 export function AddOnService(): JSX.Element {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [introPage, setIntroPage] = useState<boolean>(true);
 
   useEffect(() => {
@@ -25,7 +23,7 @@ export function AddOnService(): JSX.Element {
       <div className={!introPage ? "hidden" : ""}>
         <div className="w-screen h-screen flex place-content-center bg-green1">
           <div className="self-center">
-            <Image width={200} height={200} src={logo} />
+            <img width={200} height={200} src="/logoAnimation.gif" alt="logo" />
           </div>
         </div>
       </div>
@@ -53,7 +51,7 @@ export function AddOnService(): JSX.Element {
               role="button"
               onKeyDown={() => {}}
               onClick={() => {
-                router.push({ pathname: "/" });
+                navigate("/");
               }}
             >
               HOME

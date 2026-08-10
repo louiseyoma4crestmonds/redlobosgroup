@@ -1,15 +1,15 @@
-import Image from "next/image";
-import { useRouter } from "next/router";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
 import Footer from "@/organisms/Footer";
 import Button from "@/atoms/Button";
-import { getPropertyImages } from "./api";
-import logo from "../../public/logoAnimation.gif";
+import { getPropertyImages } from "../api";
 
 function PhotoGallery(): JSX.Element {
-  const router = useRouter();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get("id");
   const [images, setImages] = useState([]);
   const [introPage, setIntroPage] = useState<boolean>(true);
 
@@ -22,12 +22,12 @@ function PhotoGallery(): JSX.Element {
   }, []);
 
   useEffect(() => {
-    if (router.isReady && router.query.id) {
-      getPropertyImages(router.query.id).then((response: any) => {
+    if (id) {
+      getPropertyImages(id).then((response: any) => {
         setImages(response.data.data);
       });
     }
-  }, [router.isReady, router.query.id]);
+  }, [id]);
 
   return (
     <div>
@@ -35,7 +35,7 @@ function PhotoGallery(): JSX.Element {
       <div className={!introPage ? "hidden" : ""}>
         <div className="w-screen h-screen flex place-content-center bg-green1">
           <div className="self-center">
-            <Image width={200} height={200} src={logo} />
+            <img width={200} height={200} src="/logoAnimation.gif" alt="logo" />
           </div>
         </div>
       </div>
@@ -62,7 +62,7 @@ function PhotoGallery(): JSX.Element {
                 role="button"
                 onKeyDown={() => {}}
                 onClick={() => {
-                  router.push({ pathname: "/" });
+                  navigate("/");
                 }}
               >
                 HOME
@@ -74,7 +74,7 @@ function PhotoGallery(): JSX.Element {
                 role="button"
                 onKeyDown={() => {}}
                 onClick={() => {
-                  router.push({ pathname: "/properties" });
+                  navigate("/properties");
                 }}
               >
                 PROPERTIES
@@ -90,7 +90,7 @@ function PhotoGallery(): JSX.Element {
                 variant="secondary"
                 width="full"
                 onClick={() => {
-                  router.back();
+                  navigate(-1);
                 }}
               >
                 <span className="w-full text-center">BACK TO DETAILS</span>
@@ -115,8 +115,8 @@ function PhotoGallery(): JSX.Element {
                     backgroundPosition: "center",
                   }}
                   className={`
-                    rounded-lg w-full
-                    ${index % 7 === 0 ? "h-[400px] tablet:h-[600px]" : "h-[250px] tablet:h-[288px]"}
+                    w-full rounded-lg overflow-hidden
+                    ${index % 7 === 0 ? "h-[500px]" : "h-[240px]"}
                   `}
                 />
               </div>

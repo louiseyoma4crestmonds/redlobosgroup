@@ -1,7 +1,6 @@
-import Image from "next/image";
 import styled, { keyframes } from "styled-components";
 import { slideInRight, slideInLeft, zoomIn } from "react-animations";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
@@ -9,13 +8,9 @@ import Button from "@/atoms/Button";
 import Footer from "@/organisms/Footer";
 import AddOnCard from "@/molecules/AddOnCard/AddOnCard";
 import { addOnBrief } from "../data/addOnData";
-import logo from "../../public/logoAnimation.gif";
-import arrowDown from "../../public/arrowDown.gif";
-import firstImage from "../../public/firstImage.jpg";
-import secondImage from "../../public/secondImage.jpg";
 
 function Home(): JSX.Element {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [introPage, setIntroPage] = useState<boolean>(true);
 
   const slideInRightAnimation = keyframes`${slideInRight}`;
@@ -47,7 +42,7 @@ function Home(): JSX.Element {
       <div className={!introPage ? "hidden" : ""}>
         <div className="w-screen h-screen flex place-content-center bg-green1">
           <div className="self-center">
-            <Image alt="logo" width={200} height={200} src={logo} />
+            <img alt="logo" width={200} height={200} src="/logoAnimation.gif" />
           </div>
         </div>
       </div>
@@ -61,17 +56,11 @@ function Home(): JSX.Element {
         {/* END OF UTILITY BAR */}
 
         <div className="px-6 bg-green1 tablet:px-28">
-          {/* eslint-disable jsx-a11y/media-has-caption */}
-          <audio autoPlay>
-            <source src="/audio.mp3" type="audio/ogg" />
-            <source src="/audio.mp3" type="audio/mpeg" />
-            Unsuported Audio by Browser
-          </audio>
           <div className="space-y-8 text-center py-12 tablet:space-y-48 bg-green1  ">
             <div className="tablet:flex place-content-center ">
               <div className="hidden tablet:block tablet:h-[100px] w-3/12  absolute left-0">
                 <SlideInLeftDiv>
-                  <Image className="rounded-lg" src={firstImage} />
+                  <img className="rounded-lg" src="/firstImage.jpg" alt="First" />
                 </SlideInLeftDiv>
               </div>
 
@@ -80,7 +69,7 @@ function Home(): JSX.Element {
                   <ZoomInDiv>
                     <Heading Tag="h1" variant="lg">
                       <span className="text-center">
-                        SERVICE ACCOMMODATION & PROPERTY DEVELOPMENT
+                        SERVICE ACCOMMODATION &amp; PROPERTY DEVELOPMENT
                       </span>
                     </Heading>
                   </ZoomInDiv>
@@ -102,7 +91,7 @@ function Home(): JSX.Element {
                       variant="primary"
                       width="full"
                       onClick={() => {
-                        router.push({ pathname: "/properties" });
+                        navigate("/properties");
                       }}
                     >
                       <span
@@ -111,7 +100,7 @@ function Home(): JSX.Element {
                         role="button"
                         onKeyDown={() => {}}
                         onClick={() => {
-                          router.push({ pathname: "/properties" });
+                          navigate("/properties");
                         }}
                       >
                         BOOK NOW
@@ -120,12 +109,12 @@ function Home(): JSX.Element {
                   </div>
                 </div>
                 <div className="cursor-pointer">
-                  <Image width={50} height={70} src={arrowDown} />
+                  <img width={50} height={70} src="/arrowDown.gif" alt="scroll down" />
                 </div>
               </div>
               <div className="hidden tablet:block h-[100px] w-3/12   absolute right-0 mt-[100px]">
                 <SlideInRightDiv>
-                  <Image className="rounded-lg" src={secondImage} />
+                  <img className="rounded-lg" src="/secondImage.jpg" alt="Second" />
                 </SlideInRightDiv>
               </div>
             </div>

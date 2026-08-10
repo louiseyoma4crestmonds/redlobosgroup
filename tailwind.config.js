@@ -12,6 +12,8 @@ const customColors = {
 
 module.exports = {
   content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx,css}",
     "./src/pages/**/*.{js,ts,jsx,tsx,css}",
     "./src/components/**/*.{js,ts,jsx,tsx,css}",
     "./src/atoms/**/*.{js,ts,jsx,tsx,css}",
@@ -22,10 +24,10 @@ module.exports = {
   theme: {
     extend: {
       screens: {
-        phone: "375px", // => @media (min-width: 640px) { ... }
-        tablet: "640px", // => @media (min-width: 640px) { ... }
-        laptop: "1024px", // => @media (min-width: 1024px) { ... }
-        desktop: "1280px", // => @media (min-width: 1280px) { ... }
+        phone: "375px",
+        tablet: "640px",
+        laptop: "1024px",
+        desktop: "1280px",
       },
       colors: {
         redLobosBackground: customColors.bg,

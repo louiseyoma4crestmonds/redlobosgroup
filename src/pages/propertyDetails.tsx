@@ -1,8 +1,6 @@
-import Image from "next/image";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import dynamic from "next/dynamic";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useState, lazy, Suspense } from "react";
+import { useSession } from "../context/AuthContext";
 import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
 import Footer from "@/organisms/Footer";
@@ -11,16 +9,19 @@ import Modal from "@/molecules/Modal";
 import BookingCalendar from "@/molecules/BookingCalendar";
 import ReserveScheduler from "@/organisms/ReserveScheduler";
 import Calendar from "@/organisms/Calendar";
-import { getPropertyAmenities, getPropertyImages, getPropertyEvents, getPropertyDetails } from "./api";
-import logo from "../../public/logoAnimation.gif";
+import {
+  getPropertyAmenities,
+  getPropertyImages,
+  getPropertyEvents,
+  getPropertyDetails,
+} from "../api";
 
-const PropertyMap = dynamic(() => import("@/molecules/PropertyMap").then(mod => mod.default), {
-  ssr: false,
-  loading: () => <div className="w-full h-96 bg-gray-100 rounded-lg flex items-center justify-center">Loading map...</div>,
-});
+const PropertyMap = lazy(() => import("@/molecules/PropertyMap"));
 
 function PropertyDetails(): JSX.Element {
-  const router = useRouter();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get("id");
   const { data: session } = useSession();
   const [eventz, setEvents] = useState([]);
   const [amenities, setAmenities] = useState([]);
@@ -35,7 +36,10 @@ function PropertyDetails(): JSX.Element {
   const [guestCount, setGuestCount] = useState<string>("1");
   const [propertyEvents, setPropertyEvents] = useState<any>([]);
   const [propertyDetails, setPropertyDetails] = useState<any>(null);
-  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [coordinates, setCoordinates] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -46,14 +50,14 @@ function PropertyDetails(): JSX.Element {
   }, []);
 
   useEffect(() => {
-    if (router.isReady && router.query.id) {
-      getPropertyAmenities(router.query.id).then((response: any) => {
+    if (id) {
+      getPropertyAmenities(id).then((response: any) => {
         setAmenities(response.data.data[0]);
       });
-      getPropertyImages(router.query.id).then((response: any) => {
+      getPropertyImages(id).then((response: any) => {
         setImages(response.data.data);
       });
-      getPropertyDetails(router.query.id)
+      getPropertyDetails(id)
         .then((response: any) => {
           if (
             response &&
@@ -63,7 +67,7 @@ function PropertyDetails(): JSX.Element {
           ) {
             const property = response.data.data[0] || response.data.data;
             setPropertyDetails(property);
-            
+
             if (property.latitude && property.longitude) {
               setCoordinates({
                 lat: parseFloat(property.latitude),
@@ -72,13 +76,13 @@ function PropertyDetails(): JSX.Element {
               return;
             }
           }
-          setCoordinates({ lat: 50.8198, lng: -1.0880 });
+          setCoordinates({ lat: 50.8198, lng: -1.088 });
         })
         .catch(() => {
-          setCoordinates({ lat: 50.8198, lng: -1.0880 });
+          setCoordinates({ lat: 50.8198, lng: -1.088 });
         });
     }
-  }, [router.isReady, router.query.id]);
+  }, [id]);
 
   console.log(eventz);
 
@@ -92,9 +96,9 @@ function PropertyDetails(): JSX.Element {
 
   const handleBookNowClick = () => {
     setShowBookingModal(true);
-    
-    if (router.query.id) {
-      getPropertyEvents(router.query.id).then((response: any) => {
+
+    if (id) {
+      getPropertyEvents(id).then((response: any) => {
         setPropertyEvents(response.data.data[0] || []);
       });
     }
@@ -116,7 +120,7 @@ function PropertyDetails(): JSX.Element {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          propertyId: router.query.id,
+          propertyId: id,
           propertyName: "Tourist Best Find in Portsmouth",
           checkIn: checkInDate,
           checkOut: checkOutDate,
@@ -144,7 +148,7 @@ function PropertyDetails(): JSX.Element {
       <div className={!introPage ? "hidden" : ""}>
         <div className="w-screen h-screen flex place-content-center bg-green1">
           <div className="self-center">
-            <Image width={200} height={200} src={logo} />
+            <img width={200} height={200} src="/logoAnimation.gif" alt="logo" />
           </div>
         </div>
       </div>
@@ -171,7 +175,7 @@ function PropertyDetails(): JSX.Element {
                 role="button"
                 onKeyDown={() => {}}
                 onClick={() => {
-                  router.push({ pathname: "/" });
+                  navigate("/");
                 }}
               >
                 HOME
@@ -181,16 +185,6 @@ function PropertyDetails(): JSX.Element {
             </div>
           </div>
 
-          {/*
-            {events.map((calendarEvent: any) => (
-              <div key={calendarEvent.id}>- {calendarEvent.summary}</div>
-            ))}
-            <iframe
-              src="https://calendar.google.com/calendar/embed?src=b3VpbWFzZ2xvYmFsQGdtYWlsLmNvbQ&ctz=UTC"
-              style={{ border: "0", width: "80%", height: "80vh" }}
-              title="nby"
-            />
-            */}
           <div className="w-full flex flex-col laptop:flex-row desktop:flex-row phone:gap-y-4 gap-x-4">
             <div className="basis-3/6 phone:w-full">
               {images.map((image: any, index: number) => (
@@ -240,13 +234,10 @@ function PropertyDetails(): JSX.Element {
               <Button
                 variant="primary"
                 width="full"
-                disabled={!router.isReady || !router.query.id}
+                disabled={!id}
                 onClick={() => {
-                  if (router.query.id) {
-                    router.push({
-                      pathname: "/photoGallery",
-                      query: { id: router.query.id },
-                    });
+                  if (id) {
+                    navigate(`/photoGallery?id=${id}`);
                   }
                 }}
               >
@@ -294,10 +285,11 @@ function PropertyDetails(): JSX.Element {
                   <div key={index}>
                     <div className="flex gap-x-2">
                       <div className="self-center">
-                        <Image
+                        <img
                           src={amenity ? amenity.image : ""}
                           width={20}
                           height={20}
+                          alt={amenity?.label?.name}
                         />
                       </div>
                       <div className="self-center">{amenity.label.name}</div>
@@ -336,12 +328,20 @@ function PropertyDetails(): JSX.Element {
             </div>
             <div className="rounded-lg">
               {coordinates && (
-                <PropertyMap
-                  latitude={coordinates.lat}
-                  longitude={coordinates.lng}
-                  propertyName="Tourist Best Find in Portsmouth"
-                  address="KALA SD, QS"
-                />
+                <Suspense
+                  fallback={
+                    <div className="w-full h-96 bg-gray-100 rounded-lg flex items-center justify-center">
+                      Loading map...
+                    </div>
+                  }
+                >
+                  <PropertyMap
+                    latitude={coordinates.lat}
+                    longitude={coordinates.lng}
+                    propertyName="Tourist Best Find in Portsmouth"
+                    address="KALA SD, QS"
+                  />
+                </Suspense>
               )}
             </div>
           </div>

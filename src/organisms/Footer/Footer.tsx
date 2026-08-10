@@ -1,18 +1,8 @@
-// import React, { useState } from "react";
-// import Image from "next/image";
-
 import Heading from "@/atoms/Heading";
-/*
-import styles from "./UtilityBar.module.css";
-import twitter from "../../../public/twitter.png";
-import instagram from "../../../public/instagram.png";
-import linkedin from "../../../public/linkedin.png";
-import facebook from "../../../public/facebook.png";
-*/
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 
 function Footer(): JSX.Element {
-  const router = useRouter();
+  const navigate = useNavigate();
   return (
     <div className=" bg-redLobosFooterBackground">
       <div className="w-full pt-32 pb-16 px-6 space-y-8 tablet:space-y-0 tablet:flex tablet:justify-between tablet:px-24">
@@ -59,12 +49,12 @@ function Footer(): JSX.Element {
               role="button"
               onKeyDown={() => {}}
               onClick={() => {
-                router.push({ pathname: "/mission" });
+                navigate("/mission");
               }}
             >
               About Us
             </div>
-            <div className="cursor-pointer">Terms & Conditions</div>
+            <div className="cursor-pointer">Terms &amp; Conditions</div>
             <div className="cursor-pointer">Privacy Policy</div>
           </div>
         </div>

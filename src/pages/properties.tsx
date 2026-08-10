@@ -1,5 +1,4 @@
-import Image from "next/image";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
@@ -7,12 +6,10 @@ import Footer from "@/organisms/Footer";
 import Button from "@/atoms/Button";
 import Modal from "@/molecules/Modal";
 import BookingCalendar from "@/molecules/BookingCalendar";
-import logo from "../../public/logoAnimation.gif";
-import testimony1 from "../../public/property1.jpg";
-import { getProperties, getPropertyEvents } from "./api";
+import { getProperties, getPropertyEvents } from "../api";
 
 function Properties(): JSX.Element {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [introPage, setIntroPage] = useState<boolean>(true);
   const [properties, setProperties] = useState<any>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -37,7 +34,7 @@ function Properties(): JSX.Element {
   const handleBookNowClick = (property: any) => {
     setSelectedProperty(property);
     setIsModalOpen(true);
-    
+
     getPropertyEvents(property.id).then((response: any) => {
       setPropertyEvents(response.data.data[0] || []);
     });
@@ -87,7 +84,7 @@ function Properties(): JSX.Element {
       <div className={!introPage ? "hidden" : ""}>
         <div className="w-screen h-screen flex place-content-center bg-green1">
           <div className="self-center">
-            <Image width={200} height={200} src={logo} />
+            <img width={200} height={200} src="/logoAnimation.gif" alt="logo" />
           </div>
         </div>
       </div>
@@ -114,7 +111,7 @@ function Properties(): JSX.Element {
                 role="button"
                 onKeyDown={() => {}}
                 onClick={() => {
-                  router.push({ pathname: "/" });
+                  navigate("/");
                 }}
               >
                 HOME
@@ -126,9 +123,12 @@ function Properties(): JSX.Element {
 
           <div>
             {properties.map((property: any) => (
-              <div key={property.id} className="flex flex-col tablet:pt-0 tablet:flex-row tablet:justify-between tablet:gap-x-6 tablet:px-24">
+              <div
+                key={property.id}
+                className="flex flex-col tablet:pt-0 tablet:flex-row tablet:justify-between tablet:gap-x-6 tablet:px-24"
+              >
                 <div className="self-center basis-4/12">
-                  <Image className="rounded-2xl" src={testimony1} />
+                  <img className="rounded-2xl" src="/property1.jpg" alt="Property" />
                 </div>
                 <div className="self-center basis-7/12 tablet:px-8 text-left">
                   <div className="mt-8 space-y-6">
@@ -150,10 +150,7 @@ function Properties(): JSX.Element {
                       <div>
                         <Button
                           onClick={() => {
-                            router.push({
-                              pathname: "/propertyDetails",
-                              query: { id: property.id },
-                            });
+                            navigate(`/propertyDetails?id=${property.id}`);
                           }}
                           variant="secondary"
                         >

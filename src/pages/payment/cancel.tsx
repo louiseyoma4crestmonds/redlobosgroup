@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import Image from "next/image";
+import { useNavigate } from "react-router-dom";
 import UtilityBar from "@/organisms/UtilityBar";
 import Footer from "@/organisms/Footer";
 import Heading from "@/atoms/Heading";
 import Button from "@/atoms/Button";
-import logo from "../../../public/logoAnimation.gif";
 
 function PaymentCancel(): JSX.Element {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [introPage, setIntroPage] = useState<boolean>(true);
 
   useEffect(() => {
@@ -24,7 +22,7 @@ function PaymentCancel(): JSX.Element {
       <div className={!introPage ? "hidden" : ""}>
         <div className="w-screen h-screen flex place-content-center bg-green1">
           <div className="self-center">
-            <Image width={200} height={200} src={logo} alt="Logo" />
+            <img width={200} height={200} src="/logoAnimation.gif" alt="Logo" />
           </div>
         </div>
       </div>
@@ -56,10 +54,12 @@ function PaymentCancel(): JSX.Element {
 
             <div className="space-y-4 text-gray-700">
               <p className="text-lg">
-                Your payment was cancelled. No charges were made to your account.
+                Your payment was cancelled. No charges have been made to your
+                account.
               </p>
               <p>
-                If you encountered any issues during checkout, please try again or contact our support team.
+                If you experienced any issues, please try again or contact our
+                support team.
               </p>
             </div>
 
@@ -67,16 +67,16 @@ function PaymentCancel(): JSX.Element {
               <Button
                 variant="primary"
                 width="full"
-                onClick={() => router.back()}
+                onClick={() => navigate("/properties")}
               >
-                TRY AGAIN
+                RETURN TO PROPERTIES
               </Button>
               <Button
                 variant="secondary"
                 width="full"
-                onClick={() => router.push("/properties")}
+                onClick={() => navigate("/")}
               >
-                BROWSE PROPERTIES
+                GO TO HOME
               </Button>
             </div>
           </div>

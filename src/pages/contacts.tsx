@@ -1,14 +1,12 @@
-import Image from "next/image";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
 import Button from "@/atoms/Button";
 import Footer from "@/organisms/Footer";
-import logo from "../../public/logoAnimation.gif";
 
 function Contacts(): JSX.Element {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [introPage, setIntroPage] = useState<boolean>(true);
 
   useEffect(() => {
@@ -26,7 +24,7 @@ function Contacts(): JSX.Element {
       <div className={!introPage ? "hidden" : ""}>
         <div className="w-screen h-screen flex place-content-center bg-green1">
           <div className="self-center">
-            <Image width={200} height={200} src={logo} />
+            <img width={200} height={200} src="/logoAnimation.gif" alt="logo" />
           </div>
         </div>
       </div>
@@ -52,7 +50,7 @@ function Contacts(): JSX.Element {
                 role="button"
                 onKeyDown={() => {}}
                 onClick={() => {
-                  router.push({ pathname: "/" });
+                  navigate("/");
                 }}
               >
                 HOME
@@ -126,7 +124,7 @@ function Contacts(): JSX.Element {
                   <input type="checkbox" />
                 </div>
                 <div>
-                  I accept <span className="font-bold">Terms & Conditions</span>{" "}
+                  I accept <span className="font-bold">Terms &amp; Conditions</span>{" "}
                   for processing personal data
                 </div>
               </div>

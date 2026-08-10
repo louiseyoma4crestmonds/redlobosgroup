@@ -1,17 +1,13 @@
-import { useRouter } from "next/router";
-
-import Image from "next/image";
+import { useParams } from "react-router-dom";
 import Heading from "@/atoms/Heading";
 import Footer from "@/organisms/Footer";
 import { useEffect, useState } from "react";
 import UtilityBar from "@/organisms/UtilityBar";
 import BookingCard from "@/molecules/BookingCard/BookingCard";
-import { addOnDetails } from "../../../data/addOnData";
-import logo from "../../../../public/logoAnimation.gif";
+import { addOnDetails } from "../../data/addOnData";
 
 export function AddOnDetailsPage(): JSX.Element {
-  const router = useRouter();
-  const { id } = router.query;
+  const { id } = useParams<{ id: string }>();
   const [introPage, setIntroPage] = useState<boolean>(true);
 
   useEffect(() => {
@@ -29,7 +25,7 @@ export function AddOnDetailsPage(): JSX.Element {
       <div className={!introPage ? "hidden" : ""}>
         <div className="w-screen h-screen flex place-content-center bg-green1">
           <div className="self-center">
-            <Image width={200} height={200} src={logo} />
+            <img width={200} height={200} src="/logoAnimation.gif" alt="logo" />
           </div>
         </div>
       </div>
@@ -57,11 +53,13 @@ export function AddOnDetailsPage(): JSX.Element {
           </p>
         </div>
 
-        <Image
-          src={service?.image || ""}
-          alt={service?.title}
-          className="w-full object-cover rounded-2xl shadow-lg"
-        />
+        {service?.image && (
+          <img
+            src={service.image}
+            alt={service?.title}
+            className="w-full object-cover rounded-2xl shadow-lg"
+          />
+        )}
 
         <div className="space-y-2">
           <Heading Tag="h3" className="text-center">

@@ -1,18 +1,11 @@
-import Image from "next/image";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
 import Footer from "@/organisms/Footer";
-import logo from "../../public/logoAnimation.gif";
-import mission from "../../public/mission.jpg";
-import vision from "../../public/vision.jpg";
-import firstSittingRoom from "../../public/firstSittingRoom.png";
-import commercialDevelopment from "../../public/commercialDevelopment.jpg";
-import industrialDevelopment from "../../public/industrialDevelopment.jpg";
 
 function About(): JSX.Element {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [introPage, setIntroPage] = useState<boolean>(true);
 
   useEffect(() => {
@@ -30,7 +23,7 @@ function About(): JSX.Element {
       <div className={!introPage ? "hidden" : ""}>
         <div className="w-screen h-screen flex place-content-center bg-green1">
           <div className="self-center">
-            <Image width={200} height={200} src={logo} />
+            <img width={200} height={200} src="/logoAnimation.gif" alt="logo" />
           </div>
         </div>
       </div>
@@ -56,7 +49,7 @@ function About(): JSX.Element {
                 role="button"
                 onKeyDown={() => {}}
                 onClick={() => {
-                  router.push({ pathname: "/" });
+                  navigate("/");
                 }}
               >
                 HOME
@@ -67,11 +60,12 @@ function About(): JSX.Element {
           </div>
           <div className="flex flex-col tablet:pt-12 tablet:flex-row tablet:justify-between tablet:gap-8 tablet:px-24">
             <div className="self-center basis-6/12">
-              <Image
+              <img
                 className="rounded-2xl"
-                src={mission}
+                src="/mission.jpg"
                 height={900}
                 width={800}
+                alt="Mission"
               />
             </div>
             <div className="self-center basis-6/12 tablet:px-8 text-center">
@@ -101,11 +95,12 @@ function About(): JSX.Element {
           </div>
           <div className="flex flex-col tablet:pt-12 tablet:flex-row tablet:flex-row-reverse tablet:justify-between tablet:gap-8 tablet:px-24">
             <div className="self-center basis-6/12">
-              <Image
+              <img
                 className="rounded-2xl"
-                src={vision}
+                src="/vision.jpg"
                 height={900}
                 width={800}
+                alt="Vision"
               />
             </div>
             <div className="self-center basis-6/12 tablet:px-8 text-center">
@@ -149,11 +144,12 @@ function About(): JSX.Element {
             <div className="py-16 space-y-16 tablet:flex tablet:gap-x-4 tablet:space-y-0 ">
               <div className="space-y-4">
                 <div>
-                  <Image
+                  <img
                     className="rounded-full"
                     width={200}
                     height={200}
-                    src={firstSittingRoom}
+                    src="/firstSittingRoom.png"
+                    alt="Residential"
                   />
                 </div>
                 <div>
@@ -173,7 +169,7 @@ function About(): JSX.Element {
                     role="button"
                     onKeyDown={() => {}}
                     onClick={() => {
-                      router.push({ pathname: "/mission" });
+                      navigate("/mission");
                     }}
                   >
                     LEARN MORE
@@ -182,11 +178,12 @@ function About(): JSX.Element {
               </div>
               <div className="space-y-4">
                 <div>
-                  <Image
+                  <img
                     className="rounded-full"
                     width={200}
                     height={200}
-                    src={commercialDevelopment}
+                    src="/commercialDevelopment.jpg"
+                    alt="Commercial"
                   />
                 </div>
                 <div>
@@ -206,7 +203,7 @@ function About(): JSX.Element {
                     role="button"
                     onKeyDown={() => {}}
                     onClick={() => {
-                      router.push({ pathname: "/mission" });
+                      navigate("/mission");
                     }}
                   >
                     LEARN MORE
@@ -215,11 +212,12 @@ function About(): JSX.Element {
               </div>
               <div className="space-y-4">
                 <div>
-                  <Image
+                  <img
                     className="rounded-full"
                     width={200}
                     height={200}
-                    src={industrialDevelopment}
+                    src="/industrialDevelopment.jpg"
+                    alt="Industrial"
                   />
                 </div>
                 <div>
@@ -239,7 +237,7 @@ function About(): JSX.Element {
                     role="button"
                     onKeyDown={() => {}}
                     onClick={() => {
-                      router.push({ pathname: "/mission" });
+                      navigate("/mission");
                     }}
                   >
                     LEARN MORE

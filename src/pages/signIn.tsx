@@ -1,15 +1,17 @@
-import Image from "next/image";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { signIn, signOut, useSession } from "next-auth/react";
+import {
+  useSession,
+  signIn,
+  signOut,
+} from "../context/AuthContext";
 import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
 import Footer from "@/organisms/Footer";
 import Button from "@/atoms/Button";
-import logo from "../../public/logoAnimation.gif";
 
 function SignIn(): JSX.Element {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { data: session } = useSession();
   const [introPage, setIntroPage] = useState<boolean>(true);
 
@@ -28,7 +30,7 @@ function SignIn(): JSX.Element {
       <div className={!introPage ? "hidden" : ""}>
         <div className="w-screen h-screen flex place-content-center bg-green1">
           <div className="self-center">
-            <Image width={200} height={200} src={logo} />
+            <img width={200} height={200} src="/logoAnimation.gif" alt="logo" />
           </div>
         </div>
       </div>
@@ -55,7 +57,7 @@ function SignIn(): JSX.Element {
                 role="button"
                 onKeyDown={() => {}}
                 onClick={() => {
-                  router.push({ pathname: "/" });
+                  navigate("/");
                 }}
               >
                 HOME
