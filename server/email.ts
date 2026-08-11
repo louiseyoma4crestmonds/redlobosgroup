@@ -1,39 +1,4 @@
-import nodemailer from "nodemailer";
-
-function createTransporter() {
-  const user = process.env.EMAIL_USER;
-  const pass = process.env.EMAIL_PASS;
-
-  if (!user || !pass) return null;
-
-  // Strip whitespace from App Password (Google sometimes shows it with spaces)
-  const cleanPass = pass.replace(/\s+/g, "");
-
-  // Detect whether this is Gmail/Google Workspace and use the correct host
-  const isGmail =
-    user.endsWith("@gmail.com") ||
-    user.endsWith("@googlemail.com");
-
-  // For Google Workspace / custom domains on Google, use the same SMTP host
-  // but we default to Gmail's SMTP. If EMAIL_SMTP_HOST is set, use that instead.
-  const host = process.env.EMAIL_SMTP_HOST || "smtp.gmail.com";
-  const port = parseInt(process.env.EMAIL_SMTP_PORT || "587", 10);
-
-  console.log(
-    `📧 Email configured — host: ${host}:${port}, user: ${user.slice(0, 4)}***`
-  );
-
-  return nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465, // true for 465, false for 587
-    auth: { user, pass: cleanPass },
-    tls: {
-      // Accept self-signed certificates in dev
-      rejectUnauthorized: false,
-    },
-  });
-}
+import { Resend } from "resend";
 
 interface AdminBookingEmailOptions {
   serviceName: string;
@@ -46,16 +11,29 @@ interface AdminBookingEmailOptions {
 }
 
 export async function sendAdminBookingEmail(opts: AdminBookingEmailOptions) {
-  const transporter = createTransporter();
+  const apiKey = process.env.RESEND_API_KEY;
   const adminEmail = process.env.ADMIN_EMAIL;
 
-  if (!transporter || !adminEmail) {
+  if (!apiKey || !adminEmail) {
     console.warn(
       "⚠️  Email not configured — booking saved to DB but no email sent. " +
-        "Set EMAIL_USER, EMAIL_PASS and ADMIN_EMAIL secrets to enable notifications."
+        "Set RESEND_API_KEY and ADMIN_EMAIL secrets to enable notifications."
     );
     return;
   }
+
+  const resend = new Resend(apiKey.trim());
+
+  // Extract a plain email address from whatever format ADMIN_EMAIL is stored in
+  // (handles "email@example.com", "<email@example.com>", "Name <email@example.com>", etc.)
+  const emailMatch = adminEmail.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
+  if (!emailMatch) {
+    console.error(
+      `❌ ADMIN_EMAIL secret does not contain a valid email address. Current value starts with: ${adminEmail.slice(0, 6)}...`
+    );
+    return;
+  }
+  const cleanAdminEmail = emailMatch[0];
 
   const fmt = (d: string) =>
     new Date(d).toLocaleDateString("en-GB", {
@@ -125,13 +103,17 @@ export async function sendAdminBookingEmail(opts: AdminBookingEmailOptions) {
     </div>
   `;
 
-  await transporter.sendMail({
-    from: `"Red Lobos Group" <${process.env.EMAIL_USER}>`,
-    to: adminEmail,
+  const { data, error } = await resend.emails.send({
+    from: "Red Lobos Group <onboarding@resend.dev>",
+    to: [cleanAdminEmail],
     replyTo: opts.customerEmail,
     subject: `New Booking: ${opts.serviceName} — ${opts.customerName}`,
     html,
   });
 
-  console.log(`✅ Admin booking email sent to ${adminEmail}`);
+  if (error) {
+    throw new Error(`Resend error: ${JSON.stringify(error)}`);
+  }
+
+  console.log(`✅ Admin booking email sent via Resend — id: ${data?.id}`);
 }
