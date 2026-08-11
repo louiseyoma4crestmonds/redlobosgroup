@@ -58,6 +58,9 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 router.get("/session", (req: Request, res: Response) => {
   if (req.isAuthenticated && req.isAuthenticated()) {
     const user = req.user as Record<string, unknown>;
+    const adminEmail = process.env.ADMIN_EMAIL?.trim().match(
+      /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/
+    )?.[0];
     res.json({
       user: {
         name: user.name,
@@ -65,6 +68,7 @@ router.get("/session", (req: Request, res: Response) => {
         image: user.image,
       },
       accessToken: user.accessToken,
+      isAdmin: !!(adminEmail && user.email === adminEmail),
     });
   } else {
     res.json(null);

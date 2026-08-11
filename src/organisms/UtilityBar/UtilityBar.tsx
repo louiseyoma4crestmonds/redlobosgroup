@@ -16,11 +16,14 @@ function UtilityBar(props: UtilityBarProps): JSX.Element {
   const getNavPath = (link: string) => {
     if (link === "HOME") return "/";
     if (link === "DASHBOARD") return "/dashboard";
+    if (link === "ADMIN") return "/admin";
     return `/${link.toLowerCase()}`;
   };
 
-  // Show DASHBOARD in nav only when signed in
-  const navigationLinks = session ? [...baseLinks, "DASHBOARD"] : baseLinks;
+  // Show DASHBOARD when signed in; ADMIN only for admin users
+  const navigationLinks = session
+    ? [...baseLinks, "DASHBOARD", ...(session.isAdmin ? ["ADMIN"] : [])]
+    : baseLinks;
 
   return (
     <div>
