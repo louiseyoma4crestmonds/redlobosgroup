@@ -8,6 +8,7 @@ import authRouter from "./routes/auth";
 import stripeRouter from "./routes/stripe";
 import propertiesRouter from "./routes/properties";
 import bookingsRouter from "./routes/bookings";
+import addonBookingsRouter from "./routes/addonBookings";
 import { WebhookHandlers } from "./webhookHandlers";
 import { getStripeSync } from "./stripeClient";
 
@@ -104,6 +105,7 @@ async function createServer() {
   app.use("/api/stripe", stripeRouter);
   app.use("/api/properties", propertiesRouter);
   app.use("/api/bookings", bookingsRouter);
+  app.use("/api/addon-bookings", addonBookingsRouter);
 
   // ── 5. Static / Vite ───────────────────────────────────────────────────────
   if (process.env.NODE_ENV === "production") {

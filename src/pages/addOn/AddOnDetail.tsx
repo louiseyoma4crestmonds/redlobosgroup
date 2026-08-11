@@ -32,11 +32,7 @@ export function AddOnDetailsPage(): JSX.Element {
       {/* END OF LOGO LOADING SCREEN */}
 
       <div className={introPage ? "hidden" : ""}>
-        {/* UTILITY BAR */}
-        <div>
-          <UtilityBar activeLink="" />
-        </div>
-        {/* END OF UTILITY BAR */}
+        <UtilityBar activeLink="" />
       </div>
 
       <div className="px-6 tablet:p-20 space-y-8">
@@ -58,6 +54,9 @@ export function AddOnDetailsPage(): JSX.Element {
             src={service.image}
             alt={service?.title}
             className="w-full object-cover rounded-2xl shadow-lg"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = "none";
+            }}
           />
         )}
 
@@ -69,9 +68,13 @@ export function AddOnDetailsPage(): JSX.Element {
         </div>
       </div>
 
-      <div className="mb-96 mt-10">
-        <BookingCard />
+      <div className="mb-20 mt-10">
+        <BookingCard
+          serviceId={service?.id ?? Number(id)}
+          serviceName={service?.title ?? "Add-On Service"}
+        />
       </div>
+
       <Footer />
     </div>
   );
