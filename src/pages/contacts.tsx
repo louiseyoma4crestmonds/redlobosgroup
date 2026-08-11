@@ -94,38 +94,58 @@ function Contacts(): JSX.Element {
               </div>
             </div>
 
-            <div className="space-y-3">
-              <div className="w-full flex flex-col  place-content-center space-y-2 tablet:flex-row tablet:gap-2 tablet:space-y-0">
-                <input
-                  className="rounded border border-black py-2 px-4 outline-none"
-                  placeholder="Your name"
-                />
-                <input
-                  className="rounded border border-black py-2 px-4 outline-none"
-                  placeholder="Phone number"
-                />
+            <div className="space-y-4">
+              <div className="w-full flex flex-col place-content-center space-y-4 tablet:flex-row tablet:gap-4 tablet:space-y-0">
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                    Your Name
+                  </label>
+                  <input
+                    className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all"
+                    placeholder="Jane Smith"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                    Phone Number
+                  </label>
+                  <input
+                    className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all"
+                    placeholder="+44 7700 000000"
+                  />
+                </div>
               </div>
 
-              <div className="w-full h-48 flex place-content-center">
-                <textarea
-                  className="w-full tablet:w-4/12 rounded border border-black  py-2 px-4 outline-none"
-                  placeholder="Write messge"
-                />
+              <div className="w-full flex place-content-center">
+                <div className="w-full tablet:w-4/12">
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                    Message
+                  </label>
+                  <textarea
+                    rows={5}
+                    className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all resize-none"
+                    placeholder="Write your message…"
+                  />
+                </div>
               </div>
+
+              <div className="w-full flex place-content-center gap-2">
+                <input
+                  type="checkbox"
+                  id="terms"
+                  className="mt-0.5 accent-gold cursor-pointer"
+                />
+                <label htmlFor="terms" className="text-sm text-gray-600 cursor-pointer">
+                  I accept <span className="font-bold text-gray-800">Terms &amp; Conditions</span>{" "}
+                  for processing personal data
+                </label>
+              </div>
+
               <div className="w-full flex place-content-center">
                 <div className="w-3/5 tablet:w-1/5">
                   <Button variant="primary" width="full">
                     <span className="w-full text-center">SUBMIT</span>
                   </Button>
-                </div>
-              </div>
-              <div className="w-full flex place-content-center gap-2 ">
-                <div>
-                  <input type="checkbox" />
-                </div>
-                <div>
-                  I accept <span className="font-bold">Terms &amp; Conditions</span>{" "}
-                  for processing personal data
                 </div>
               </div>
             </div>

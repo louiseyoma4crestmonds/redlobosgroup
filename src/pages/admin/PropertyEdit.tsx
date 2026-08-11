@@ -249,36 +249,36 @@ export default function PropertyEdit() {
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 required
                 placeholder="e.g. Ocean View Villa"
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#c9a96e]/30 focus:border-[#c9a96e]"
+                className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Address</label>
               <input
                 type="text"
                 value={form.address}
                 onChange={(e) => setForm({ ...form, address: e.target.value })}
                 placeholder="e.g. 123 Coastal Road, Malibu, CA"
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#c9a96e]/30 focus:border-[#c9a96e]"
+                className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Description</label>
               <textarea
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 rows={4}
                 placeholder="Describe the property…"
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#c9a96e]/30 focus:border-[#c9a96e] resize-none"
+                className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all text-sm resize-none"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               {(["bedrooms", "bathrooms", "max_guests"] as const).map((field) => (
                 <div key={field}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 capitalize">
                     {field.replace("_", " ")}
                   </label>
                   <input
@@ -286,20 +286,20 @@ export default function PropertyEdit() {
                     min={0}
                     value={form[field]}
                     onChange={(e) => setForm({ ...form, [field]: Number(e.target.value) })}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#c9a96e]/30 focus:border-[#c9a96e]"
+                    className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all text-sm"
                   />
                 </div>
               ))}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Price / Night ($)</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Price / Night ($)</label>
                 <input
                   type="number"
                   min={0}
                   step={0.01}
                   value={form.price_per_night}
                   onChange={(e) => setForm({ ...form, price_per_night: Number(e.target.value) })}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#c9a96e]/30 focus:border-[#c9a96e]"
+                  className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all text-sm"
                 />
               </div>
             </div>
@@ -308,7 +308,7 @@ export default function PropertyEdit() {
               <button
                 type="button"
                 onClick={() => setForm({ ...form, is_available: !form.is_available })}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${form.is_available ? "bg-[#c9a96e]" : "bg-gray-200"}`}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${form.is_available ? "bg-gold" : "bg-gray-200"}`}
               >
                 <span
                   className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${form.is_available ? "translate-x-6" : "translate-x-1"}`}
@@ -324,7 +324,7 @@ export default function PropertyEdit() {
             <button
               type="submit"
               disabled={saving}
-              className="bg-[#c9a96e] hover:bg-[#b8945a] disabled:opacity-60 text-white font-bold px-8 py-2.5 rounded-lg transition-colors text-sm"
+              className="bg-gold hover:bg-black disabled:opacity-60 text-white font-bold px-8 py-3 rounded-lg transition-colors text-sm tracking-wider"
             >
               {saving ? "Saving…" : isNew ? "Create Property" : "Save Changes"}
             </button>
@@ -346,11 +346,11 @@ export default function PropertyEdit() {
                   onChange={(e) => setNewAmenity(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addAmenity())}
                   placeholder="e.g. Swimming Pool, WiFi, Air Conditioning…"
-                  className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#c9a96e]/30 focus:border-[#c9a96e]"
+                  className="flex-1 rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all text-sm"
                 />
                 <button
                   onClick={addAmenity}
-                  className="bg-[#c9a96e] hover:bg-[#b8945a] text-white font-semibold px-4 py-2.5 rounded-lg text-sm transition-colors"
+                  className="bg-gold hover:bg-black text-white font-semibold px-4 py-3 rounded-lg text-sm transition-colors"
                 >
                   Add
                 </button>
@@ -371,7 +371,7 @@ export default function PropertyEdit() {
                             onChange={(e) => setEditingAmenity({ ...editingAmenity, name: e.target.value })}
                             onKeyDown={(e) => e.key === "Enter" && saveAmenityEdit()}
                             autoFocus
-                            className="flex-1 border border-[#c9a96e] rounded-lg px-3 py-2 text-sm focus:outline-none"
+                            className="flex-1 rounded-lg border border-gold bg-white px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-gold/40 transition-all text-sm"
                           />
                           <button onClick={saveAmenityEdit} className="text-green-600 text-sm font-semibold px-2 py-1">Save</button>
                           <button onClick={() => setEditingAmenity(null)} className="text-gray-400 text-sm px-2 py-1">Cancel</button>
@@ -381,7 +381,7 @@ export default function PropertyEdit() {
                           <span className="flex-1 text-sm text-gray-700 bg-gray-50 rounded-lg px-3 py-2">{a.name}</span>
                           <button
                             onClick={() => setEditingAmenity({ id: a.id, name: a.name })}
-                            className="opacity-0 group-hover:opacity-100 text-[#c9a96e] text-xs font-semibold px-2 py-1 transition-opacity"
+                            className="opacity-0 group-hover:opacity-100 text-gold text-xs font-semibold px-2 py-1 transition-opacity"
                           >
                             Edit
                           </button>
@@ -411,12 +411,12 @@ export default function PropertyEdit() {
                   onChange={(e) => setNewImageUrl(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addImage())}
                   placeholder="https://example.com/photo.jpg"
-                  className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#c9a96e]/30 focus:border-[#c9a96e]"
+                  className="flex-1 rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all text-sm"
                 />
                 <button
                   onClick={addImage}
                   disabled={addingImage}
-                  className="bg-[#c9a96e] hover:bg-[#b8945a] disabled:opacity-60 text-white font-semibold px-4 py-2.5 rounded-lg text-sm transition-colors"
+                  className="bg-gold hover:bg-black disabled:opacity-60 text-white font-semibold px-4 py-3 rounded-lg text-sm transition-colors"
                 >
                   {addingImage ? "…" : "Add"}
                 </button>
@@ -439,7 +439,7 @@ export default function PropertyEdit() {
                       />
                       {/* Primary badge */}
                       {img.is_primary && (
-                        <div className="absolute top-2 left-2 bg-[#c9a96e] text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                        <div className="absolute top-2 left-2 bg-gold text-white text-xs font-bold px-2 py-0.5 rounded-full">
                           Primary
                         </div>
                       )}
@@ -448,7 +448,7 @@ export default function PropertyEdit() {
                         {!img.is_primary && (
                           <button
                             onClick={() => setPrimaryImage(img.id)}
-                            className="bg-white text-gray-800 text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-[#c9a96e] hover:text-white transition-colors"
+                            className="bg-white text-gray-800 text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-gold hover:text-white transition-colors"
                           >
                             Set Primary
                           </button>

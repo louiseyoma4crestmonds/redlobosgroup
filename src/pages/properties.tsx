@@ -349,7 +349,7 @@ function Properties(): JSX.Element {
                 min="1"
                 value={guestCount}
                 onChange={(e) => setGuestCount(e.target.value)}
-                className="w-full rounded-md border border-gray-300 py-3 px-4 text-gray-700 outline-none focus:ring-1 focus:ring-gold"
+                className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all"
               />
             </div>
 
