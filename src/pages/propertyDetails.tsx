@@ -1,10 +1,11 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useState, lazy, Suspense, useCallback } from "react";
+import { differenceInCalendarDays, parseISO } from "date-fns";
 import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
 import Footer from "@/organisms/Footer";
 import Modal from "@/molecules/Modal";
-import BookingCalendar from "@/molecules/BookingCalendar";
+import BookingCalendar, { CalendarEvent } from "@/molecules/BookingCalendar";
 import Calendar from "@/organisms/Calendar";
 import { getPropertyDetails, getPropertyEvents } from "../api";
 
@@ -75,8 +76,9 @@ function PropertyDetails(): JSX.Element {
   const [checkInDate, setCheckInDate] = useState<string | null>(null);
   const [checkOutDate, setCheckOutDate] = useState<string | null>(null);
   const [guestCount, setGuestCount] = useState("1");
-  const [propertyEvents, setPropertyEvents] = useState<any[]>([]);
+  const [propertyEvents, setPropertyEvents] = useState<CalendarEvent[]>([]);
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [calendarDate, setCalendarDate] = useState(new Date());
 
   // Geocode address via Nominatim (no API key required)
   const geocodeAddress = useCallback((address: string) => {
@@ -408,74 +410,200 @@ function PropertyDetails(): JSX.Element {
 
       {/* Booking modal */}
       <Modal isOpen={showBookingModal} onClose={handleCloseBookingModal}>
-        <div className="space-y-6 p-6 max-w-2xl mx-auto">
-          <div className="text-center">
-            <Heading Tag="h2" variant="lg">
-              <span>Book Your Stay</span>
-            </Heading>
-            {property && (
-              <p className="text-gray1 mt-1 text-sm">{property.name}</p>
-            )}
-          </div>
+        {(() => {
+          const nights =
+            checkInDate && checkOutDate
+              ? differenceInCalendarDays(parseISO(checkOutDate), parseISO(checkInDate))
+              : 0;
+          const pricePerNight = Number(property?.price_per_night ?? 0);
+          const subtotal = nights * pricePerNight;
+          const serviceFee = Math.round(subtotal * 0.12);
+          const total = subtotal + serviceFee;
 
-          <div className="space-y-5">
-            <div>
-              <p className="text-sm font-medium text-gray-700 mb-3">
-                Select check-in and check-out dates
-              </p>
+          const step = !checkInDate
+            ? "checkin"
+            : !checkOutDate
+            ? "checkout"
+            : "summary";
+
+          return (
+            <div className="p-6 w-full max-w-xl mx-auto space-y-5">
+              {/* Header */}
+              <div className="text-center">
+                <Heading Tag="h2" variant="lg">
+                  <span>Make a Reservation</span>
+                </Heading>
+                {property && (
+                  <p className="text-gray1 text-sm mt-1">{property.name}</p>
+                )}
+              </div>
+
+              {/* Step hint */}
+              <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                <span
+                  className={
+                    step === "checkin"
+                      ? "font-semibold text-gold"
+                      : "text-gray-400"
+                  }
+                >
+                  1. Pick check-in
+                </span>
+                <span className="text-gray-300">→</span>
+                <span
+                  className={
+                    step === "checkout"
+                      ? "font-semibold text-gold"
+                      : "text-gray-400"
+                  }
+                >
+                  2. Pick check-out
+                </span>
+                <span className="text-gray-300">→</span>
+                <span
+                  className={
+                    step === "summary"
+                      ? "font-semibold text-gold"
+                      : "text-gray-400"
+                  }
+                >
+                  3. Confirm
+                </span>
+              </div>
+
+              {/* Calendar */}
               <BookingCalendar
                 events={propertyEvents}
                 checkInDate={checkInDate}
                 checkOutDate={checkOutDate}
-                onCheckInSelect={(date) => setCheckInDate(date)}
+                onCheckInSelect={(date) => {
+                  setCheckInDate(date);
+                  setCheckOutDate(null);
+                }}
                 onCheckOutSelect={(date) => setCheckOutDate(date)}
+                currentDate={calendarDate}
+                onMonthChange={setCalendarDate}
               />
-            </div>
 
-            {checkInDate && checkOutDate && (
-              <div className="bg-green1 border border-gray-200 p-4 rounded-lg">
-                <div className="flex justify-between items-center text-sm">
-                  <div>
-                    <p className="text-gray-500">Check-in</p>
-                    <p className="font-semibold">{checkInDate}</p>
+              {/* Summary — shown once both dates chosen */}
+              {step === "summary" && nights > 0 && (
+                <div className="rounded-xl border border-gray-200 overflow-hidden">
+                  {/* Date row */}
+                  <div className="grid grid-cols-2 divide-x divide-gray-200">
+                    <div className="p-3">
+                      <p className="text-xs text-gray-400 uppercase tracking-wide mb-0.5">
+                        Check-in
+                      </p>
+                      <p className="font-semibold text-gray-800 text-sm">
+                        {new Date(checkInDate!).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </p>
+                    </div>
+                    <div className="p-3">
+                      <p className="text-xs text-gray-400 uppercase tracking-wide mb-0.5">
+                        Check-out
+                      </p>
+                      <p className="font-semibold text-gray-800 text-sm">
+                        {new Date(checkOutDate!).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </p>
+                    </div>
                   </div>
-                  <span className="text-gray-400 text-lg">→</span>
-                  <div className="text-right">
-                    <p className="text-gray-500">Check-out</p>
-                    <p className="font-semibold">{checkOutDate}</p>
+
+                  {/* Price breakdown */}
+                  <div className="bg-green1 px-4 py-3 space-y-2 text-sm border-t border-gray-100">
+                    <div className="flex justify-between text-gray-600">
+                      <span>
+                        £{pricePerNight.toFixed(0)} × {nights}{" "}
+                        {nights === 1 ? "night" : "nights"}
+                      </span>
+                      <span>£{subtotal.toFixed(0)}</span>
+                    </div>
+                    <div className="flex justify-between text-gray-600">
+                      <span>Service fee</span>
+                      <span>£{serviceFee.toFixed(0)}</span>
+                    </div>
+                    <div className="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-200">
+                      <span>Total</span>
+                      <span>£{total.toFixed(0)}</span>
+                    </div>
                   </div>
                 </div>
+              )}
+
+              {/* Guests */}
+              <div>
+                <label
+                  htmlFor="guests"
+                  className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2"
+                >
+                  Guests
+                </label>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setGuestCount((g) =>
+                        String(Math.max(1, parseInt(g) - 1))
+                      )
+                    }
+                    className="w-9 h-9 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-gold hover:text-gold transition-colors"
+                  >
+                    −
+                  </button>
+                  <span className="w-8 text-center font-semibold text-gray-800">
+                    {guestCount}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setGuestCount((g) =>
+                        String(
+                          Math.min(
+                            property?.max_guests ?? 10,
+                            parseInt(g) + 1
+                          )
+                        )
+                      )
+                    }
+                    className="w-9 h-9 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-gold hover:text-gold transition-colors"
+                  >
+                    +
+                  </button>
+                  <span className="text-sm text-gray-400">
+                    (max {property?.max_guests ?? 10})
+                  </span>
+                </div>
               </div>
-            )}
 
-            <div>
-              <label
-                htmlFor="guests"
-                className="block text-sm font-medium text-gray-700 mb-2"
+              {/* CTA */}
+              <button
+                type="button"
+                disabled={bookingLoading || step !== "summary" || nights <= 0}
+                onClick={handleMakeReservation}
+                className="w-full py-3.5 rounded-xl bg-gold text-white font-semibold tracking-wide hover:bg-black transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Number of guests
-              </label>
-              <input
-                id="guests"
-                type="number"
-                min="1"
-                max={property?.max_guests ?? 10}
-                value={guestCount}
-                onChange={(e) => setGuestCount(e.target.value)}
-                className="w-full rounded-md border border-gray-300 py-3 px-4 text-gray-700 outline-none focus:ring-1 focus:ring-gold"
-              />
-            </div>
+                {bookingLoading
+                  ? "Processing…"
+                  : step !== "summary"
+                  ? "Select your dates above"
+                  : `Proceed to Checkout · £${total.toFixed(0)}`}
+              </button>
 
-            <button
-              type="button"
-              disabled={bookingLoading || !checkInDate || !checkOutDate}
-              onClick={handleMakeReservation}
-              className="w-full py-3 rounded-lg bg-gold text-white font-semibold tracking-wide hover:bg-black transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {bookingLoading ? "Processing…" : "MAKE RESERVATION"}
-            </button>
-          </div>
-        </div>
+              {step !== "summary" && (
+                <p className="text-center text-xs text-gray-400">
+                  Grayed-out dates are already booked
+                </p>
+              )}
+            </div>
+          );
+        })()}
       </Modal>
     </div>
   );

@@ -25,10 +25,9 @@ export default function Calendar(props: CalendarProps) {
 
   useEffect(() => {
     getPropertyEvents(1).then((response: any) => {
-      console.log(response.data.data[0]);
-      setPropertyEvents(response.data.data[0]);
-    });
-    console.log(selectedDate, isModalOpen, closeModal);
+      const data = response?.data?.data;
+      setPropertyEvents(Array.isArray(data) ? data : []);
+    }).catch(() => setPropertyEvents([]));
   }, []);
 
   const navigateMonth = (direction: "prev" | "next") => {

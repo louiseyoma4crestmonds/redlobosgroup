@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   format,
   startOfMonth,
@@ -13,16 +11,14 @@ import {
   isAfter,
   isBefore,
   isWithinInterval,
+  differenceInCalendarDays,
 } from "date-fns";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-interface CalendarEvent {
-  id: string;
-  price: number;
+export interface CalendarEvent {
+  id?: string | number;
+  date: string; // "yyyy-MM-dd"
   is_booked: boolean;
-  date: string;
-  created_at: Date;
-  booked_by: {};
-  property: {};
 }
 
 interface BookingCalendarProps {
@@ -31,6 +27,8 @@ interface BookingCalendarProps {
   onCheckOutSelect: (date: string | null) => void;
   checkInDate: string | null;
   checkOutDate: string | null;
+  currentDate: Date;
+  onMonthChange: (date: Date) => void;
 }
 
 const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -41,174 +39,228 @@ export default function BookingCalendar({
   onCheckOutSelect,
   checkInDate,
   checkOutDate,
+  currentDate,
+  onMonthChange,
 }: BookingCalendarProps) {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
-  const calendarStart = startOfWeek(monthStart);
-  const calendarEnd = endOfWeek(monthEnd);
-
-  const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
-
-  const eventMap = new Map<string, CalendarEvent>();
-  events.forEach((event: CalendarEvent) => {
-    eventMap.set(event.date, event);
+  const days = eachDayOfInterval({
+    start: startOfWeek(monthStart),
+    end: endOfWeek(monthEnd),
   });
 
-  const navigateMonth = (direction: "prev" | "next") => {
-    const newDate = new Date(currentDate);
-    if (direction === "prev") {
-      newDate.setMonth(newDate.getMonth() - 1);
-    } else {
-      newDate.setMonth(newDate.getMonth() + 1);
+  // Build a fast lookup: date-string → is_booked
+  const bookedSet = new Set<string>();
+  events.forEach((e) => {
+    if (e.is_booked) bookedSet.add(e.date);
+  });
+
+  const isBooked = (date: Date) => bookedSet.has(format(date, "yyyy-MM-dd"));
+  const isPast = (date: Date) => isBefore(date, today) && !isSameDay(date, today);
+
+  /** Returns true if any booked day falls strictly between start and end (inclusive of end, exclusive of start if needed) */
+  const hasBookedInRange = (start: Date, end: Date): boolean => {
+    const s = isAfter(start, end) ? end : start;
+    const e = isAfter(start, end) ? start : end;
+    for (const b of Array.from(bookedSet)) {
+      const bd = parseISO(b);
+      if (isWithinInterval(bd, { start: s, end: e })) return true;
     }
-    setCurrentDate(newDate);
+    return false;
   };
 
-  const handleDateClick = (date: Date, event: CalendarEvent | undefined) => {
+  const handleDateClick = (date: Date) => {
     if (!isSameMonth(date, currentDate)) return;
-    if (event?.is_booked) return;
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (isBefore(date, today)) return;
+    if (isBooked(date) || isPast(date)) return;
 
     const dateString = format(date, "yyyy-MM-dd");
 
     if (!checkInDate) {
-      onCheckInSelect(dateString);
-    } else if (!checkOutDate) {
-      const checkIn = parseISO(checkInDate);
-      if (isAfter(date, checkIn)) {
-        onCheckOutSelect(dateString);
-      } else {
-        onCheckInSelect(dateString);
-      }
-    } else {
+      // No selection yet — set check-in
       onCheckInSelect(dateString);
       onCheckOutSelect(null);
+      return;
     }
+
+    const checkIn = parseISO(checkInDate);
+
+    if (!checkOutDate) {
+      if (isSameDay(date, checkIn)) {
+        // Clicked same day — deselect
+        onCheckInSelect(null);
+        return;
+      }
+
+      if (isAfter(date, checkIn)) {
+        // Check no booked dates in range
+        if (hasBookedInRange(checkIn, date)) {
+          // Start fresh from this date as new check-in
+          onCheckInSelect(dateString);
+          onCheckOutSelect(null);
+        } else {
+          onCheckOutSelect(dateString);
+        }
+      } else {
+        // Clicked before check-in — reassign as new check-in
+        onCheckInSelect(dateString);
+        onCheckOutSelect(null);
+      }
+      return;
+    }
+
+    // Both dates set — restart selection
+    onCheckInSelect(dateString);
+    onCheckOutSelect(null);
   };
 
-  const isDateInRange = (date: Date) => {
+  // Determine hover/range state per day
+  const isCheckInDay = (date: Date) =>
+    !!checkInDate && isSameDay(date, parseISO(checkInDate));
+  const isCheckOutDay = (date: Date) =>
+    !!checkOutDate && isSameDay(date, parseISO(checkOutDate));
+  const isInRange = (date: Date) => {
     if (!checkInDate || !checkOutDate) return false;
     try {
-      const checkIn = parseISO(checkInDate);
-      const checkOut = parseISO(checkOutDate);
-      return isWithinInterval(date, { start: checkIn, end: checkOut });
+      return isWithinInterval(date, {
+        start: parseISO(checkInDate),
+        end: parseISO(checkOutDate),
+      });
     } catch {
       return false;
     }
   };
 
-  const isCheckIn = (date: Date) => {
-    if (!checkInDate) return false;
-    try {
-      return isSameDay(date, parseISO(checkInDate));
-    } catch {
-      return false;
-    }
-  };
-
-  const isCheckOut = (date: Date) => {
-    if (!checkOutDate) return false;
-    try {
-      return isSameDay(date, parseISO(checkOutDate));
-    } catch {
-      return false;
-    }
-  };
-
-  const weeks = [];
+  // Split into weeks
+  const weeks: Date[][] = [];
   for (let i = 0; i < days.length; i += 7) {
     weeks.push(days.slice(i, i + 7));
   }
 
-  const monthName = currentDate.toLocaleDateString("en-US", {
-    month: "long",
-    year: "numeric",
-  });
+  const navigateMonth = (dir: "prev" | "next") => {
+    const d = new Date(currentDate);
+    d.setMonth(d.getMonth() + (dir === "next" ? 1 : -1));
+    onMonthChange(d);
+  };
+
+  // Disable "prev" if already on current month
+  const isPrevDisabled =
+    currentDate.getFullYear() === today.getFullYear() &&
+    currentDate.getMonth() === today.getMonth();
 
   return (
-    <div className="w-full">
-      {/* Calendar Header */}
+    <div className="w-full select-none">
+      {/* Month nav */}
       <div className="flex items-center justify-between mb-4">
         <button
           type="button"
+          disabled={isPrevDisabled}
           onClick={() => navigateMonth("prev")}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
           <ChevronLeft className="h-5 w-5 text-gray-600" />
         </button>
-        <h3 className="text-lg font-semibold text-gray-800">{monthName}</h3>
+        <span className="text-base font-semibold text-gray-800">
+          {format(currentDate, "MMMM yyyy")}
+        </span>
         <button
           type="button"
           onClick={() => navigateMonth("next")}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
         >
           <ChevronRight className="h-5 w-5 text-gray-600" />
         </button>
       </div>
 
-      {/* Weekday Headers */}
-      <div className="grid grid-cols-7 mb-2">
-        {WEEKDAYS.map((day) => (
+      {/* Weekday headers */}
+      <div className="grid grid-cols-7 mb-1">
+        {WEEKDAYS.map((d) => (
           <div
-            key={day}
-            className="text-center text-xs font-medium text-gray-500 py-2"
+            key={d}
+            className="text-center text-[11px] font-semibold text-gray-400 py-1 tracking-wide"
           >
-            {day}
+            {d}
           </div>
         ))}
       </div>
 
-      {/* Calendar Grid */}
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
-        {weeks.map((week, weekIndex) => (
-          <div key={weekIndex} className="grid grid-cols-7">
-            {week.map((day, dayIndex) => {
-              const dateString = format(day, "yyyy-MM-dd");
-              const event = eventMap.get(dateString);
-              const isCurrentMonth = isSameMonth(day, currentDate);
-              const isBooked = event?.is_booked;
-              const inRange = isDateInRange(day);
-              const isCheckInDate = isCheckIn(day);
-              const isCheckOutDate = isCheckOut(day);
-              const isPast = isBefore(day, new Date()) && !isSameDay(day, new Date());
+      {/* Day grid */}
+      <div className="rounded-xl overflow-hidden border border-gray-100">
+        {weeks.map((week, wi) => (
+          <div key={wi} className="grid grid-cols-7">
+            {week.map((day, di) => {
+              const inCurrentMonth = isSameMonth(day, currentDate);
+              const booked = isBooked(day);
+              const past = isPast(day);
+              const disabled = !inCurrentMonth || booked || past;
+              const checkIn = isCheckInDay(day);
+              const checkOut = isCheckOutDay(day);
+              const inRange = isInRange(day);
 
-              let cellClasses = "relative h-12 flex items-center justify-center text-sm border-b border-r ";
-              
-              if (dayIndex === 6) cellClasses += "border-r-0 ";
-              if (weekIndex === weeks.length - 1) cellClasses += "border-b-0 ";
+              let bg = "bg-white";
+              let text = "text-gray-800";
+              let cursor = "cursor-pointer hover:bg-gray-50";
+              let rounded = "";
 
-              if (!isCurrentMonth) {
-                cellClasses += "bg-gray-50 text-gray-300 ";
-              } else if (isBooked || isPast) {
-                cellClasses += "bg-gray-100 text-gray-400 cursor-not-allowed ";
-              } else if (isCheckInDate || isCheckOutDate) {
-                cellClasses += "bg-gold text-white font-bold cursor-pointer ";
+              if (!inCurrentMonth) {
+                bg = "bg-gray-50";
+                text = "text-gray-200";
+                cursor = "cursor-default";
+              } else if (booked) {
+                bg = "bg-gray-100";
+                text = "text-gray-300 line-through";
+                cursor = "cursor-not-allowed";
+              } else if (past) {
+                bg = "bg-white";
+                text = "text-gray-300";
+                cursor = "cursor-not-allowed";
+              } else if (checkIn || checkOut) {
+                bg = "bg-gold";
+                text = "text-white font-bold";
+                cursor = "cursor-pointer";
+                rounded = checkIn ? "rounded-l-full" : "rounded-r-full";
               } else if (inRange) {
-                cellClasses += "bg-yellow-50 text-gray-800 cursor-pointer hover:bg-yellow-100 ";
+                bg = "bg-amber-50";
+                text = "text-gray-700";
+                cursor = "cursor-pointer hover:bg-amber-100";
               } else {
-                cellClasses += "text-gray-700 cursor-pointer hover:bg-gray-50 ";
+                cursor = "cursor-pointer hover:bg-gray-50";
               }
 
               return (
                 <div
-                  key={dayIndex}
-                  className={cellClasses}
-                  onClick={() => handleDateClick(day, event)}
+                  key={di}
                   role="button"
-                  tabIndex={0}
-                  onKeyDown={() => {}}
+                  tabIndex={disabled ? -1 : 0}
+                  aria-label={format(day, "PPP")}
+                  aria-disabled={disabled}
+                  className={[
+                    "relative h-11 flex flex-col items-center justify-center text-sm transition-colors",
+                    "border-b border-r border-gray-100",
+                    di === 6 ? "border-r-0" : "",
+                    wi === weeks.length - 1 ? "border-b-0" : "",
+                    bg,
+                    text,
+                    cursor,
+                    rounded,
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  onClick={() => !disabled && handleDateClick(day)}
+                  onKeyDown={(e) => {
+                    if ((e.key === "Enter" || e.key === " ") && !disabled) {
+                      handleDateClick(day);
+                    }
+                  }}
                 >
-                  <div className="flex flex-col items-center">
-                    <span>{format(day, "d")}</span>
-                    {isBooked && isCurrentMonth && (
-                      <span className="text-xs text-red-500">✕</span>
-                    )}
-                  </div>
+                  <span className="leading-none">{format(day, "d")}</span>
+                  {booked && inCurrentMonth && (
+                    <span className="text-[9px] leading-none text-red-400 mt-0.5">
+                      booked
+                    </span>
+                  )}
                 </div>
               );
             })}
@@ -217,19 +269,19 @@ export default function BookingCalendar({
       </div>
 
       {/* Legend */}
-      <div className="mt-4 flex items-center justify-center gap-4 text-xs text-gray-600">
-        <div className="flex items-center gap-1">
-          <div className="w-4 h-4 bg-gold rounded"></div>
-          <span>Selected</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-4 h-4 bg-yellow-50 border border-yellow-200 rounded"></div>
-          <span>In Range</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-4 h-4 bg-gray-100 rounded"></div>
-          <span>Unavailable</span>
-        </div>
+      <div className="mt-3 flex flex-wrap items-center justify-center gap-4 text-xs text-gray-500">
+        <span className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded-full bg-gold inline-block" />
+          Selected
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded-full bg-amber-100 inline-block" />
+          Your stay
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded-full bg-gray-200 inline-block" />
+          Unavailable
+        </span>
       </div>
     </div>
   );
