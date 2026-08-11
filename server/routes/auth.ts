@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 
@@ -28,33 +28,34 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   passport.serializeUser((user, done) => done(null, user));
   passport.deserializeUser((user: Express.User, done) => done(null, user));
 
-  router.get(
-    "/google",
+  router.get("/google", (req: Request, res: Response, next: NextFunction) => {
+    // Persist redirect target through the OAuth round-trip via the session
+    if (typeof req.query.redirect === "string") {
+      (req.session as Record<string, unknown>).authRedirect = req.query.redirect;
+    }
     passport.authenticate("google", {
-      scope: [
-        "openid",
-        "email",
-        "profile",
-        "https://www.googleapis.com/auth/calendar.events",
-      ],
-    })
-  );
+      scope: ["openid", "email", "profile"],
+    })(req, res, next);
+  });
 
   router.get(
     "/google/callback",
     passport.authenticate("google", { failureRedirect: "/signIn" }),
-    (_req, res) => {
-      res.redirect("/");
+    (req: Request, res: Response) => {
+      const redirect =
+        (req.session as Record<string, unknown>).authRedirect as string | undefined;
+      delete (req.session as Record<string, unknown>).authRedirect;
+      res.redirect(redirect || "/dashboard");
     }
   );
 } else {
   // Fallback routes when Google OAuth is not configured
-  router.get("/google", (_req, res) => {
+  router.get("/google", (_req: Request, res: Response) => {
     res.status(503).json({ message: "Google OAuth not configured" });
   });
 }
 
-router.get("/session", (req, res) => {
+router.get("/session", (req: Request, res: Response) => {
   if (req.isAuthenticated && req.isAuthenticated()) {
     const user = req.user as Record<string, unknown>;
     res.json({
@@ -70,7 +71,7 @@ router.get("/session", (req, res) => {
   }
 });
 
-router.post("/signout", (req, res) => {
+router.post("/signout", (req: Request, res: Response) => {
   req.logout((err) => {
     if (err) {
       res.status(500).json({ message: "Error signing out" });

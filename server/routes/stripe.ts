@@ -15,6 +15,15 @@ router.post("/create-checkout-session", async (req: Request, res: Response) => {
     return;
   }
 
+  // Require authentication
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
+    res.status(401).json({ message: "Sign in to make a reservation." });
+    return;
+  }
+
+  const currentUser = req.user as Record<string, unknown>;
+  const userEmail = currentUser.email as string;
+
   const { propertyId, propertyName, checkIn, checkOut, guests, totalAmount } = req.body;
 
   if (!propertyId || !checkIn || !checkOut || !guests) {
@@ -82,6 +91,7 @@ router.post("/create-checkout-session", async (req: Request, res: Response) => {
         checkIn,
         checkOut,
         guests: String(guests),
+        userEmail,
       },
     });
 
@@ -113,6 +123,21 @@ router.get("/checkout-session", async (req: Request, res: Response) => {
 
   try {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    // Persist booking to DB (idempotent — covers dev where webhooks may not fire)
+    if (session.payment_status === "paid") {
+      const { upsertBookingFromSession } = await import("../webhookHandlers");
+      await upsertBookingFromSession({
+        id: session.id,
+        metadata: session.metadata as Record<string, string> | null,
+        amount_total: session.amount_total,
+        currency: session.currency,
+        payment_status: session.payment_status,
+      }).catch((err: Error) =>
+        console.error("Failed to upsert booking on success page:", err.message)
+      );
+    }
+
     res.json({
       metadata: session.metadata,
       amount_total: session.amount_total,

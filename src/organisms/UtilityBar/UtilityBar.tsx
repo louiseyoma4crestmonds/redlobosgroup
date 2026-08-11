@@ -10,32 +10,35 @@ function UtilityBar(props: UtilityBarProps): JSX.Element {
   const navigate = useNavigate();
   const { data: session } = useSession();
   const [showMobileNavBar, setShowMobileNavBar] = useState(false);
-  const navigationLinks = ["HOME", "ABOUT", "PROPERTIES", "CONTACTS"];
+
+  const baseLinks = ["HOME", "ABOUT", "PROPERTIES", "CONTACTS"];
 
   const getNavPath = (link: string) => {
     if (link === "HOME") return "/";
+    if (link === "DASHBOARD") return "/dashboard";
     return `/${link.toLowerCase()}`;
   };
+
+  // Show DASHBOARD in nav only when signed in
+  const navigationLinks = session ? [...baseLinks, "DASHBOARD"] : baseLinks;
 
   return (
     <div>
       {showMobileNavBar ? <Backdrop /> : null}
 
+      {/* Mobile drawer */}
       <div className={showMobileNavBar ? "flex flex-row-reverse " : "hidden"}>
         <div className=" absolute z-50 bg-white h-screen w-10/12 border ">
           <div className="flex justify-between px-4 py-4 bg-green1 border-b">
             <div className="self-center ">
               <img src="/redlobosLogo.png" width={100} height={90} alt="logo" />
             </div>
-
             <div
               className="self-center cursor-pointer"
               tabIndex={0}
               role="button"
               onKeyDown={() => {}}
-              onClick={() => {
-                setShowMobileNavBar(!showMobileNavBar);
-              }}
+              onClick={() => setShowMobileNavBar(!showMobileNavBar)}
             >
               <img src="/close.png" height={16} width={16} alt="close" />
             </div>
@@ -47,9 +50,7 @@ function UtilityBar(props: UtilityBarProps): JSX.Element {
               tabIndex={0}
               role="button"
               onKeyDown={() => {}}
-              onClick={() => {
-                navigate(getNavPath(navigationLink));
-              }}
+              onClick={() => navigate(getNavPath(navigationLink))}
               className={
                 activeLink === navigationLink
                   ? "text-gold cursor-pointer py-4 border-b pl-8"
@@ -90,18 +91,14 @@ function UtilityBar(props: UtilityBarProps): JSX.Element {
           <div className="px-6 mt-6 flex justify-between">
             <div>
               <div className="self-center border p-4 cursor-pointer">
-                <img
-                  width={15}
-                  height={15}
-                  src="/instagram.png"
-                  alt="instagram"
-                />
+                <img width={15} height={15} src="/instagram.png" alt="instagram" />
               </div>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Desktop bar */}
       <div className={styles.utilityBarContainer}>
         <div className="flex justify-between">
           <div className="w-4/6 phone:w-full self-center flex gap-x-48 ">
@@ -109,7 +106,7 @@ function UtilityBar(props: UtilityBarProps): JSX.Element {
               <img src="/redlobosLogo.png" width={70} height={72} alt="logo" />
             </div>
 
-            <div className="self-center laptop:inline-block desktop:inline-block tablet:inline-block  phone:hidden">
+            <div className="self-center laptop:inline-block desktop:inline-block tablet:inline-block phone:hidden">
               <div className="flex gap-x-12 text-lg font-bold">
                 {navigationLinks.map((navigationLink: string) => (
                   <div
@@ -117,9 +114,7 @@ function UtilityBar(props: UtilityBarProps): JSX.Element {
                     tabIndex={0}
                     role="button"
                     onKeyDown={() => {}}
-                    onClick={() => {
-                      navigate(getNavPath(navigationLink));
-                    }}
+                    onClick={() => navigate(getNavPath(navigationLink))}
                     className={
                       activeLink === navigationLink
                         ? "text-gold cursor-pointer"
@@ -133,9 +128,20 @@ function UtilityBar(props: UtilityBarProps): JSX.Element {
             </div>
           </div>
 
-          <div className="self-center phone:hidden tablet:flex gap-x-4">
+          <div className="self-center phone:hidden tablet:flex gap-x-4 items-center">
             {session ? (
               <div className="flex gap-x-4 items-center">
+                {session.user?.image && (
+                  <img
+                    src={session.user.image}
+                    alt={session.user.name ?? ""}
+                    width={32}
+                    height={32}
+                    referrerPolicy="no-referrer"
+                    className="rounded-full border border-gold/30 cursor-pointer"
+                    onClick={() => navigate("/dashboard")}
+                  />
+                )}
                 <span className="text-sm">
                   Hi, {session.user?.name?.split(" ")[0]}
                 </span>
@@ -161,23 +167,17 @@ function UtilityBar(props: UtilityBarProps): JSX.Element {
               </div>
             )}
             <div>
-              <img
-                width={15}
-                height={15}
-                src="/instagram.png"
-                alt="instagram"
-              />
+              <img width={15} height={15} src="/instagram.png" alt="instagram" />
             </div>
           </div>
 
+          {/* Hamburger */}
           <div
             className="self-center phone:block tablet:hidden desktop:hidden laptop:hidden cursor-pointer"
             tabIndex={0}
             role="button"
             onKeyDown={() => {}}
-            onClick={() => {
-              setShowMobileNavBar(!showMobileNavBar);
-            }}
+            onClick={() => setShowMobileNavBar(!showMobileNavBar)}
           >
             <div className="space-y-1">
               <div className="w-6 h-0.5 bg-black" />

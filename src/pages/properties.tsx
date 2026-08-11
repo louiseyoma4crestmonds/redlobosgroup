@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useCallback } from "react";
+import { useSession } from "../context/AuthContext";
 import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
 import Footer from "@/organisms/Footer";
@@ -129,6 +130,7 @@ function PropertyCard({ property, onBook }: PropertyCardProps) {
 
 function Properties(): JSX.Element {
   const navigate = useNavigate();
+  const { data: session, status: authStatus } = useSession();
 
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -164,6 +166,10 @@ function Properties(): JSX.Element {
   }, [fetchProperties]);
 
   const handleBookNowClick = (property: Property) => {
+    if (authStatus !== "authenticated") {
+      navigate(`/signIn?redirect=/properties`);
+      return;
+    }
     setSelectedProperty(property);
     setIsModalOpen(true);
     getPropertyEvents(property.id)

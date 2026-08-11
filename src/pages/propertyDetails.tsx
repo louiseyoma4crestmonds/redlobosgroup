@@ -1,6 +1,7 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useState, lazy, Suspense, useCallback } from "react";
 import { differenceInCalendarDays, parseISO } from "date-fns";
+import { useSession } from "../context/AuthContext";
 import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
 import Footer from "@/organisms/Footer";
@@ -70,6 +71,7 @@ function PropertyDetails(): JSX.Element {
     lng: number;
   } | null>(null);
 
+  const { data: session, status: authStatus } = useSession();
   const [showCalendar, setShowCalendar] = useState(false);
   const [showDescriptionModal, setShowDescriptionModal] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
@@ -117,6 +119,10 @@ function PropertyDetails(): JSX.Element {
   }, [id, geocodeAddress]);
 
   const handleBookNowClick = () => {
+    if (authStatus !== "authenticated") {
+      navigate(`/signIn?redirect=${encodeURIComponent(`/propertyDetails?id=${id}`)}`);
+      return;
+    }
     setShowBookingModal(true);
     if (id) {
       getPropertyEvents(id)
@@ -352,14 +358,7 @@ function PropertyDetails(): JSX.Element {
               onClick={handleBookNowClick}
               className="flex-1 py-3 rounded-lg bg-gold text-white font-semibold tracking-wide hover:bg-black transition-colors duration-300"
             >
-              MAKE RESERVATION
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowCalendar(true)}
-              className="flex-1 py-3 rounded-lg border border-gold text-gold font-semibold tracking-wide hover:bg-gold hover:text-white transition-colors duration-300"
-            >
-              VIEW CALENDAR
+              {authStatus === "unauthenticated" ? "SIGN IN TO RESERVE" : "MAKE RESERVATION"}
             </button>
           </div>
 

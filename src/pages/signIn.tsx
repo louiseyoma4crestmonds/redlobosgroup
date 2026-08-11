@@ -1,17 +1,12 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
-import { useSession, signIn, signOut } from "../context/AuthContext";
+import { useSession, signOut } from "../context/AuthContext";
 import UtilityBar from "@/organisms/UtilityBar";
 import Footer from "@/organisms/Footer";
 
 function GoogleIcon() {
   return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 48 48"
-      aria-hidden="true"
-    >
+    <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
       <path
         fill="#EA4335"
         d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
@@ -35,14 +30,23 @@ function GoogleIcon() {
 
 function SignIn(): JSX.Element {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { data: session, status } = useSession();
 
-  // Redirect home once signed in
+  // The redirect destination — where to go after sign-in
+  const redirectTo = searchParams.get("redirect") || "/dashboard";
+
+  // Already signed in → go straight to the redirect target
   useEffect(() => {
     if (status === "authenticated") {
-      navigate("/");
+      navigate(redirectTo);
     }
-  }, [status, navigate]);
+  }, [status, navigate, redirectTo]);
+
+  // Kick off Google OAuth, preserving the redirect target through the round-trip
+  const handleGoogleSignIn = () => {
+    window.location.href = `/api/auth/google?redirect=${encodeURIComponent(redirectTo)}`;
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-green1">
@@ -100,21 +104,17 @@ function SignIn(): JSX.Element {
                   />
                 )}
                 <div>
-                  <p className="font-semibold text-gray-800">
-                    {session.user?.name}
-                  </p>
+                  <p className="font-semibold text-gray-800">{session.user?.name}</p>
                   <p className="text-sm text-gray1">{session.user?.email}</p>
                 </div>
-                <p className="text-sm text-gray1">
-                  You are already signed in.
-                </p>
+                <p className="text-sm text-gray1">You are already signed in.</p>
                 <div className="space-y-3">
                   <button
                     type="button"
-                    onClick={() => navigate("/")}
+                    onClick={() => navigate("/dashboard")}
                     className="w-full py-3 rounded-lg bg-gold text-white font-semibold tracking-wide hover:bg-black transition-colors duration-300"
                   >
-                    GO TO HOME
+                    GO TO DASHBOARD
                   </button>
                   <button
                     type="button"
@@ -138,7 +138,7 @@ function SignIn(): JSX.Element {
 
                 <button
                   type="button"
-                  onClick={() => signIn("google")}
+                  onClick={handleGoogleSignIn}
                   className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 shadow-sm transition-all duration-200 font-medium text-gray-700"
                 >
                   <GoogleIcon />
@@ -147,14 +147,9 @@ function SignIn(): JSX.Element {
 
                 <p className="text-center text-xs text-gray1 leading-relaxed">
                   By signing in you agree to our{" "}
-                  <span className="underline cursor-pointer">
-                    Terms &amp; Conditions
-                  </span>{" "}
+                  <span className="underline cursor-pointer">Terms &amp; Conditions</span>{" "}
                   and{" "}
-                  <span className="underline cursor-pointer">
-                    Privacy Policy
-                  </span>
-                  .
+                  <span className="underline cursor-pointer">Privacy Policy</span>.
                 </p>
               </div>
             )}
