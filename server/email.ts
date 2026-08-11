@@ -117,3 +117,96 @@ export async function sendAdminBookingEmail(opts: AdminBookingEmailOptions) {
 
   console.log(`✅ Admin booking email sent via Resend — id: ${data?.id}`);
 }
+
+// ── Contact-form enquiry email ─────────────────────────────────────────────
+
+interface ContactEnquiryEmailOptions {
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+}
+
+export async function sendContactEnquiryEmail(opts: ContactEnquiryEmailOptions) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const adminEmail = process.env.ADMIN_EMAIL;
+
+  if (!apiKey || !adminEmail) {
+    console.warn(
+      "⚠️  Email not configured — contact enquiry not sent. " +
+        "Set RESEND_API_KEY and ADMIN_EMAIL secrets to enable notifications."
+    );
+    return;
+  }
+
+  const resend = new Resend(apiKey.trim());
+
+  const emailMatch = adminEmail.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
+  if (!emailMatch) {
+    console.error(`❌ ADMIN_EMAIL does not contain a valid email address.`);
+    return;
+  }
+  const cleanAdminEmail = emailMatch[0];
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background: #BD9A68; padding: 24px 32px; border-radius: 12px 12px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 22px; letter-spacing: 2px;">
+          NEW CONTACT ENQUIRY
+        </h1>
+        <p style="color: rgba(255,255,255,0.85); margin: 6px 0 0; font-size: 14px;">
+          Red Lobos Group — Website Contact Form
+        </p>
+      </div>
+
+      <div style="background: white; padding: 32px; border: 1px solid #e5e7eb; border-radius: 0 0 12px 12px;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-size: 13px; width: 120px;">Name</td>
+            <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; font-weight: 600; color: #111827;">${opts.name}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-size: 13px;">Email</td>
+            <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; color: #111827;">
+              <a href="mailto:${opts.email}" style="color: #BD9A68;">${opts.email}</a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-size: 13px;">Phone</td>
+            <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; color: #111827;">${opts.phone || "—"}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-size: 13px;">Subject</td>
+            <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; color: #111827;">${opts.subject}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; color: #6b7280; font-size: 13px; vertical-align: top;">Message</td>
+            <td style="padding: 10px 0; color: #111827; line-height: 1.7;">${opts.message.replace(/\n/g, "<br>")}</td>
+          </tr>
+        </table>
+
+        <div style="margin-top: 24px; padding: 16px; background: #fefce8; border-radius: 8px; border: 1px solid #fde68a;">
+          <p style="margin: 0; font-size: 13px; color: #92400e;">
+            📬 Reply to this email to respond directly to
+            <strong> ${opts.name}</strong> at <strong>${opts.email}</strong>.
+          </p>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const { data, error } = await resend.emails.send({
+    from: "Red Lobos Group <onboarding@resend.dev>",
+    to: [cleanAdminEmail],
+    replyTo: opts.email,
+    subject: `Enquiry: ${opts.subject} — ${opts.name}`,
+    html,
+  });
+
+  if (error) {
+    throw new Error(`Resend error: ${JSON.stringify(error)}`);
+  }
+
+  console.log(`✅ Contact enquiry email sent via Resend — id: ${data?.id}`);
+}
