@@ -4,13 +4,34 @@ function createTransporter() {
   const user = process.env.EMAIL_USER;
   const pass = process.env.EMAIL_PASS;
 
-  if (!user || !pass) {
-    return null;
-  }
+  if (!user || !pass) return null;
+
+  // Strip whitespace from App Password (Google sometimes shows it with spaces)
+  const cleanPass = pass.replace(/\s+/g, "");
+
+  // Detect whether this is Gmail/Google Workspace and use the correct host
+  const isGmail =
+    user.endsWith("@gmail.com") ||
+    user.endsWith("@googlemail.com");
+
+  // For Google Workspace / custom domains on Google, use the same SMTP host
+  // but we default to Gmail's SMTP. If EMAIL_SMTP_HOST is set, use that instead.
+  const host = process.env.EMAIL_SMTP_HOST || "smtp.gmail.com";
+  const port = parseInt(process.env.EMAIL_SMTP_PORT || "587", 10);
+
+  console.log(
+    `📧 Email configured — host: ${host}:${port}, user: ${user.slice(0, 4)}***`
+  );
 
   return nodemailer.createTransport({
-    service: "gmail",
-    auth: { user, pass },
+    host,
+    port,
+    secure: port === 465, // true for 465, false for 587
+    auth: { user, pass: cleanPass },
+    tls: {
+      // Accept self-signed certificates in dev
+      rejectUnauthorized: false,
+    },
   });
 }
 
@@ -31,7 +52,7 @@ export async function sendAdminBookingEmail(opts: AdminBookingEmailOptions) {
   if (!transporter || !adminEmail) {
     console.warn(
       "⚠️  Email not configured — booking saved to DB but no email sent. " +
-      "Set EMAIL_USER, EMAIL_PASS and ADMIN_EMAIL secrets to enable notifications."
+        "Set EMAIL_USER, EMAIL_PASS and ADMIN_EMAIL secrets to enable notifications."
     );
     return;
   }
@@ -83,11 +104,15 @@ export async function sendAdminBookingEmail(opts: AdminBookingEmailOptions) {
             <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-size: 13px;">Preferred Time</td>
             <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6; color: #111827;">${opts.preferredTime || "—"}</td>
           </tr>
-          ${opts.message ? `
+          ${
+            opts.message
+              ? `
           <tr>
             <td style="padding: 10px 0; color: #6b7280; font-size: 13px; vertical-align: top;">Message</td>
             <td style="padding: 10px 0; color: #111827;">${opts.message.replace(/\n/g, "<br>")}</td>
-          </tr>` : ""}
+          </tr>`
+              : ""
+          }
         </table>
 
         <div style="margin-top: 24px; padding: 16px; background: #fefce8; border-radius: 8px; border: 1px solid #fde68a;">
@@ -107,4 +132,6 @@ export async function sendAdminBookingEmail(opts: AdminBookingEmailOptions) {
     subject: `New Booking: ${opts.serviceName} — ${opts.customerName}`,
     html,
   });
+
+  console.log(`✅ Admin booking email sent to ${adminEmail}`);
 }

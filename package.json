@@ -54,6 +54,7 @@
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.2.1",
     "react-router-dom": "^7.18.2",
+    "resend": "^6.19.0",
     "stripe": "^19.3.0",
     "stripe-replit-sync": "^1.0.0",
     "styled-components": "^6.0.7",
