@@ -3,127 +3,154 @@ import { useEffect, useState } from "react";
 import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
 import Footer from "@/organisms/Footer";
-import Button from "@/atoms/Button";
 import { getPropertyImages } from "../api";
+
+interface PropertyImage {
+  id: number;
+  image_url: string;
+  is_primary: boolean;
+}
 
 function PhotoGallery(): JSX.Element {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
-  const [images, setImages] = useState([]);
-  const [introPage, setIntroPage] = useState<boolean>(true);
+
+  const [images, setImages] = useState<PropertyImage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIntroPage(false);
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (id) {
-      getPropertyImages(id).then((response: any) => {
-        setImages(response.data.data);
-      });
+    if (!id) {
+      setLoading(false);
+      return;
     }
+    setLoading(true);
+    setError(false);
+    getPropertyImages(id)
+      .then((response: any) => {
+        const data = response?.data?.data;
+        setImages(Array.isArray(data) ? data : []);
+      })
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
   }, [id]);
 
   return (
-    <div>
-      {/* LOGO LOADING SCREEN */}
-      <div className={!introPage ? "hidden" : ""}>
-        <div className="w-screen h-screen flex place-content-center bg-green1">
-          <div className="self-center">
-            <img width={200} height={200} src="/logoAnimation.gif" alt="logo" />
-          </div>
+    <div className="min-h-screen flex flex-col bg-green1">
+      <UtilityBar activeLink="PROPERTIES" />
+
+      {/* Header */}
+      <div className="text-center pt-12 pb-6 space-y-3 px-6">
+        <Heading Tag="h1" variant="xxl">
+          <span>PHOTO GALLERY</span>
+        </Heading>
+        <div className="flex gap-2 place-content-center text-sm">
+          <button
+            type="button"
+            className="hover:text-gold transition-colors"
+            onClick={() => navigate("/")}
+          >
+            HOME
+          </button>
+          <span>&gt;</span>
+          <button
+            type="button"
+            className="hover:text-gold transition-colors"
+            onClick={() => navigate("/properties")}
+          >
+            PROPERTIES
+          </button>
+          <span>&gt;</span>
+          <button
+            type="button"
+            className="hover:text-gold transition-colors"
+            onClick={() => navigate(-1)}
+          >
+            DETAILS
+          </button>
+          <span>&gt;</span>
+          <span className="text-gray1">GALLERY</span>
         </div>
       </div>
-      {/* END OF LOGO LOADING SCREEN */}
 
-      <div className={introPage ? "hidden" : ""}>
-        {/* UTILITY BAR */}
-        <div>
-          <UtilityBar activeLink="PROPERTIES" />
+      <div className="flex-1 px-6 tablet:px-16 desktop:px-24 pb-16 space-y-6">
+        {/* Back button */}
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="px-6 py-2.5 rounded-lg border border-gold text-gold text-sm font-semibold hover:bg-gold hover:text-white transition-colors duration-300"
+          >
+            ← BACK TO DETAILS
+          </button>
         </div>
-        {/* END OF UTILITY BAR */}
 
-        <div className="px-6 bg-green1 space-y-6 pb-12">
-          <div className="text-center pt-12 space-y-3 bg-green1">
-            <div>
-              <Heading Tag="h1" variant="xxl">
-                <span className="text-center">PHOTO GALLERY</span>
-              </Heading>
-            </div>
-            <div className="flex gap-2 place-content-center">
-              <div
-                className="cursor-pointer"
-                tabIndex={0}
-                role="button"
-                onKeyDown={() => {}}
-                onClick={() => {
-                  navigate("/");
-                }}
-              >
-                HOME
-              </div>
-              <div> &gt;</div>
-              <div
-                className="cursor-pointer"
-                tabIndex={0}
-                role="button"
-                onKeyDown={() => {}}
-                onClick={() => {
-                  navigate("/properties");
-                }}
-              >
-                PROPERTIES
-              </div>
-              <div> &gt;</div>
-              <div className="text-gray1">GALLERY</div>
-            </div>
+        {/* Loading */}
+        {loading && (
+          <div className="flex items-center justify-center py-32">
+            <div className="w-10 h-10 border-2 border-gold border-t-transparent rounded-full animate-spin" />
           </div>
+        )}
 
-          <div className="w-full flex justify-end">
-            <div className="w-full desktop:w-1/4 laptop:w-1/4 tablet:w-1/3">
-              <Button
-                variant="secondary"
-                width="full"
-                onClick={() => {
-                  navigate(-1);
-                }}
-              >
-                <span className="w-full text-center">BACK TO DETAILS</span>
-              </Button>
-            </div>
+        {/* Error */}
+        {!loading && error && (
+          <div className="flex flex-col items-center justify-center py-24 space-y-4">
+            <p className="text-gray1 text-lg">Could not load photos. Please try again.</p>
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="px-6 py-3 rounded-lg bg-gold text-white font-semibold hover:bg-black transition-colors duration-300"
+            >
+              GO BACK
+            </button>
           </div>
+        )}
 
+        {/* No images */}
+        {!loading && !error && images.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-24 space-y-4">
+            <p className="text-gray1 text-lg">No photos available for this property.</p>
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="px-6 py-3 rounded-lg bg-gold text-white font-semibold hover:bg-black transition-colors duration-300"
+            >
+              GO BACK
+            </button>
+          </div>
+        )}
+
+        {/* Masonry-style grid */}
+        {!loading && !error && images.length > 0 && (
           <div className="grid grid-cols-1 tablet:grid-cols-2 laptop:grid-cols-3 desktop:grid-cols-3 gap-4">
-            {images.map((image: any, index: number) => (
+            {images.map((image, index) => (
               <div
-                key={index}
-                className={`
-                  ${index % 7 === 0 || index % 7 === 3 ? "tablet:col-span-2" : ""}
-                  ${index % 7 === 0 ? "tablet:row-span-2" : ""}
-                `}
+                key={image.id ?? index}
+                className={[
+                  index % 7 === 0 || index % 7 === 3 ? "tablet:col-span-2" : "",
+                  index % 7 === 0 ? "tablet:row-span-2" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
               >
-                <div
-                  style={{
-                    backgroundImage: `url("${image.image}")`,
-                    backgroundRepeat: "no-repeat",
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
+                <img
+                  src={image.image_url}
+                  alt={`Property photo ${index + 1}`}
+                  className={[
+                    "w-full rounded-2xl object-cover",
+                    index % 7 === 0 ? "h-[500px]" : "h-[240px]",
+                  ].join(" ")}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/property1.jpg";
                   }}
-                  className={`
-                    w-full rounded-lg overflow-hidden
-                    ${index % 7 === 0 ? "h-[500px]" : "h-[240px]"}
-                  `}
                 />
               </div>
             ))}
           </div>
-        </div>
+        )}
       </div>
+
       <Footer />
     </div>
   );
