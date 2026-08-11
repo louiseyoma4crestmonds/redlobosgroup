@@ -5,7 +5,7 @@ import Heading from "@/atoms/Heading";
 import Footer from "@/organisms/Footer";
 import Modal from "@/molecules/Modal";
 import BookingCalendar from "@/molecules/BookingCalendar";
-import { getProperties, getPropertyImages, getPropertyEvents } from "../api";
+import { getProperties, getPropertyEvents } from "../api";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -13,6 +13,12 @@ interface Property {
   id: number;
   name: string;
   address: string;
+  description?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  max_guests?: number;
+  price_per_night?: number;
+  primary_image?: string | null;
   [key: string]: unknown;
 }
 
@@ -44,19 +50,8 @@ interface PropertyCardProps {
 
 function PropertyCard({ property, onBook }: PropertyCardProps) {
   const navigate = useNavigate();
-  const [imgSrc, setImgSrc] = useState<string | null>(null);
-
-  useEffect(() => {
-    getPropertyImages(property.id)
-      .then((res: any) => {
-        const images = res?.data?.data?.[0] ?? res?.data?.data ?? [];
-        const first = Array.isArray(images) ? images[0] : null;
-        if (first?.image_url || first?.url) {
-          setImgSrc(first.image_url ?? first.url);
-        }
-      })
-      .catch(() => {});
-  }, [property.id]);
+  // primary_image is already included in the list response via JOIN — no extra fetch needed
+  const imgSrc = (property.primary_image as string | null) ?? "/property1.jpg";
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300 flex flex-col">
@@ -153,13 +148,9 @@ function Properties(): JSX.Element {
     setError(null);
     getProperties()
       .then((response: any) => {
-        // API returns { data: { data: [ Array ] } }
+        // DB-backed API returns { data: [ ...properties ] }
         const raw = response?.data?.data;
-        const list: Property[] = Array.isArray(raw?.[0])
-          ? raw[0]
-          : Array.isArray(raw)
-          ? raw
-          : [];
+        const list: Property[] = Array.isArray(raw) ? raw : [];
         setProperties(list);
       })
       .catch(() => {

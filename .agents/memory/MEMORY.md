@@ -1,0 +1,1 @@
+- [Database schema](db-schema.md) — properties/images/amenities tables in Replit PG; external API replaced due to CORS + 502 issues.
