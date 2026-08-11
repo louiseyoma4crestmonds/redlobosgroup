@@ -1,2 +1,3 @@
 - [Database schema](db-schema.md) — properties/images/amenities tables in Replit PG; external API replaced due to CORS + 502 issues.
 - [Stripe credentials](stripe-credentials.md) — Replit connector uses `settings.secret` not `settings.secret_key`; template is wrong.
+- [Email sending](email-sending.md) — switched from Gmail SMTP (nodemailer) to Resend SDK; Gmail rejected App Passwords with BadCredentials; ADMIN_EMAIL must be a plain address.
