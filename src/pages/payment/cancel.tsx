@@ -1,91 +1,64 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UtilityBar from "@/organisms/UtilityBar";
 import Footer from "@/organisms/Footer";
-import Heading from "@/atoms/Heading";
-import Button from "@/atoms/Button";
 
-function PaymentCancel(): JSX.Element {
+export default function PaymentCancel() {
   const navigate = useNavigate();
-  const [introPage, setIntroPage] = useState<boolean>(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIntroPage(false);
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   return (
-    <div>
-      <div className={!introPage ? "hidden" : ""}>
-        <div className="w-screen h-screen flex place-content-center bg-green1">
-          <div className="self-center">
-            <img width={200} height={200} src="/logoAnimation.gif" alt="Logo" />
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen flex flex-col bg-green1">
+      <UtilityBar activeLink="PROPERTIES" />
 
-      <div className={introPage ? "hidden" : ""}>
-        <UtilityBar activeLink="" />
-
-        <div className="min-h-screen bg-green1 px-6 py-12">
-          <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8 text-center space-y-6">
-            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+      <div className="flex-1 flex items-center justify-center px-6 py-16">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-10 text-center space-y-6">
+          {/* X icon */}
+          <div className="flex justify-center">
+            <div className="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center">
               <svg
-                className="w-12 h-12 text-red-600"
+                className="w-10 h-10 text-red-400"
                 fill="none"
-                stroke="currentColor"
                 viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
                   d="M6 18L18 6M6 6l12 12"
                 />
               </svg>
             </div>
+          </div>
 
-            <Heading Tag="h1" variant="xxl">
-              <span className="text-red-600">Payment Cancelled</span>
-            </Heading>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold text-gray-900">
+              Payment Cancelled
+            </h1>
+            <p className="text-gray-500 text-sm">
+              Your booking was not completed. No payment has been taken.
+            </p>
+          </div>
 
-            <div className="space-y-4 text-gray-700">
-              <p className="text-lg">
-                Your payment was cancelled. No charges have been made to your
-                account.
-              </p>
-              <p>
-                If you experienced any issues, please try again or contact our
-                support team.
-              </p>
-            </div>
-
-            <div className="pt-6 space-y-4">
-              <Button
-                variant="primary"
-                width="full"
-                onClick={() => navigate("/properties")}
-              >
-                RETURN TO PROPERTIES
-              </Button>
-              <Button
-                variant="secondary"
-                width="full"
-                onClick={() => navigate("/")}
-              >
-                GO TO HOME
-              </Button>
-            </div>
+          <div className="flex flex-col gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="w-full py-3 rounded-xl bg-gold text-white font-semibold hover:bg-black transition-colors duration-300"
+            >
+              Try Again
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/properties")}
+              className="w-full py-3 rounded-xl border border-gray-200 text-gray-600 font-medium hover:border-gold hover:text-gold transition-colors duration-300"
+            >
+              Browse Properties
+            </button>
           </div>
         </div>
-
-        <Footer />
       </div>
+
+      <Footer />
     </div>
   );
 }
-
-export default PaymentCancel;

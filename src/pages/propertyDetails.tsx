@@ -143,6 +143,15 @@ function PropertyDetails(): JSX.Element {
     }
     setBookingLoading(true);
     try {
+      const nights = differenceInCalendarDays(
+        parseISO(checkOutDate),
+        parseISO(checkInDate)
+      );
+      const pricePerNight = Number(property?.price_per_night ?? 0);
+      const subtotal = nights * pricePerNight;
+      const serviceFee = Math.round(subtotal * 0.12);
+      const totalAmount = subtotal + serviceFee;
+
       const response = await fetch("/api/stripe/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -152,6 +161,7 @@ function PropertyDetails(): JSX.Element {
           checkIn: checkInDate,
           checkOut: checkOutDate,
           guests: guestCount,
+          totalAmount,
         }),
       });
       const data = await response.json();

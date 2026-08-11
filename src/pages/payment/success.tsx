@@ -2,97 +2,131 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import UtilityBar from "@/organisms/UtilityBar";
 import Footer from "@/organisms/Footer";
-import Heading from "@/atoms/Heading";
-import Button from "@/atoms/Button";
 
-function PaymentSuccess(): JSX.Element {
+export default function PaymentSuccess() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const session_id = searchParams.get("session_id");
-  const [introPage, setIntroPage] = useState<boolean>(true);
+  const sessionId = searchParams.get("session_id");
+  const [details, setDetails] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIntroPage(false);
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, []);
+    if (!sessionId) {
+      setLoading(false);
+      return;
+    }
+    fetch(`/api/stripe/checkout-session?session_id=${sessionId}`)
+      .then((r) => r.json())
+      .then((data) => setDetails(data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [sessionId]);
 
   return (
-    <div>
-      <div className={!introPage ? "hidden" : ""}>
-        <div className="w-screen h-screen flex place-content-center bg-green1">
-          <div className="self-center">
-            <img width={200} height={200} src="/logoAnimation.gif" alt="Logo" />
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen flex flex-col bg-green1">
+      <UtilityBar activeLink="PROPERTIES" />
 
-      <div className={introPage ? "hidden" : ""}>
-        <UtilityBar activeLink="" />
-
-        <div className="min-h-screen bg-green1 px-6 py-12">
-          <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8 text-center space-y-6">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+      <div className="flex-1 flex items-center justify-center px-6 py-16">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-10 text-center space-y-6">
+          {/* Check icon */}
+          <div className="flex justify-center">
+            <div className="w-20 h-20 rounded-full bg-amber-50 flex items-center justify-center">
               <svg
-                className="w-12 h-12 text-green-600"
+                className="w-10 h-10 text-gold"
                 fill="none"
-                stroke="currentColor"
                 viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
                   d="M5 13l4 4L19 7"
                 />
               </svg>
             </div>
+          </div>
 
-            <Heading Tag="h1" variant="xxl">
-              <span className="text-green-600">Payment Successful!</span>
-            </Heading>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold text-gray-900">
+              Booking Confirmed!
+            </h1>
+            <p className="text-gray-500 text-sm">
+              Your reservation has been successfully placed.
+            </p>
+          </div>
 
-            <div className="space-y-4 text-gray-700">
-              <p className="text-lg">
-                Thank you for your reservation. Your payment has been processed
-                successfully.
-              </p>
-              <p>
-                A confirmation email has been sent to your email address with
-                all the booking details.
-              </p>
-              {session_id && (
-                <p className="text-sm text-gray-500">
-                  Transaction ID: {session_id}
-                </p>
+          {!loading && details?.metadata && (
+            <div className="rounded-xl border border-gray-100 divide-y divide-gray-100 text-left text-sm">
+              <div className="px-4 py-3 flex justify-between">
+                <span className="text-gray-500">Property</span>
+                <span className="font-medium text-gray-800">
+                  {details.metadata.propertyName ?? "—"}
+                </span>
+              </div>
+              <div className="px-4 py-3 flex justify-between">
+                <span className="text-gray-500">Check-in</span>
+                <span className="font-medium text-gray-800">
+                  {details.metadata.checkIn
+                    ? new Date(details.metadata.checkIn).toLocaleDateString(
+                        "en-GB",
+                        { day: "numeric", month: "short", year: "numeric" }
+                      )
+                    : "—"}
+                </span>
+              </div>
+              <div className="px-4 py-3 flex justify-between">
+                <span className="text-gray-500">Check-out</span>
+                <span className="font-medium text-gray-800">
+                  {details.metadata.checkOut
+                    ? new Date(details.metadata.checkOut).toLocaleDateString(
+                        "en-GB",
+                        { day: "numeric", month: "short", year: "numeric" }
+                      )
+                    : "—"}
+                </span>
+              </div>
+              <div className="px-4 py-3 flex justify-between">
+                <span className="text-gray-500">Guests</span>
+                <span className="font-medium text-gray-800">
+                  {details.metadata.guests ?? "—"}
+                </span>
+              </div>
+              {details.amount_total != null && (
+                <div className="px-4 py-3 flex justify-between">
+                  <span className="text-gray-500">Total paid</span>
+                  <span className="font-bold text-gray-900">
+                    £{(details.amount_total / 100).toFixed(2)}
+                  </span>
+                </div>
               )}
             </div>
+          )}
 
-            <div className="pt-6 space-y-4">
-              <Button
-                variant="primary"
-                width="full"
-                onClick={() => navigate("/properties")}
-              >
-                BROWSE MORE PROPERTIES
-              </Button>
-              <Button
-                variant="secondary"
-                width="full"
-                onClick={() => navigate("/")}
-              >
-                GO TO HOME
-              </Button>
-            </div>
+          <p className="text-xs text-gray-400">
+            A confirmation email will be sent to the address on file.
+          </p>
+
+          <div className="flex flex-col gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => navigate("/properties")}
+              className="w-full py-3 rounded-xl bg-gold text-white font-semibold hover:bg-black transition-colors duration-300"
+            >
+              Browse More Properties
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              className="w-full py-3 rounded-xl border border-gray-200 text-gray-600 font-medium hover:border-gold hover:text-gold transition-colors duration-300"
+            >
+              Go to Home
+            </button>
           </div>
         </div>
-
-        <Footer />
       </div>
+
+      <Footer />
     </div>
   );
 }
-
-export default PaymentSuccess;
