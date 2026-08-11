@@ -1,43 +1,25 @@
 import axios from "axios";
 
-const endpointUrl = "https://properties.redlobosgroup.com";
+// All property calls go through the Express proxy to avoid browser CORS issues
+// with the upstream https://properties.redlobosgroup.com API.
+const base = "/api/properties";
 
 export async function getProperties() {
-  const response = await axios
-    .get(`${endpointUrl}/server/properties`, {})
-    .then((res: any) => res)
-    .catch((err: any) => err.message);
-  return response;
+  return axios.get(base).catch((err: any) => err.message);
 }
 
 export async function getPropertyImages(property_id: any) {
-  const response = await axios
-    .get(`${endpointUrl}/server/property/${property_id}/images`, {})
-    .then((res: any) => res)
-    .catch((err: any) => err.message);
-  return response;
+  return axios.get(`${base}/${property_id}/images`).catch((err: any) => err.message);
 }
 
 export async function getPropertyAmenities(property_id: any) {
-  const response = await axios
-    .get(`${endpointUrl}/server/property/${property_id}/amenities`, {})
-    .then((res: any) => res)
-    .catch((err: any) => err.message);
-  return response;
+  return axios.get(`${base}/${property_id}/amenities`).catch((err: any) => err.message);
 }
 
 export async function getPropertyEvents(property_id: any) {
-  const response = await axios
-    .get(`${endpointUrl}/server/property/${property_id}/events`, {})
-    .then((res: any) => res)
-    .catch((err: any) => err.message);
-  return response;
+  return axios.get(`${base}/${property_id}/events`).catch((err: any) => err.message);
 }
 
 export async function getPropertyDetails(property_id: any) {
-  const response = await axios
-    .get(`${endpointUrl}/server/property/${property_id}`, {})
-    .then((res: any) => res)
-    .catch((err: any) => err.message);
-  return response;
+  return axios.get(`${base}/${property_id}`).catch((err: any) => err.message);
 }

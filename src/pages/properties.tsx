@@ -1,43 +1,188 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
 import Footer from "@/organisms/Footer";
-import Button from "@/atoms/Button";
 import Modal from "@/molecules/Modal";
 import BookingCalendar from "@/molecules/BookingCalendar";
-import { getProperties, getPropertyEvents } from "../api";
+import { getProperties, getPropertyImages, getPropertyEvents } from "../api";
+
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+interface Property {
+  id: number;
+  name: string;
+  address: string;
+  [key: string]: unknown;
+}
+
+// ─── Skeleton card ───────────────────────────────────────────────────────────
+
+function SkeletonCard() {
+  return (
+    <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 animate-pulse">
+      <div className="h-56 bg-gray-200" />
+      <div className="p-6 space-y-3">
+        <div className="h-3 bg-gray-200 rounded w-1/3" />
+        <div className="h-5 bg-gray-200 rounded w-2/3" />
+        <div className="h-3 bg-gray-200 rounded w-1/2" />
+        <div className="flex gap-3 pt-2">
+          <div className="h-10 bg-gray-200 rounded-lg flex-1" />
+          <div className="h-10 bg-gray-200 rounded-lg flex-1" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Property card ───────────────────────────────────────────────────────────
+
+interface PropertyCardProps {
+  property: Property;
+  onBook: (property: Property) => void;
+}
+
+function PropertyCard({ property, onBook }: PropertyCardProps) {
+  const navigate = useNavigate();
+  const [imgSrc, setImgSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    getPropertyImages(property.id)
+      .then((res: any) => {
+        const images = res?.data?.data?.[0] ?? res?.data?.data ?? [];
+        const first = Array.isArray(images) ? images[0] : null;
+        if (first?.image_url || first?.url) {
+          setImgSrc(first.image_url ?? first.url);
+        }
+      })
+      .catch(() => {});
+  }, [property.id]);
+
+  return (
+    <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300 flex flex-col">
+      {/* Image */}
+      <div className="relative h-56 bg-gray-100 overflow-hidden">
+        <img
+          src={imgSrc ?? "/property1.jpg"}
+          alt={property.name}
+          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = "/property1.jpg";
+          }}
+        />
+      </div>
+
+      {/* Body */}
+      <div className="p-6 flex flex-col flex-1 gap-4">
+        {/* Address */}
+        <div className="flex items-start gap-1.5 text-sm text-gray1">
+          <svg
+            className="w-4 h-4 mt-0.5 shrink-0 text-gold"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+            aria-hidden="true"
+          >
+            <path
+              fillRule="evenodd"
+              d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <span className="leading-tight">{property.address}</span>
+        </div>
+
+        {/* Name */}
+        <h3
+          className="text-xl font-bold text-gray-800 hover:text-gold cursor-pointer transition-colors duration-200"
+          onClick={() => navigate(`/propertyDetails?id=${property.id}`)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter")
+              navigate(`/propertyDetails?id=${property.id}`);
+          }}
+        >
+          {property.name}
+        </h3>
+
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Actions */}
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => onBook(property)}
+            className="flex-1 py-2.5 px-4 rounded-lg bg-gold text-white font-semibold text-sm hover:bg-black transition-colors duration-300"
+          >
+            BOOK NOW
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate(`/propertyDetails?id=${property.id}`)}
+            className="flex-1 py-2.5 px-4 rounded-lg border border-gold text-gold font-semibold text-sm hover:bg-gold hover:text-white transition-colors duration-300"
+          >
+            VIEW DETAILS
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Page ────────────────────────────────────────────────────────────────────
 
 function Properties(): JSX.Element {
   const navigate = useNavigate();
-  const [introPage, setIntroPage] = useState<boolean>(true);
-  const [properties, setProperties] = useState<any>([]);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [selectedProperty, setSelectedProperty] = useState<any>(null);
+
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Booking modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [checkInDate, setCheckInDate] = useState<string | null>(null);
   const [checkOutDate, setCheckOutDate] = useState<string | null>(null);
-  const [guestCount, setGuestCount] = useState<string>("1");
-  const [propertyEvents, setPropertyEvents] = useState<any>([]);
+  const [guestCount, setGuestCount] = useState("1");
+  const [propertyEvents, setPropertyEvents] = useState<any[]>([]);
+  const [bookingLoading, setBookingLoading] = useState(false);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIntroPage(false);
-    }, 5000);
-
-    getProperties().then((response: any) => {
-      setProperties(response.data.data[0]);
-    });
-
-    return () => clearTimeout(timer);
+  const fetchProperties = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    getProperties()
+      .then((response: any) => {
+        // API returns { data: { data: [ Array ] } }
+        const raw = response?.data?.data;
+        const list: Property[] = Array.isArray(raw?.[0])
+          ? raw[0]
+          : Array.isArray(raw)
+          ? raw
+          : [];
+        setProperties(list);
+      })
+      .catch(() => {
+        setError("Could not load properties. Please try again.");
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  const handleBookNowClick = (property: any) => {
+  useEffect(() => {
+    fetchProperties();
+  }, [fetchProperties]);
+
+  const handleBookNowClick = (property: Property) => {
     setSelectedProperty(property);
     setIsModalOpen(true);
-
-    getPropertyEvents(property.id).then((response: any) => {
-      setPropertyEvents(response.data.data[0] || []);
-    });
+    getPropertyEvents(property.id)
+      .then((res: any) => {
+        const raw = res?.data?.data;
+        setPropertyEvents(
+          Array.isArray(raw?.[0]) ? raw[0] : Array.isArray(raw) ? raw : []
+        );
+      })
+      .catch(() => setPropertyEvents([]));
   };
 
   const handleCloseModal = () => {
@@ -49,124 +194,110 @@ function Properties(): JSX.Element {
   };
 
   const handleMakeReservation = async () => {
+    if (!checkInDate || !checkOutDate) {
+      alert("Please select check-in and check-out dates.");
+      return;
+    }
+    setBookingLoading(true);
     try {
       const response = await fetch("/api/stripe/create-checkout-session", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           propertyId: selectedProperty?.id,
-          propertyName: selectedProperty?.name || "Property Reservation",
+          propertyName: selectedProperty?.name ?? "Property Reservation",
           checkIn: checkInDate,
           checkOut: checkOutDate,
           guests: guestCount,
         }),
       });
-
       const data = await response.json();
-
       if (response.ok && data.url) {
         window.location.href = data.url;
       } else {
-        console.error("Checkout error:", data.message);
-        alert("Failed to create checkout session. Please try again.");
+        alert(data.message ?? "Failed to create checkout session. Please try again.");
       }
-    } catch (error) {
-      console.error("Payment error:", error);
+    } catch {
       alert("An error occurred. Please try again.");
+    } finally {
+      setBookingLoading(false);
     }
   };
 
   return (
-    <div>
-      {/* LOGO LOADING SCREEN */}
-      <div className={!introPage ? "hidden" : ""}>
-        <div className="w-screen h-screen flex place-content-center bg-green1">
-          <div className="self-center">
-            <img width={200} height={200} src="/logoAnimation.gif" alt="logo" />
-          </div>
+    <div className="min-h-screen flex flex-col bg-green1">
+      <UtilityBar activeLink="PROPERTIES" />
+
+      {/* Page header */}
+      <div className="text-center pt-12 pb-4 space-y-3 px-6">
+        <Heading Tag="h1" variant="xxl">
+          <span>PROPERTIES</span>
+        </Heading>
+        <div className="flex gap-2 place-content-center text-sm">
+          <button
+            type="button"
+            className="hover:text-gold transition-colors"
+            onClick={() => navigate("/")}
+          >
+            HOME
+          </button>
+          <span>&gt;</span>
+          <span className="text-gray1">PROPERTIES</span>
         </div>
       </div>
-      {/* END OF LOGO LOADING SCREEN */}
 
-      <div className={introPage ? "hidden" : ""}>
-        {/* UTILITY BAR */}
-        <div>
-          <UtilityBar activeLink="PROPERTIES" />
-        </div>
-        {/* END OF UTILITY BAR */}
-
-        <div className="px-6 bg-green1 space-y-12">
-          <div className="text-center pt-12 space-y-3 bg-green1">
-            <div>
-              <Heading Tag="h1" variant="xxl">
-                <span className="text-center">PROPERTIES</span>
-              </Heading>
-            </div>
-            <div className="flex gap-2 place-content-center">
-              <div
-                className="cursor-pointer"
-                tabIndex={0}
-                role="button"
-                onKeyDown={() => {}}
-                onClick={() => {
-                  navigate("/");
-                }}
-              >
-                HOME
-              </div>
-              <div> &gt;</div>
-              <div className="text-gray1">PROPERTIES</div>
-            </div>
+      {/* Content */}
+      <div className="flex-1 px-6 tablet:px-24 py-10">
+        {/* Error state */}
+        {error && !loading && (
+          <div className="flex flex-col items-center justify-center py-24 space-y-4 text-center">
+            <div className="text-5xl">🏠</div>
+            <p className="text-gray1 text-lg">{error}</p>
+            <button
+              type="button"
+              onClick={fetchProperties}
+              className="mt-2 px-6 py-3 rounded-lg bg-gold text-white font-semibold hover:bg-black transition-colors duration-300"
+            >
+              TRY AGAIN
+            </button>
           </div>
+        )}
 
-          <div>
-            {properties.map((property: any) => (
-              <div
-                key={property.id}
-                className="flex flex-col tablet:pt-0 tablet:flex-row tablet:justify-between tablet:gap-x-6 tablet:px-24"
-              >
-                <div className="self-center basis-4/12">
-                  <img className="rounded-2xl" src="/property1.jpg" alt="Property" />
-                </div>
-                <div className="self-center basis-7/12 tablet:px-8 text-left">
-                  <div className="mt-8 space-y-6">
-                    <p>{property.address}</p>
-
-                    <div className="text-3xl font-bold cursor-pointer text-black hover:text-gold">
-                      {property.name}
-                    </div>
-
-                    <div className="flex gap-x-4">
-                      <div>
-                        <Button
-                          onClick={() => handleBookNowClick(property)}
-                          variant="primary"
-                        >
-                          BOOK NOW
-                        </Button>
-                      </div>
-                      <div>
-                        <Button
-                          onClick={() => {
-                            navigate(`/propertyDetails?id=${property.id}`);
-                          }}
-                          variant="secondary"
-                        >
-                          VIEW DETAILS
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        {/* Loading skeletons */}
+        {loading && (
+          <div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-8">
+            {[1, 2, 3].map((n) => (
+              <SkeletonCard key={n} />
             ))}
           </div>
-        </div>
+        )}
+
+        {/* Empty state */}
+        {!loading && !error && properties.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-24 space-y-3 text-center">
+            <div className="text-5xl">🏠</div>
+            <p className="text-gray1 text-lg">No properties available at the moment.</p>
+            <p className="text-gray1 text-sm">Please check back soon.</p>
+          </div>
+        )}
+
+        {/* Property grid */}
+        {!loading && !error && properties.length > 0 && (
+          <div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-8">
+            {properties.map((property) => (
+              <PropertyCard
+                key={property.id}
+                property={property}
+                onBook={handleBookNowClick}
+              />
+            ))}
+          </div>
+        )}
       </div>
+
       <Footer />
 
+      {/* Booking modal */}
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
         <div className="space-y-6 p-6 max-w-2xl mx-auto">
           <div className="text-center">
@@ -174,15 +305,15 @@ function Properties(): JSX.Element {
               <span>Book Your Stay</span>
             </Heading>
             {selectedProperty && (
-              <p className="text-gray1 mt-2">{selectedProperty.name}</p>
+              <p className="text-gray1 mt-1 text-sm">{selectedProperty.name}</p>
             )}
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Select Check-in and Check-out Dates
-              </label>
+              <p className="block text-sm font-medium text-gray-700 mb-3">
+                Select check-in and check-out dates
+              </p>
               <BookingCalendar
                 events={propertyEvents}
                 checkInDate={checkInDate}
@@ -193,15 +324,15 @@ function Properties(): JSX.Element {
             </div>
 
             {checkInDate && checkOutDate && (
-              <div className="bg-green1 p-4 rounded-lg">
-                <div className="flex justify-between items-center">
+              <div className="bg-green1 border border-gray-200 p-4 rounded-lg">
+                <div className="flex justify-between items-center text-sm">
                   <div>
-                    <p className="text-sm text-gray-600">Check-in</p>
+                    <p className="text-gray-500">Check-in</p>
                     <p className="font-semibold">{checkInDate}</p>
                   </div>
-                  <div className="text-gray-400">→</div>
-                  <div>
-                    <p className="text-sm text-gray-600">Check-out</p>
+                  <span className="text-gray-400 text-lg">→</span>
+                  <div className="text-right">
+                    <p className="text-gray-500">Check-out</p>
                     <p className="font-semibold">{checkOutDate}</p>
                   </div>
                 </div>
@@ -209,27 +340,30 @@ function Properties(): JSX.Element {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Number of Guests
+              <label
+                htmlFor="guest-count"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Number of guests
               </label>
               <input
+                id="guest-count"
                 type="number"
                 min="1"
                 value={guestCount}
                 onChange={(e) => setGuestCount(e.target.value)}
-                className="w-full rounded-md border border-gray-300 py-3 px-4 text-lg text-gray-700 outline-none focus:ring-1 focus:ring-gold"
+                className="w-full rounded-md border border-gray-300 py-3 px-4 text-gray-700 outline-none focus:ring-1 focus:ring-gold"
               />
             </div>
 
-            <div className="pt-2">
-              <Button
-                variant="primary"
-                width="full"
-                onClick={handleMakeReservation}
-              >
-                MAKE RESERVATION
-              </Button>
-            </div>
+            <button
+              type="button"
+              disabled={bookingLoading || !checkInDate || !checkOutDate}
+              onClick={handleMakeReservation}
+              className="w-full py-3 rounded-lg bg-gold text-white font-semibold tracking-wide hover:bg-black transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {bookingLoading ? "Processing…" : "MAKE RESERVATION"}
+            </button>
           </div>
         </div>
       </Modal>

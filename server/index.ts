@@ -5,6 +5,7 @@ import passport from "passport";
 import path from "path";
 import authRouter from "./routes/auth";
 import stripeRouter from "./routes/stripe";
+import propertiesRouter from "./routes/properties";
 
 async function createServer() {
   const app = express();
@@ -53,6 +54,7 @@ async function createServer() {
   // API routes
   app.use("/api/auth", authRouter);
   app.use("/api/stripe", stripeRouter);
+  app.use("/api/properties", propertiesRouter);
 
   if (process.env.NODE_ENV === "production") {
     const distPath = path.resolve("dist");
