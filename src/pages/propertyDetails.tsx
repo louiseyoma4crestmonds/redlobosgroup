@@ -1,106 +1,128 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect, useState, lazy, Suspense } from "react";
-import { useSession } from "../context/AuthContext";
+import { useEffect, useState, lazy, Suspense, useCallback } from "react";
 import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
 import Footer from "@/organisms/Footer";
-import Button from "@/atoms/Button";
 import Modal from "@/molecules/Modal";
 import BookingCalendar from "@/molecules/BookingCalendar";
-import ReserveScheduler from "@/organisms/ReserveScheduler";
 import Calendar from "@/organisms/Calendar";
-import {
-  getPropertyAmenities,
-  getPropertyImages,
-  getPropertyEvents,
-  getPropertyDetails,
-} from "../api";
+import { getPropertyDetails, getPropertyEvents } from "../api";
 
 const PropertyMap = lazy(() => import("@/molecules/PropertyMap"));
+
+// ─── Amenity icon map ─────────────────────────────────────────────────────────
+
+const AMENITY_ICONS: Record<string, string> = {
+  "Free Wi-Fi": "📶",
+  "Smart TV": "📺",
+  "Fully Equipped Kitchen": "🍳",
+  "Air Conditioning": "❄️",
+  "Washing Machine": "🧺",
+  "Iron & Ironing Board": "👔",
+  "Private Balcony": "🌇",
+  "Gym Access": "🏋️",
+  "Private Garden": "🌳",
+  "Parking Space": "🅿️",
+  "Concierge Service": "🛎️",
+  "Private Terrace": "☀️",
+  "Thames View": "🌉",
+  "Hyde Park Access": "🌿",
+  "Valet Parking": "🚗",
+};
+
+function amenityIcon(name: string) {
+  return AMENITY_ICONS[name] ?? "✓";
+}
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface PropertyImage {
+  image_url: string;
+  is_primary: boolean;
+}
+
+interface PropertyData {
+  id: number;
+  name: string;
+  address: string;
+  description: string;
+  bedrooms: number;
+  bathrooms: number;
+  max_guests: number;
+  price_per_night: number;
+  amenities: string[];
+  images: PropertyImage[];
+}
+
+// ─── Page ────────────────────────────────────────────────────────────────────
 
 function PropertyDetails(): JSX.Element {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
-  const { data: session } = useSession();
-  const [eventz, setEvents] = useState([]);
-  const [amenities, setAmenities] = useState([]);
-  const [images, setImages] = useState([]);
-  const [introPage, setIntroPage] = useState<boolean>(true);
-  const [showCalendar, setShowCalendar] = useState<boolean>(false);
-  const [showDescriptionModal, setShowDescriptionModal] =
-    useState<boolean>(false);
-  const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
-  const [checkInDate, setCheckInDate] = useState<string | null>(null);
-  const [checkOutDate, setCheckOutDate] = useState<string | null>(null);
-  const [guestCount, setGuestCount] = useState<string>("1");
-  const [propertyEvents, setPropertyEvents] = useState<any>([]);
-  const [propertyDetails, setPropertyDetails] = useState<any>(null);
+
+  const [property, setProperty] = useState<PropertyData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [coordinates, setCoordinates] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIntroPage(false);
-    }, 5000);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [showDescriptionModal, setShowDescriptionModal] = useState(false);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [checkInDate, setCheckInDate] = useState<string | null>(null);
+  const [checkOutDate, setCheckOutDate] = useState<string | null>(null);
+  const [guestCount, setGuestCount] = useState("1");
+  const [propertyEvents, setPropertyEvents] = useState<any[]>([]);
+  const [bookingLoading, setBookingLoading] = useState(false);
 
-    return () => clearTimeout(timer);
+  // Geocode address via Nominatim (no API key required)
+  const geocodeAddress = useCallback((address: string) => {
+    fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`,
+      { headers: { "Accept-Language": "en" } }
+    )
+      .then((r) => r.json())
+      .then((results) => {
+        if (results?.[0]) {
+          setCoordinates({
+            lat: parseFloat(results[0].lat),
+            lng: parseFloat(results[0].lon),
+          });
+        } else {
+          // Default to central London
+          setCoordinates({ lat: 51.5074, lng: -0.1278 });
+        }
+      })
+      .catch(() => setCoordinates({ lat: 51.5074, lng: -0.1278 }));
   }, []);
 
   useEffect(() => {
-    if (id) {
-      getPropertyAmenities(id).then((response: any) => {
-        setAmenities(response.data.data[0]);
-      });
-      getPropertyImages(id).then((response: any) => {
-        setImages(response.data.data);
-      });
-      getPropertyDetails(id)
-        .then((response: any) => {
-          if (
-            response &&
-            typeof response === "object" &&
-            response.data &&
-            response.data.data
-          ) {
-            const property = response.data.data[0] || response.data.data;
-            setPropertyDetails(property);
-
-            if (property.latitude && property.longitude) {
-              setCoordinates({
-                lat: parseFloat(property.latitude),
-                lng: parseFloat(property.longitude),
-              });
-              return;
-            }
-          }
-          setCoordinates({ lat: 50.8198, lng: -1.088 });
-        })
-        .catch(() => {
-          setCoordinates({ lat: 50.8198, lng: -1.088 });
-        });
-    }
-  }, [id]);
-
-  console.log(eventz);
-
-  useEffect(() => {
-    if (session) {
-      fetch("/api/calendar")
-        .then((res) => res.json())
-        .then((data) => setEvents(data));
-    }
-  }, [session]);
+    if (!id) return;
+    setLoading(true);
+    setError(null);
+    getPropertyDetails(id)
+      .then((response: any) => {
+        const data: PropertyData = response?.data?.data;
+        if (!data) throw new Error("Not found");
+        setProperty(data);
+        geocodeAddress(data.address);
+      })
+      .catch(() => setError("Could not load property details. Please try again."))
+      .finally(() => setLoading(false));
+  }, [id, geocodeAddress]);
 
   const handleBookNowClick = () => {
     setShowBookingModal(true);
-
     if (id) {
-      getPropertyEvents(id).then((response: any) => {
-        setPropertyEvents(response.data.data[0] || []);
-      });
+      getPropertyEvents(id)
+        .then((res: any) => {
+          const raw = res?.data?.data;
+          setPropertyEvents(Array.isArray(raw) ? raw : []);
+        })
+        .catch(() => setPropertyEvents([]));
     }
   };
 
@@ -113,327 +135,294 @@ function PropertyDetails(): JSX.Element {
   };
 
   const handleMakeReservation = async () => {
+    if (!checkInDate || !checkOutDate) {
+      alert("Please select check-in and check-out dates.");
+      return;
+    }
+    setBookingLoading(true);
     try {
       const response = await fetch("/api/stripe/create-checkout-session", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           propertyId: id,
-          propertyName: "Tourist Best Find in Portsmouth",
+          propertyName: property?.name ?? "Property Reservation",
           checkIn: checkInDate,
           checkOut: checkOutDate,
           guests: guestCount,
         }),
       });
-
       const data = await response.json();
-
       if (response.ok && data.url) {
         window.location.href = data.url;
       } else {
-        console.error("Checkout error:", data.message);
-        alert("Failed to create checkout session. Please try again.");
+        alert(data.message ?? "Failed to create checkout session. Please try again.");
       }
-    } catch (error) {
-      console.error("Payment error:", error);
+    } catch {
       alert("An error occurred. Please try again.");
+    } finally {
+      setBookingLoading(false);
     }
   };
 
+  const images: PropertyImage[] = Array.isArray(property?.images) ? property.images : [];
+  const amenities: string[] = Array.isArray(property?.amenities) ? property.amenities : [];
+
+  const primaryImage =
+    images.find((i) => i.is_primary)?.image_url ??
+    images[0]?.image_url ??
+    "/property1.jpg";
+
+  const secondaryImages = images.filter((i) => !i.is_primary).slice(0, 4);
+
+  const descriptionPreview = property?.description
+    ? property.description.slice(0, 200) + (property.description.length > 200 ? " …" : "")
+    : "";
+
   return (
-    <div>
-      {/* LOGO LOADING SCREEN */}
-      <div className={!introPage ? "hidden" : ""}>
-        <div className="w-screen h-screen flex place-content-center bg-green1">
-          <div className="self-center">
-            <img width={200} height={200} src="/logoAnimation.gif" alt="logo" />
-          </div>
+    <div className="min-h-screen flex flex-col bg-green1">
+      <UtilityBar activeLink="PROPERTIES" />
+
+      {/* Page header */}
+      <div className="text-center pt-12 pb-6 space-y-3 px-6">
+        <Heading Tag="h1" variant="xxl">
+          <span>PROPERTY DETAILS</span>
+        </Heading>
+        <div className="flex gap-2 place-content-center text-sm">
+          <button
+            type="button"
+            className="hover:text-gold transition-colors"
+            onClick={() => navigate("/")}
+          >
+            HOME
+          </button>
+          <span>&gt;</span>
+          <button
+            type="button"
+            className="hover:text-gold transition-colors"
+            onClick={() => navigate("/properties")}
+          >
+            PROPERTIES
+          </button>
+          <span>&gt;</span>
+          <span className="text-gray1">{property?.name ?? "DETAILS"}</span>
         </div>
       </div>
-      {/* END OF LOGO LOADING SCREEN */}
 
-      <div className={introPage ? "hidden" : ""}>
-        {/* UTILITY BAR */}
-        <div>
-          <UtilityBar activeLink="PROPERTIES" />
+      {/* Loading */}
+      {loading && (
+        <div className="flex-1 flex items-center justify-center py-32">
+          <div className="w-10 h-10 border-2 border-gold border-t-transparent rounded-full animate-spin" />
         </div>
-        {/* END OF UTILITY BAR */}
+      )}
 
-        <div className="px-6 bg-green1 space-y-4">
-          <div className="text-center pt-12 space-y-3 bg-green1">
-            <div>
-              <Heading Tag="h1" variant="xxl">
-                <span className="text-center">PROPERTY DETAILS</span>
-              </Heading>
-            </div>
-            <div className="flex gap-2 place-content-center">
-              <div
-                className="cursor-pointer"
-                tabIndex={0}
-                role="button"
-                onKeyDown={() => {}}
-                onClick={() => {
-                  navigate("/");
+      {/* Error */}
+      {!loading && error && (
+        <div className="flex-1 flex flex-col items-center justify-center py-24 space-y-4">
+          <p className="text-gray1 text-lg">{error}</p>
+          <button
+            type="button"
+            onClick={() => navigate("/properties")}
+            className="px-6 py-3 rounded-lg bg-gold text-white font-semibold hover:bg-black transition-colors duration-300"
+          >
+            BACK TO PROPERTIES
+          </button>
+        </div>
+      )}
+
+      {/* Content */}
+      {!loading && !error && property && (
+        <div className="flex-1 px-6 tablet:px-16 desktop:px-24 space-y-8 pb-16">
+
+          {/* Image gallery */}
+          <div className="w-full flex flex-col laptop:flex-row gap-4">
+            {/* Primary image */}
+            <div className="basis-1/2">
+              <img
+                src={primaryImage}
+                alt={property.name}
+                className="w-full h-[320px] laptop:h-[420px] object-cover rounded-2xl"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/property1.jpg";
                 }}
-              >
-                HOME
+              />
+            </div>
+
+            {/* Secondary images grid */}
+            {secondaryImages.length > 0 && (
+              <div className="basis-1/2 grid grid-cols-2 gap-4">
+                {secondaryImages.map((img, i) => (
+                  <img
+                    key={i}
+                    src={img.image_url}
+                    alt={`${property.name} ${i + 2}`}
+                    className="w-full h-[196px] object-cover rounded-2xl"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/property1.jpg";
+                    }}
+                  />
+                ))}
               </div>
-              <div> &gt;</div>
-              <div className="text-gray1">OVERVIEW</div>
+            )}
+          </div>
+
+          {/* Show all photos */}
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => navigate(`/photoGallery?id=${id}`)}
+              className="px-6 py-2.5 rounded-lg bg-gold text-white text-sm font-semibold hover:bg-black transition-colors duration-300"
+            >
+              SHOW ALL PHOTOS
+            </button>
+          </div>
+
+          {/* Property headline */}
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-gray-800">{property.name}</h2>
+            <div className="flex items-center gap-1.5 text-gray1 text-sm">
+              <svg className="w-4 h-4 text-gold shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+              </svg>
+              <span>{property.address}</span>
+            </div>
+            <div className="flex flex-wrap gap-4 text-sm text-gray-600 pt-1">
+              <span>🛏 {property.bedrooms} {property.bedrooms === 1 ? "Bedroom" : "Bedrooms"}</span>
+              <span>🚿 {property.bathrooms} {property.bathrooms === 1 ? "Bathroom" : "Bathrooms"}</span>
+              <span>👥 Up to {property.max_guests} guests</span>
+              {property.price_per_night && (
+                <span className="text-gold font-semibold">
+                  £{Number(property.price_per_night).toFixed(0)} / night
+                </span>
+              )}
             </div>
           </div>
 
-          <div className="w-full flex flex-col laptop:flex-row desktop:flex-row phone:gap-y-4 gap-x-4">
-            <div className="basis-3/6 phone:w-full">
-              {images.map((image: any, index: number) => (
-                <div key={index}>
-                  {image.primary ? (
-                    <div
-                      style={{
-                        backgroundImage: `url("${image.image}")`,
-                        backgroundRepeat: "no-repeat",
-                        backgroundSize: "cover",
-                        backgroundPositionX: "center",
-                      }}
-                      className="h-[300px] laptop:h-[420px] desktop:h-[420px] tablet:h-[420px]"
-                    />
-                  ) : (
-                    ""
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="basis-3/6 grid grid-cols grid-cols-2  gap-4">
-              {images.map((image: any, index: number) => (
-                <div key={index} className={image.primary ? "hidden" : ""}>
-                  {image.primary === false && index < 5 ? (
-                    <div>
-                      <div className="basis-3/6 h-[204px]">
-                        <div
-                          style={{
-                            backgroundImage: `url("${image.image}")`,
-                            backgroundRepeat: "no-repeat",
-                            backgroundSize: "cover",
-                            backgroundPositionX: "center",
-                          }}
-                          className="h-full p-4"
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    ""
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="w-full flex flex-row-reverse ">
-            <div className="w-full desktop:w-1/4 laptop:w-1/4 tablet:w-1/4">
-              <Button
-                variant="primary"
-                width="full"
-                disabled={!id}
-                onClick={() => {
-                  if (id) {
-                    navigate(`/photoGallery?id=${id}`);
-                  }
-                }}
-              >
-                <span className="w-full text-center">SHOW ALL PHOTOS</span>
-              </Button>
-            </div>
-          </div>
-          <div>
-            <div className="text-black">Tourist Best Find in Portsmouth</div>
-            <div className="text-black">
-              2 Guests - 1 Bedroom - 1 Bath - Water Heater{" "}
-            </div>
-          </div>
-          <hr />
-          <div className="py-4 w-full flex tablet:gap-x-12 desktop:gap-x-12 laptop:gap-x-12 tablet:flex-row desktop:flex-row laptop:flex-row phone:flex-col phone:gap-y-8">
-            <div className="space-y-4 basis-full tablet:basis-4/6 laptop:basis-4/6 desktop:basis-4/6">
-              <div>Description</div>
+          <hr className="border-gray-200" />
 
-              <div className="space-y-6">
-                <div>
-                  The Tourist best find in portsmouth is on the hills of england
-                  is the ideal retreat for romantics and nature lovers. On just
-                  25 m², a cozy atmosphere awaits you with a bedroom, a small
-                  kitchen and a dining area. Enjoy the stunning ocean view from
-                  your covered terrace, just a meter from the mountains.
-                  Children are very welcome and restaurants and shopping are in
-                  the immediate vicinity. Experience unforgettable moments on
-                  the Wa ...
-                </div>
-                <div className="w-full desktop:w-1/4 laptop:w-1/4 tablet:w-1/4">
-                  <Button
-                    variant="secondary"
-                    width="full"
-                    onClick={() => setShowDescriptionModal(true)}
-                  >
-                    <span className="w-full text-center">SHOW MORE</span>
-                  </Button>
-                </div>
-              </div>
+          {/* Description + Amenities */}
+          <div className="flex flex-col tablet:flex-row gap-10">
+            {/* Description */}
+            <div className="basis-full tablet:basis-4/6 space-y-4">
+              <h3 className="text-lg font-semibold">Description</h3>
+              <p className="text-gray-700 leading-relaxed">{descriptionPreview}</p>
+              {property.description.length > 200 && (
+                <button
+                  type="button"
+                  onClick={() => setShowDescriptionModal(true)}
+                  className="px-5 py-2 rounded-lg border border-gold text-gold text-sm font-semibold hover:bg-gold hover:text-white transition-colors duration-300"
+                >
+                  SHOW MORE
+                </button>
+              )}
             </div>
-            <div className="space-y-4 basis-full tablet:basis-2/6 laptop:basis-2/6 desktop:basis-2/6">
-              <div>What this place offers</div>
-              <div className="grid grid-cols-2">
-                {amenities.map((amenity: any, index: number) => (
-                  <div key={index}>
-                    <div className="flex gap-x-2">
-                      <div className="self-center">
-                        <img
-                          src={amenity ? amenity.image : ""}
-                          width={20}
-                          height={20}
-                          alt={amenity?.label?.name}
-                        />
-                      </div>
-                      <div className="self-center">{amenity.label.name}</div>
-                    </div>
+
+            {/* Amenities */}
+            <div className="basis-full tablet:basis-2/6 space-y-4">
+              <h3 className="text-lg font-semibold">What this place offers</h3>
+              <div className="grid grid-cols-2 gap-y-3 gap-x-2">
+                {amenities.map((amenity, i) => (
+                  <div key={i} className="flex items-center gap-2 text-sm text-gray-700">
+                    <span className="text-base">{amenityIcon(amenity)}</span>
+                    <span>{amenity}</span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-          <hr />
-          <div className="w-full flex place-content-center gap-4 py-8">
-            <div className="w-full tablet:w-2/4 desktop:w-2/4 laptop:w-2/4">
-              <Button
-                variant="primary"
-                width="full"
-                onClick={handleBookNowClick}
-              >
-                <span className="w-full text-center">MAKE RESERVATION</span>
-              </Button>
-            </div>
-            <div className="w-full tablet:w-2/4 desktop:w-2/4 laptop:w-2/4">
-              <Button
-                variant="secondary"
-                width="full"
-                onClick={() => setShowCalendar(true)}
-              >
-                <span className="w-full text-center">VIEW CALENDAR</span>
-              </Button>
-            </div>
+
+          <hr className="border-gray-200" />
+
+          {/* CTA buttons */}
+          <div className="flex flex-col tablet:flex-row gap-4">
+            <button
+              type="button"
+              onClick={handleBookNowClick}
+              className="flex-1 py-3 rounded-lg bg-gold text-white font-semibold tracking-wide hover:bg-black transition-colors duration-300"
+            >
+              MAKE RESERVATION
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowCalendar(true)}
+              className="flex-1 py-3 rounded-lg border border-gold text-gold font-semibold tracking-wide hover:bg-gold hover:text-white transition-colors duration-300"
+            >
+              VIEW CALENDAR
+            </button>
           </div>
-          <hr />
-          <div className="space-y-4 p-4">
-            <div className="text-xl font-semibold">Where you will be</div>
-            <div className="text-gray-600">
-              KALA SD, QS - Portsmouth, England
-            </div>
-            <div className="rounded-lg">
-              {coordinates && (
+
+          <hr className="border-gray-200" />
+
+          {/* Map */}
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold">Where you will be</h3>
+            <p className="text-gray-600 text-sm">{property.address}</p>
+            <div className="rounded-2xl overflow-hidden">
+              {coordinates ? (
                 <Suspense
                   fallback={
-                    <div className="w-full h-96 bg-gray-100 rounded-lg flex items-center justify-center">
-                      Loading map...
+                    <div className="w-full h-96 bg-gray-100 rounded-2xl flex items-center justify-center">
+                      <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
                     </div>
                   }
                 >
                   <PropertyMap
                     latitude={coordinates.lat}
                     longitude={coordinates.lng}
-                    propertyName="Tourist Best Find in Portsmouth"
-                    address="KALA SD, QS"
+                    propertyName={property.name}
+                    address={property.address}
                   />
                 </Suspense>
+              ) : (
+                <div className="w-full h-96 bg-gray-100 rounded-2xl flex items-center justify-center">
+                  <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+                </div>
               )}
             </div>
           </div>
         </div>
-        <div>
-          <Calendar isOpen={showCalendar} closeCalendar={setShowCalendar} />
-        </div>
-      </div>
+      )}
+
+      {/* Calendar overlay */}
+      <Calendar isOpen={showCalendar} closeCalendar={setShowCalendar} />
+
       <Footer />
 
-      <Modal
-        isOpen={showDescriptionModal}
-        onClose={() => setShowDescriptionModal(false)}
-      >
-        <div className="space-y-6 p-4 max-w-3xl">
-          <div className="text-center">
-            <Heading Tag="h2" variant="lg">
-              <span>Full Property Description</span>
-            </Heading>
-          </div>
-
-          <div className="space-y-4 text-gray-700 leading-7">
-            <div className="font-semibold text-black text-xl">
-              Tourist Best Find in Portsmouth
-            </div>
-
-            <div>
-              The Tourist best find in portsmouth is on the hills of England is
-              the ideal retreat for romantics and nature lovers. On just 25 m²,
-              a cozy atmosphere awaits you with a bedroom, a small kitchen and
-              a dining area. Enjoy the stunning ocean view from your covered
-              terrace, just a meter from the mountains.
-            </div>
-
-            <div>
-              Children are very welcome and restaurants and shopping are in the
-              immediate vicinity. Experience unforgettable moments on the
-              waterfront of Portsmouth, where relaxation and adventure go hand
-              in hand.
-            </div>
-
-            <div>
-              This charming property offers the perfect blend of comfort and
-              natural beauty. Wake up to breathtaking views of the English
-              countryside and enjoy your morning coffee on the private terrace.
-              The compact yet thoughtfully designed space ensures you have
-              everything you need for a memorable stay.
-            </div>
-
-            <div>
-              <strong>Perfect for:</strong>
-              <ul className="list-disc list-inside mt-2 space-y-1">
-                <li>Romantic getaways</li>
-                <li>Solo travelers seeking tranquility</li>
-                <li>Nature enthusiasts</li>
-                <li>Families with children</li>
-              </ul>
-            </div>
-
-            <div>
-              <strong>Nearby attractions:</strong> Explore local restaurants,
-              shopping centers, hiking trails, and scenic viewpoints all within
-              easy reach of this beautiful property.
-            </div>
-          </div>
-
-          <div className="pt-4">
-            <Button
-              variant="primary"
-              width="full"
-              onClick={() => setShowDescriptionModal(false)}
-            >
-              CLOSE
-            </Button>
-          </div>
+      {/* Description modal */}
+      <Modal isOpen={showDescriptionModal} onClose={() => setShowDescriptionModal(false)}>
+        <div className="space-y-6 p-6 max-w-2xl">
+          <Heading Tag="h2" variant="lg">
+            <span className="text-center block">About this property</span>
+          </Heading>
+          <h3 className="font-semibold text-xl text-gray-800">{property?.name}</h3>
+          <p className="text-gray-700 leading-relaxed">{property?.description}</p>
+          <button
+            type="button"
+            onClick={() => setShowDescriptionModal(false)}
+            className="w-full py-3 rounded-lg bg-gold text-white font-semibold hover:bg-black transition-colors duration-300"
+          >
+            CLOSE
+          </button>
         </div>
       </Modal>
 
+      {/* Booking modal */}
       <Modal isOpen={showBookingModal} onClose={handleCloseBookingModal}>
         <div className="space-y-6 p-6 max-w-2xl mx-auto">
           <div className="text-center">
             <Heading Tag="h2" variant="lg">
               <span>Book Your Stay</span>
             </Heading>
-            <p className="text-gray1 mt-2">Tourist Best Find in Portsmouth</p>
+            {property && (
+              <p className="text-gray1 mt-1 text-sm">{property.name}</p>
+            )}
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Select Check-in and Check-out Dates
-              </label>
+              <p className="text-sm font-medium text-gray-700 mb-3">
+                Select check-in and check-out dates
+              </p>
               <BookingCalendar
                 events={propertyEvents}
                 checkInDate={checkInDate}
@@ -444,15 +433,15 @@ function PropertyDetails(): JSX.Element {
             </div>
 
             {checkInDate && checkOutDate && (
-              <div className="bg-green1 p-4 rounded-lg">
-                <div className="flex justify-between items-center">
+              <div className="bg-green1 border border-gray-200 p-4 rounded-lg">
+                <div className="flex justify-between items-center text-sm">
                   <div>
-                    <p className="text-sm text-gray-600">Check-in</p>
+                    <p className="text-gray-500">Check-in</p>
                     <p className="font-semibold">{checkInDate}</p>
                   </div>
-                  <div className="text-gray-400">→</div>
-                  <div>
-                    <p className="text-sm text-gray-600">Check-out</p>
+                  <span className="text-gray-400 text-lg">→</span>
+                  <div className="text-right">
+                    <p className="text-gray-500">Check-out</p>
                     <p className="font-semibold">{checkOutDate}</p>
                   </div>
                 </div>
@@ -460,27 +449,31 @@ function PropertyDetails(): JSX.Element {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Number of Guests
+              <label
+                htmlFor="guests"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Number of guests
               </label>
               <input
+                id="guests"
                 type="number"
                 min="1"
+                max={property?.max_guests ?? 10}
                 value={guestCount}
                 onChange={(e) => setGuestCount(e.target.value)}
-                className="w-full rounded-md border border-gray-300 py-3 px-4 text-lg text-gray-700 outline-none focus:ring-1 focus:ring-gold"
+                className="w-full rounded-md border border-gray-300 py-3 px-4 text-gray-700 outline-none focus:ring-1 focus:ring-gold"
               />
             </div>
 
-            <div className="pt-2">
-              <Button
-                variant="primary"
-                width="full"
-                onClick={handleMakeReservation}
-              >
-                MAKE RESERVATION
-              </Button>
-            </div>
+            <button
+              type="button"
+              disabled={bookingLoading || !checkInDate || !checkOutDate}
+              onClick={handleMakeReservation}
+              className="w-full py-3 rounded-lg bg-gold text-white font-semibold tracking-wide hover:bg-black transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {bookingLoading ? "Processing…" : "MAKE RESERVATION"}
+            </button>
           </div>
         </div>
       </Modal>
