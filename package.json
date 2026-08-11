@@ -53,6 +53,7 @@
     "react-leaflet": "^4.2.1",
     "react-router-dom": "^7.18.2",
     "stripe": "^19.3.0",
+    "stripe-replit-sync": "^1.0.0",
     "styled-components": "^6.0.7",
     "usehooks-ts": "^2.6.0",
     "zod": "^4.0.15"

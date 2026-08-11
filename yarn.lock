@@ -4843,6 +4843,14 @@ pg-int8@1.0.1:
   resolved "http://package-firewall.replit.local/npm/pg-int8/-/pg-int8-1.0.1.tgz#943bd463bf5b71b4170115f80f8efc9a0c0eb78c"
   integrity sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==
 
+pg-node-migrations@0.0.8:
+  version "0.0.8"
+  resolved "http://package-firewall.replit.local/npm/pg-node-migrations/-/pg-node-migrations-0.0.8.tgz#e7014e877fe976bccfd6f6137fdef6bd39acee03"
+  integrity sha512-44cMl9umOmCv0hzZyEcvjEq8Bm8u7mrzggZ06qXTJVSsMMB4j2OsjG+rSp+uzeKWyP2Vu0K9Ye2wKtjFUJwrdw==
+  dependencies:
+    pg "^8.6.0"
+    sql-template-strings "^2.2.2"
+
 pg-pool@^3.14.0:
   version "3.14.0"
   resolved "http://package-firewall.replit.local/npm/pg-pool/-/pg-pool-3.14.0.tgz#f35ae4eb846780cad71af24099b3edfa9781ad90"
@@ -4864,7 +4872,7 @@ pg-types@2.2.0, pg-types@^2.2.0:
     postgres-date "~1.0.4"
     postgres-interval "^1.1.0"
 
-pg@^8.23.0:
+pg@^8.16.3, pg@^8.23.0, pg@^8.6.0:
   version "8.23.0"
   resolved "http://package-firewall.replit.local/npm/pg/-/pg-8.23.0.tgz#5c2026d32bd0cb4fbd9196bac1ecf5ae66607180"
   integrity sha512-Ip2EQCngowJLGOfCwkFhPXU7/ljlhn6Rxlmy4XYfL2Y+vyRM59+8uR2xqRWKdYmbXmxCFOAmKxBuSUCdF34qLg==
@@ -5631,6 +5639,11 @@ split2@^4.1.0:
   resolved "http://package-firewall.replit.local/npm/split2/-/split2-4.2.0.tgz#c9c5920904d148bab0b9f67145f245a86aadbfa4"
   integrity sha512-UcjcJOWknrNkF6PLX83qcHM6KHgVKNkV62Y8a5uYDVv9ydGQVwAHMKqHdJje1VTWpljG0WYpCDhrCdAOYH4TWg==
 
+sql-template-strings@^2.2.2:
+  version "2.2.2"
+  resolved "http://package-firewall.replit.local/npm/sql-template-strings/-/sql-template-strings-2.2.2.tgz#3f11508a25addfce217a3042a9d300c3193b96ff"
+  integrity sha512-UXhXR2869FQaD+GMly8jAMCRZ94nU5KcrFetZfWEMd+LVVG6y0ExgHAhatEcKZ/wk8YcKPdi+hiD2wm75lq3/Q==
+
 statuses@^2.0.1, statuses@^2.0.2, statuses@~2.0.2:
   version "2.0.2"
   resolved "http://package-firewall.replit.local/npm/statuses/-/statuses-2.0.2.tgz#8f75eecef765b5e1cfcdc080da59409ed424e382"
@@ -5759,6 +5772,16 @@ strip-json-comments@^3.1.0, strip-json-comments@^3.1.1:
   version "3.1.1"
   resolved "https://registry.npmjs.org/strip-json-comments/-/strip-json-comments-3.1.1.tgz"
   integrity sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==
+
+stripe-replit-sync@^1.0.0:
+  version "1.0.0"
+  resolved "http://package-firewall.replit.local/npm/stripe-replit-sync/-/stripe-replit-sync-1.0.0.tgz#45c03c66d00152a29f4c20b36ed6a8b339859d6b"
+  integrity sha512-Bkbih3k+IX/GugN8bKWNpwDiI2xkSLOAR+P34W7pjaR8fXyVay/QqztbrvbHZcU1JlfXncmBhuODY5TYY6DXlw==
+  dependencies:
+    pg "^8.16.3"
+    pg-node-migrations "0.0.8"
+    ws "^8.18.0"
+    yesql "^7.0.0"
 
 stripe@^19.3.0:
   version "19.3.0"
@@ -6255,6 +6278,11 @@ wrappy@1:
   resolved "https://registry.npmjs.org/wrappy/-/wrappy-1.0.2.tgz"
   integrity sha1-tSQ9jz7BqjXxNkYFvA0QNuMKtp8=
 
+ws@^8.18.0:
+  version "8.21.3"
+  resolved "http://package-firewall.replit.local/npm/ws/-/ws-8.21.3.tgz#660b4faddb6a3e575c86e078126919961f4de4fc"
+  integrity sha512-201TZ/kPWxoPr/OKWjquZR1SWKXcvxdH+e1xrx89b3YbmzLMFCLfnaG1HFIgWzJOEWZ7MvpK++odZufgYR50Rw==
+
 xtend@^4.0.0, xtend@^4.0.2:
   version "4.0.2"
   resolved "https://registry.npmjs.org/xtend/-/xtend-4.0.2.tgz"
@@ -6279,6 +6307,11 @@ yaml@^2.1.1:
   version "2.1.1"
   resolved "https://registry.npmjs.org/yaml/-/yaml-2.1.1.tgz"
   integrity sha512-o96x3OPo8GjWeSLF+wOAbrPfhFOGY0W00GNaxCDv+9hkcDJEnev1yh8S7pgHF0ik6zc8sQLuL8hjHjJULZp8bw==
+
+yesql@^7.0.0:
+  version "7.0.0"
+  resolved "http://package-firewall.replit.local/npm/yesql/-/yesql-7.0.0.tgz#7d17a73e11d6c9469c411c7be8cbff85c9ba3c27"
+  integrity sha512-sosfr7agy4ibLM7BvXBkM6BpBmKMGuBO8DUYQEuey+QqaqrgW+2bsSg6D050ocBYIz0PuHxUyehyzEztZTU4pw==
 
 zod@^4.0.15:
   version "4.0.15"

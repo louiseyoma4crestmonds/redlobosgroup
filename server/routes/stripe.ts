@@ -1,25 +1,21 @@
 import { Router, Request, Response } from "express";
-import Stripe from "stripe";
+import { getUncachableStripeClient } from "../stripeClient";
 import pool from "../db";
 
 const router = Router();
 
-function getStripe() {
-  if (!process.env.STRIPE_SECRET_KEY) return null;
-  return new Stripe(process.env.STRIPE_SECRET_KEY);
-}
-
 // ── POST /api/stripe/create-checkout-session ────────────────────────────────
 
 router.post("/create-checkout-session", async (req: Request, res: Response) => {
-  const stripe = getStripe();
-  if (!stripe) {
-    res.status(503).json({ message: "Stripe is not configured yet." });
+  let stripe: import("stripe").default;
+  try {
+    stripe = await getUncachableStripeClient();
+  } catch {
+    res.status(503).json({ message: "Stripe is not configured. Please connect Stripe via the Integrations tab." });
     return;
   }
 
-  const { propertyId, propertyName, checkIn, checkOut, guests, totalAmount } =
-    req.body;
+  const { propertyId, propertyName, checkIn, checkOut, guests, totalAmount } = req.body;
 
   if (!propertyId || !checkIn || !checkOut || !guests) {
     res.status(400).json({ message: "Missing required fields." });
@@ -27,52 +23,40 @@ router.post("/create-checkout-session", async (req: Request, res: Response) => {
   }
 
   try {
-    // Resolve price: prefer the pre-calculated total sent from the client,
-    // otherwise fall back to fetching price_per_night from the database.
+    // Resolve amount: prefer pre-calculated total from client, else compute from DB
     let unitAmountPence: number;
 
     if (totalAmount && Number(totalAmount) > 0) {
-      // Client sends total in pounds — convert to pence
       unitAmountPence = Math.round(Number(totalAmount) * 100);
     } else {
       const result = await pool.query(
         "SELECT price_per_night FROM properties WHERE id = $1",
         [parseInt(propertyId, 10)]
       );
-
       if (result.rows.length === 0) {
         res.status(404).json({ message: "Property not found." });
         return;
       }
-
       const pricePerNight = parseFloat(result.rows[0].price_per_night);
-      const checkInDate = new Date(checkIn);
-      const checkOutDate = new Date(checkOut);
       const nights = Math.max(
         1,
         Math.round(
-          (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
+          (new Date(checkOut).getTime() - new Date(checkIn).getTime()) /
+            (1000 * 60 * 60 * 24)
         )
       );
       const subtotal = pricePerNight * nights;
-      const serviceFee = Math.round(subtotal * 0.12);
-      unitAmountPence = Math.round((subtotal + serviceFee) * 100);
+      unitAmountPence = Math.round((subtotal + Math.round(subtotal * 0.12)) * 100);
     }
 
-    const host =
-      req.headers.origin ||
-      `${req.protocol}://${req.get("host")}`;
+    const host = req.headers.origin || `${req.protocol}://${req.get("host")}`;
 
-    const checkInFormatted = new Date(checkIn).toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-    const checkOutFormatted = new Date(checkOut).toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
+    const fmt = (d: string) =>
+      new Date(d).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -82,7 +66,7 @@ router.post("/create-checkout-session", async (req: Request, res: Response) => {
             currency: "gbp",
             product_data: {
               name: propertyName || "Property Reservation",
-              description: `${guests} guest${Number(guests) > 1 ? "s" : ""} · ${checkInFormatted} → ${checkOutFormatted}`,
+              description: `${guests} guest${Number(guests) > 1 ? "s" : ""} · ${fmt(checkIn)} → ${fmt(checkOut)}`,
             },
             unit_amount: unitAmountPence,
           },
@@ -110,11 +94,13 @@ router.post("/create-checkout-session", async (req: Request, res: Response) => {
 });
 
 // ── GET /api/stripe/checkout-session ────────────────────────────────────────
-// Used by the success page to fetch booking confirmation details.
+// Used by the success page to display booking confirmation details.
 
 router.get("/checkout-session", async (req: Request, res: Response) => {
-  const stripe = getStripe();
-  if (!stripe) {
+  let stripe: import("stripe").default;
+  try {
+    stripe = await getUncachableStripeClient();
+  } catch {
     res.status(503).json({ message: "Stripe is not configured." });
     return;
   }

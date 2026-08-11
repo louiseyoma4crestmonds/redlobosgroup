@@ -3,19 +3,66 @@ import session from "express-session";
 import cors from "cors";
 import passport from "passport";
 import path from "path";
+import { runMigrations } from "stripe-replit-sync";
 import authRouter from "./routes/auth";
 import stripeRouter from "./routes/stripe";
 import propertiesRouter from "./routes/properties";
+import { WebhookHandlers } from "./webhookHandlers";
+import { getStripeSync } from "./stripeClient";
+
+async function initStripe() {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    console.warn("⚠️  DATABASE_URL not set — skipping Stripe init");
+    return;
+  }
+  try {
+    console.log("Initializing Stripe schema...");
+    await runMigrations({ databaseUrl, schema: "stripe" });
+    console.log("✅ Stripe schema ready");
+
+    const stripeSync = await getStripeSync();
+    const webhookBaseUrl = `https://${process.env.REPLIT_DOMAINS?.split(",")[0]}`;
+    await stripeSync.findOrCreateManagedWebhook(`${webhookBaseUrl}/api/stripe/webhook`);
+    console.log("✅ Stripe webhook configured");
+
+    // Backfill runs in background — don't block server startup
+    stripeSync.syncBackfill()
+      .then(() => console.log("✅ Stripe backfill complete"))
+      .catch((err: Error) => console.error("Stripe backfill error:", err.message));
+  } catch (err: any) {
+    console.error("⚠️  Stripe init failed (payments will be unavailable):", err.message);
+  }
+}
 
 async function createServer() {
   const app = express();
 
-  // Restrict CORS to known origins; do not reflect arbitrary origins.
-  // Same-origin (frontend + backend on one server) and localhost dev are always allowed.
+  // ── 1. Stripe webhook — must be BEFORE express.json() ─────────────────────
+  app.post(
+    "/api/stripe/webhook",
+    express.raw({ type: "application/json" }),
+    async (req, res) => {
+      const signature = req.headers["stripe-signature"];
+      if (!signature) {
+        res.status(400).json({ error: "Missing stripe-signature" });
+        return;
+      }
+      try {
+        const sig = Array.isArray(signature) ? signature[0] : signature;
+        await WebhookHandlers.processWebhook(req.body as Buffer, sig);
+        res.status(200).json({ received: true });
+      } catch (err: any) {
+        console.error("Webhook error:", err.message);
+        res.status(400).json({ error: "Webhook processing error" });
+      }
+    }
+  );
+
+  // ── 2. CORS ────────────────────────────────────────────────────────────────
   const allowedOrigins = [
     process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : null,
     process.env.PRODUCTION_URL ?? null,
-    // localhost variants for dev and internal health-checks
     "http://localhost:5000",
     "http://127.0.0.1:5000",
   ].filter(Boolean) as string[];
@@ -23,7 +70,6 @@ async function createServer() {
   app.use(
     cors({
       origin: (origin, callback) => {
-        // Requests with no Origin header (server-to-server, curl, same-origin) are allowed
         if (!origin) return callback(null, true);
         if (allowedOrigins.includes(origin)) return callback(null, true);
         callback(new Error(`CORS: origin '${origin}' not allowed`));
@@ -32,6 +78,7 @@ async function createServer() {
     })
   );
 
+  // ── 3. Body parsing & session ──────────────────────────────────────────────
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
@@ -43,7 +90,7 @@ async function createServer() {
       cookie: {
         secure: false,
         httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        maxAge: 24 * 60 * 60 * 1000,
       },
     })
   );
@@ -51,20 +98,19 @@ async function createServer() {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // API routes
+  // ── 4. API routes ──────────────────────────────────────────────────────────
   app.use("/api/auth", authRouter);
   app.use("/api/stripe", stripeRouter);
   app.use("/api/properties", propertiesRouter);
 
+  // ── 5. Static / Vite ───────────────────────────────────────────────────────
   if (process.env.NODE_ENV === "production") {
     const distPath = path.resolve("dist");
     app.use(express.static(distPath));
-    // Express 5: use app.use() as the SPA catch-all (app.get("*") is invalid in Express 5)
     app.use((_req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
   } else {
-    // In development, use Vite middleware for HMR and asset serving
     const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -79,4 +125,5 @@ async function createServer() {
   });
 }
 
-createServer().catch(console.error);
+// Initialise Stripe (non-blocking on failure) then start the HTTP server
+initStripe().finally(() => createServer().catch(console.error));
