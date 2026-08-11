@@ -359,7 +359,7 @@ function PropertyDetails(): JSX.Element {
           <div className="space-y-4">
             <h3 className="text-xl font-semibold">Where you will be</h3>
             <p className="text-gray-600 text-sm">{property.address}</p>
-            <div className="rounded-2xl overflow-hidden">
+            <div className="rounded-2xl overflow-hidden relative z-0">
               {coordinates ? (
                 <Suspense
                   fallback={

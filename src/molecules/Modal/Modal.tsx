@@ -14,6 +14,18 @@ function Modal(props: ModalProps) {
     setIsBrowser(true);
   }, []);
 
+  // Lock / unlock body scroll
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
   const handleCloseClick = (e: React.MouseEvent) => {
     e.preventDefault();
     onClose();
@@ -21,18 +33,26 @@ function Modal(props: ModalProps) {
 
   const modalContent = isOpen ? (
     <>
-      <Backdrop />
+      {/* Backdrop — clickable to close */}
+      <div
+        className="fixed inset-0 bg-black/60 z-[9998]"
+        onClick={handleCloseClick}
+        aria-hidden="true"
+      />
+
+      {/* Modal panel */}
       <div className={styles.modal}>
         <div className={styles.modalContent}>
           <Panel>
             <button
               type="button"
-              className="absolute top-5 right-5 z-50"
+              className="absolute top-4 right-4 z-50 p-1 rounded-full hover:bg-gray-100 transition-colors"
               onClick={handleCloseClick}
+              aria-label="Close"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
+                className="h-6 w-6 text-gray-500"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -41,7 +61,7 @@ function Modal(props: ModalProps) {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  d="M6 18L18 6M6 6l12 12"
                 />
               </svg>
             </button>
