@@ -9,16 +9,20 @@ import stripeRouter from "./routes/stripe";
 async function createServer() {
   const app = express();
 
-  // Restrict CORS to the known dev/prod origins; do not reflect arbitrary origins
+  // Restrict CORS to known origins; do not reflect arbitrary origins.
+  // Same-origin (frontend + backend on one server) and localhost dev are always allowed.
   const allowedOrigins = [
     process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : null,
     process.env.PRODUCTION_URL ?? null,
+    // localhost variants for dev and internal health-checks
+    "http://localhost:5000",
+    "http://127.0.0.1:5000",
   ].filter(Boolean) as string[];
 
   app.use(
     cors({
       origin: (origin, callback) => {
-        // Same-origin browser requests have no Origin header — allow them
+        // Requests with no Origin header (server-to-server, curl, same-origin) are allowed
         if (!origin) return callback(null, true);
         if (allowedOrigins.includes(origin)) return callback(null, true);
         callback(new Error(`CORS: origin '${origin}' not allowed`));
