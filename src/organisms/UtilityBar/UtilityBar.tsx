@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSession, signOut } from "../../context/AuthContext";
-import styles from "./UtilityBar.module.css";
 import { UtilityBarProps } from "./UtilityBar.types";
 
 function UtilityBar(props: UtilityBarProps): JSX.Element {
@@ -9,6 +8,13 @@ function UtilityBar(props: UtilityBarProps): JSX.Element {
   const navigate = useNavigate();
   const { data: session } = useSession();
   const [showMobileNavBar, setShowMobileNavBar] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const baseLinks = ["HOME", "ABOUT", "PROPERTIES", "CONTACTS"];
 
@@ -29,10 +35,10 @@ function UtilityBar(props: UtilityBarProps): JSX.Element {
   };
 
   return (
-    <div>
-      {/* ── Mobile modal drawer ────────────────────────────────────────────── */}
+    <>
+      {/* ── Mobile drawer ──────────────────────────────────────────────────── */}
 
-      {/* Backdrop — sits BEHIND the drawer, click to close */}
+      {/* Backdrop */}
       <div
         className={`fixed inset-0 bg-black/60 z-40 transition-opacity duration-300 ${
           showMobileNavBar ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
@@ -41,7 +47,7 @@ function UtilityBar(props: UtilityBarProps): JSX.Element {
         aria-hidden="true"
       />
 
-      {/* Drawer — slides in from the left */}
+      {/* Drawer */}
       <div
         className={`fixed top-0 left-0 h-full w-72 bg-white z-50 shadow-2xl flex flex-col transform transition-transform duration-300 ease-in-out ${
           showMobileNavBar ? "translate-x-0" : "-translate-x-full"
@@ -86,7 +92,7 @@ function UtilityBar(props: UtilityBarProps): JSX.Element {
           ))}
         </nav>
 
-        {/* Auth section pinned to bottom */}
+        {/* Auth section */}
         <div className="flex-shrink-0 px-6 py-6 border-t border-gray-100 bg-white">
           {session ? (
             <div className="space-y-4">
@@ -106,12 +112,8 @@ function UtilityBar(props: UtilityBarProps): JSX.Element {
                   </div>
                 )}
                 <div>
-                  <p className="text-sm font-semibold text-gray-800">
-                    {session.user?.name?.split(" ")[0]}
-                  </p>
-                  <p className="text-xs text-gray-400 truncate max-w-[160px]">
-                    {session.user?.email}
-                  </p>
+                  <p className="text-sm font-semibold text-gray-800">{session.user?.name?.split(" ")[0]}</p>
+                  <p className="text-xs text-gray-400 truncate max-w-[160px]">{session.user?.email}</p>
                 </div>
               </div>
               <button
@@ -129,7 +131,6 @@ function UtilityBar(props: UtilityBarProps): JSX.Element {
               SIGN IN
             </button>
           )}
-
           <div className="mt-5 flex items-center gap-3">
             <div className="border border-gray-200 p-2.5 cursor-pointer rounded-lg hover:bg-gray-50 transition-colors">
               <img width={15} height={15} src="/instagram.png" alt="instagram" />
@@ -138,93 +139,135 @@ function UtilityBar(props: UtilityBarProps): JSX.Element {
         </div>
       </div>
 
-      {/* ── Desktop bar ────────────────────────────────────────────────────── */}
-      <div className={styles.utilityBarContainer}>
-        <div className="flex justify-between">
-          <div className="w-4/6 phone:w-full self-center flex gap-x-48">
-            <div className="self-center">
-              <img src="/redlobosLogo.png" width={70} height={72} alt="logo" />
-            </div>
+      {/* ── Desktop / tablet navbar ─────────────────────────────────────────── */}
+      <header
+        className={`sticky top-0 z-30 w-full transition-all duration-300 ${
+          scrolled
+            ? "bg-green1/90 backdrop-blur-md shadow-sm border-b border-gold/10"
+            : "bg-green1 border-b border-black/5"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-8">
 
-            <div className="self-center laptop:inline-block desktop:inline-block tablet:inline-block phone:hidden">
-              <div className="flex gap-x-12 text-lg font-bold">
-                {navigationLinks.map((link) => (
-                  <div
-                    key={link}
-                    tabIndex={0}
-                    role="button"
-                    onKeyDown={() => {}}
-                    onClick={() => navigate(getNavPath(link))}
-                    className={
-                      activeLink === link
-                        ? "text-gold cursor-pointer"
-                        : "cursor-pointer"
-                    }
+          {/* Logo */}
+          <button
+            onClick={() => navigate("/")}
+            className="flex-shrink-0 focus:outline-none"
+            aria-label="Home"
+          >
+            <img
+              src="/redlobosLogo.png"
+              width={52}
+              height={52}
+              alt="Red Lobos Group"
+              className="transition-opacity hover:opacity-80"
+            />
+          </button>
+
+          {/* Centre nav links — hidden on mobile */}
+          <nav className="hidden tablet:flex items-center gap-1">
+            {navigationLinks.map((link) => {
+              const isActive = activeLink === link;
+              return (
+                <button
+                  key={link}
+                  onClick={() => navigate(getNavPath(link))}
+                  className="relative px-3 py-2 group focus:outline-none"
+                >
+                  <span
+                    className={`text-xs font-bold tracking-[0.12em] transition-colors duration-200 ${
+                      isActive ? "text-gold" : "text-gray-700 group-hover:text-gold"
+                    }`}
                   >
                     {link}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="self-center phone:hidden tablet:flex gap-x-4 items-center">
-            {session ? (
-              <div className="flex gap-x-4 items-center">
-                {session.user?.image && (
-                  <img
-                    src={session.user.image}
-                    alt={session.user.name ?? ""}
-                    width={32}
-                    height={32}
-                    referrerPolicy="no-referrer"
-                    className="rounded-full border border-gold/30 cursor-pointer"
-                    onClick={() => navigate("/dashboard")}
+                  </span>
+                  {/* Animated underline */}
+                  <span
+                    className={`absolute bottom-0.5 left-3 right-3 h-px bg-gold transition-transform duration-300 origin-left ${
+                      isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+                    }`}
                   />
-                )}
-                <span className="text-sm">
-                  Hi, {session.user?.name?.split(" ")[0]}
-                </span>
-                <div
-                  tabIndex={0}
-                  role="button"
-                  onKeyDown={() => {}}
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Right side — auth + instagram */}
+          <div className="hidden tablet:flex items-center gap-4 flex-shrink-0">
+            {session ? (
+              <>
+                {/* Avatar */}
+                <button
+                  onClick={() => navigate("/dashboard")}
+                  className="flex items-center gap-2.5 group focus:outline-none"
+                  title="Go to Dashboard"
+                >
+                  {session.user?.image ? (
+                    <img
+                      src={session.user.image}
+                      alt={session.user.name ?? ""}
+                      width={32}
+                      height={32}
+                      referrerPolicy="no-referrer"
+                      className="rounded-full border-2 border-transparent group-hover:border-gold transition-all"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gold text-white flex items-center justify-center text-xs font-bold">
+                      {session.user?.name?.[0] ?? "U"}
+                    </div>
+                  )}
+                  <span className="text-xs font-semibold text-gray-600 group-hover:text-gold transition-colors">
+                    {session.user?.name?.split(" ")[0]}
+                  </span>
+                </button>
+
+                {/* Divider */}
+                <span className="w-px h-4 bg-gray-200" />
+
+                {/* Sign out */}
+                <button
                   onClick={() => signOut()}
-                  className="cursor-pointer text-gold font-bold"
+                  className="text-xs font-bold tracking-[0.1em] text-gray-500 hover:text-gold transition-colors focus:outline-none"
                 >
                   SIGN OUT
-                </div>
-              </div>
+                </button>
+              </>
             ) : (
-              <div
-                tabIndex={0}
-                role="button"
-                onKeyDown={() => {}}
+              /* Sign in pill button */
+              <button
                 onClick={() => navigate("/signIn")}
-                className="cursor-pointer text-gold font-bold"
+                className="px-5 py-2 rounded-full border border-gold text-gold text-xs font-bold tracking-[0.1em] hover:bg-gold hover:text-white transition-all duration-200 focus:outline-none"
               >
                 SIGN IN
-              </div>
+              </button>
             )}
-            <div>
+
+            {/* Instagram */}
+            <a
+              href="https://www.instagram.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gold/10 transition-colors"
+              aria-label="Instagram"
+            >
               <img width={15} height={15} src="/instagram.png" alt="instagram" />
-            </div>
+            </a>
           </div>
 
-          {/* Hamburger */}
+          {/* Hamburger — mobile only */}
           <button
-            className="self-center phone:flex tablet:hidden desktop:hidden laptop:hidden cursor-pointer flex-col gap-1.5 p-1"
+            className="tablet:hidden flex flex-col justify-center gap-[5px] p-2 focus:outline-none group"
             onClick={() => setShowMobileNavBar(true)}
             aria-label="Open menu"
             aria-expanded={showMobileNavBar}
           >
-            <span className="block w-6 h-0.5 bg-black" />
-            <span className="block w-6 h-0.5 bg-black" />
-            <span className="block w-6 h-0.5 bg-black" />
+            <span className="block w-6 h-px bg-gray-700 group-hover:bg-gold transition-colors" />
+            <span className="block w-4 h-px bg-gray-700 group-hover:bg-gold transition-colors" />
+            <span className="block w-6 h-px bg-gray-700 group-hover:bg-gold transition-colors" />
           </button>
         </div>
-      </div>
-    </div>
+      </header>
+    </>
   );
 }
 
