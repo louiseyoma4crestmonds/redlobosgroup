@@ -1,0 +1,18 @@
+[2K[1G[1myarn run v1.22.22[22m
+[2K[1G[2m$ tsx server/index.ts[22m
+Initializing Stripe schema...
+✅ Stripe schema ready
+{ autoExpandLists: [90mundefined[39m, stripeApiVersion: [90mundefined[39m } StripeSync initialized
+✅ Stripe webhook configured
+✅ Stripe backfill complete
+[33m(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vite.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.[39m
+✅ Server running on http://0.0.0.0:5000
+Browserslist: caniuse-lite is outdated. Please run:
+  npx browserslist@latest --update-db
+  Why you should do it regularly: https://github.com/browserslist/browserslist#browsers-data-updating
+Admin email send failed: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 956f58d0204a3-66b1ef961a1sm1097788d50.8 - gsmtp
+Admin email send failed: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 956f58d0204a3-66b1f27d02dsm1093164d50.17 - gsmtp

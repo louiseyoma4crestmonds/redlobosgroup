@@ -1,0 +1,24 @@
+[2K[1G[1myarn run v1.22.22[22m
+[2K[1G[2m$ tsx server/index.ts[22m
+Initializing Stripe schema...
+✅ Stripe schema ready
+{ autoExpandLists: [90mundefined[39m, stripeApiVersion: [90mundefined[39m } StripeSync initialized
+✅ Stripe webhook configured
+✅ Stripe backfill complete
+[33m(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vite.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.[39m
+✅ Server running on http://0.0.0.0:5000
+Browserslist: caniuse-lite is outdated. Please run:
+  npx browserslist@latest --update-db
+  Why you should do it regularly: https://github.com/browserslist/browserslist#browsers-data-updating
+[Resend API Error]: {
+  status: [33m422[39m,
+  error: {
+    statusCode: [33m422[39m,
+    name: [32m'validation_error'[39m,
+    message: [32m'Invalid `to` field. The email address needs to follow the `email@example.com` or `Name <email@example.com>` format.'[39m
+  },
+  path: [32m'/emails'[39m
+}
+Admin email send failed: Resend error: {"statusCode":422,"name":"validation_error","message":"Invalid `to` field. The email address needs to follow the `email@example.com` or `Name <email@example.com>` format."}

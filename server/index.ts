@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import session from "express-session";
 import cors from "cors";
@@ -16,10 +18,12 @@ import { getStripeSync } from "./stripeClient";
 
 async function initStripe() {
   const databaseUrl = process.env.DATABASE_URL;
+  console.warn("hello miss: ", databaseUrl);
   if (!databaseUrl) {
     console.warn("⚠️  DATABASE_URL not set — skipping Stripe init");
     return;
   }
+  console.warn("hello miss: ", databaseUrl);
   try {
     console.log("Initializing Stripe schema...");
     await runMigrations({ databaseUrl, schema: "stripe" });
@@ -120,7 +124,7 @@ async function createServer() {
     });
   } else {
     const { createServer: createViteServer } = await import("vite");
-    const vite = await createViteServer({
+    const vite:any = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
