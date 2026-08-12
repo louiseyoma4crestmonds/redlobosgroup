@@ -13,11 +13,21 @@ async function getStripeCredentials(): Promise<{ secretKey: string; webhookSecre
       ? "depl " + process.env.WEB_REPL_RENEWAL
       : null;
 
+  // ── Local / non-Replit fallback ──────────────────────────────────────────
+  // When running outside Replit (e.g. local dev), use STRIPE_SECRET_KEY and
+  // STRIPE_WEBHOOK_SECRET from the .env file directly.
   if (!hostname || !xReplitToken) {
-    throw new Error(
-      'Missing Replit environment variables. ' +
-      'Ensure the Stripe integration is connected via the Integrations tab.'
-    );
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    if (!secretKey) {
+      throw new Error(
+        'Missing Stripe credentials. ' +
+        'Add STRIPE_SECRET_KEY (and optionally STRIPE_WEBHOOK_SECRET) to your .env file.'
+      );
+    }
+    return {
+      secretKey,
+      webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+    };
   }
 
   const resp = await fetch(
