@@ -25,13 +25,9 @@ function Mission(): JSX.Element {
   `;
 
   useEffect(() => {
-    if (introPage) {
-      setIntroPage(true);
-      setTimeout(() => {
-        setIntroPage(false);
-      }, 5000);
-    }
-  }, [setIntroPage]);
+    const introTimer = setTimeout(() => setIntroPage(false), 700);
+    return () => clearTimeout(introTimer);
+  }, []);
 
   return (
     <div>
@@ -79,10 +75,10 @@ function Mission(): JSX.Element {
               <SlideInLeftDiv>
                 <img
                   className="rounded-2xl"
-                  src="/mission.jpg"
+                  src="/mission-optimized.webp"
                   height={900}
                   width={800}
-                  alt="Mission"
+                  alt="Premium shortlet accommodation supporting our mission"
                 />
               </SlideInLeftDiv>
             </div>
@@ -93,7 +89,7 @@ function Mission(): JSX.Element {
                 </ZoomInDiv>
 
                 <ZoomInDiv>
-                  <Heading Tag="h1" variant="xl">
+                  <Heading Tag="h2" variant="xl">
                     <span className="text-gold">
                       TO BE THE MOST TRUSTED NAME IN REAL ESTATE GLOBALLY
                     </span>
@@ -103,14 +99,13 @@ function Mission(): JSX.Element {
                 <div className="text-gray1 leading-8 text-left tablet:text-center ">
                   <ZoomInDiv>
                     <p>
-                      Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel
-                      ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel ipsium
-                      lorel ipsium
+                      Our mission is to make premium UK accommodation simple,
+                      reliable, and personal for business travellers, families,
+                      tourists, students, and people relocating.
                     </p>
                     <p>
-                      Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel
-                      ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel ipsium
-                      lorel ipsium
+                      We handpick properties, maintain clear booking standards,
+                      and support guests throughout every stay.
                     </p>
                   </ZoomInDiv>
                 </div>
@@ -122,10 +117,12 @@ function Mission(): JSX.Element {
               <SlideInRightDiv>
                 <img
                   className="rounded-2xl"
-                  src="/vision.jpg"
+                  src="/vision-optimized.webp"
                   height={900}
                   width={800}
-                  alt="Vision"
+                  alt="Thoughtfully designed property supporting our vision"
+                  loading="lazy"
+                  decoding="async"
                 />
               </SlideInRightDiv>
             </div>
@@ -136,7 +133,7 @@ function Mission(): JSX.Element {
                 </ZoomInDiv>
 
                 <ZoomInDiv>
-                  <Heading Tag="h1" variant="xl">
+                  <Heading Tag="h2" variant="xl">
                     <span className="text-gold">
                       CREATING A GREAT TOMORROW FOR EVERYONE
                     </span>
@@ -146,14 +143,14 @@ function Mission(): JSX.Element {
                 <div className="text-gray1 leading-8 text-left tablet:text-center ">
                   <ZoomInDiv>
                     <p>
-                      Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel
-                      ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel ipsium
-                      lorel ipsium
+                      We aim to be a trusted name in shortlet hospitality and
+                      property development by combining well-managed spaces
+                      with thoughtful service.
                     </p>
                     <p>
-                      Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel
-                      ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel ipsium
-                      lorel ipsium
+                      As we grow, we will invest responsibly in quality
+                      properties and memorable experiences that serve guests
+                      and their communities.
                     </p>
                   </ZoomInDiv>
                 </div>
@@ -165,9 +162,9 @@ function Mission(): JSX.Element {
             <div className="space-y-4">
               <div>WHAT WE DO</div>
               <div>
-                <Heading Tag="h1" variant="lg">
+                <Heading Tag="h2" variant="lg">
                   <span className="text-center">
-                    CREATING A GREAT TOMORROW FOR EVERYONE
+                    PROPERTY DEVELOPMENT WITH LASTING VALUE
                   </span>
                 </Heading>
               </div>
@@ -185,15 +182,14 @@ function Mission(): JSX.Element {
                   />
                 </div>
                 <div>
-                  <Heading Tag="h1" variant="md">
+                  <Heading Tag="h3" variant="md">
                     <span className="text-center">RESIDENTIAL DEVELOPMENT</span>
                   </Heading>
                 </div>
                 <div>
                   <p className="text-[#9B9B9B] leading-8">
-                    Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel
-                    ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel ipsium
-                    lorel ipsium
+                    We plan and improve residential spaces designed for
+                    comfort, practical living, and long-term value.
                   </p>
                   <div
                     className="text-gold mt-6 cursor-pointer"
@@ -214,20 +210,21 @@ function Mission(): JSX.Element {
                     className="rounded-full"
                     width={200}
                     height={200}
-                    src="/commercialDevelopment.jpg"
-                    alt="Commercial"
+                    src="/commercial-development-optimized.webp"
+                    alt="Commercial property development"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
                 <div>
-                  <Heading Tag="h1" variant="md">
+                  <Heading Tag="h3" variant="md">
                     <span className="text-center">COMMERCIAL DEVELOPMENT</span>
                   </Heading>
                 </div>
                 <div>
                   <p className="text-[#9B9B9B] leading-8">
-                    Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel
-                    ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel ipsium
-                    lorel ipsium
+                    We support commercial property projects that balance
+                    usability, location, and dependable management.
                   </p>
                   <div
                     className="text-gold mt-6 cursor-pointer"
@@ -248,20 +245,22 @@ function Mission(): JSX.Element {
                     className="rounded-full"
                     width={200}
                     height={200}
-                    src="/industrialDevelopment.jpg"
-                    alt="Industrial"
+                    src="/industrial-development-optimized.webp"
+                    alt="Industrial property development"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
                 <div>
-                  <Heading Tag="h1" variant="md">
+                  <Heading Tag="h3" variant="md">
                     <span className="text-center">INDUSTRIAL DEVELOPMENT</span>
                   </Heading>
                 </div>
                 <div>
                   <p className="text-[#9B9B9B] leading-8">
-                    Lorel ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel
-                    ipsium lorel ipsium Lorel ipsium lorel ipsium Lorel ipsium
-                    lorel ipsium
+                    We approach industrial property opportunities with a focus
+                    on durable infrastructure, efficient use, and sustainable
+                    growth.
                   </p>
                   <div
                     className="text-gold mt-6 cursor-pointer"

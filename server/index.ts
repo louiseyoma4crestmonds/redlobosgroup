@@ -4,6 +4,7 @@ import session from "express-session";
 import cors from "cors";
 import passport from "passport";
 import path from "path";
+import { readFile } from "fs/promises";
 import { runMigrations } from "stripe-replit-sync";
 import authRouter, { ensureAuthTables } from "./routes/auth";
 import stripeRouter from "./routes/stripe";
@@ -14,6 +15,14 @@ import adminRouter from "./routes/admin";
 import contactRouter from "./routes/contact";
 import { WebhookHandlers } from "./webhookHandlers";
 import { getStripeSync } from "./stripeClient";
+import pool from "./db";
+import {
+  getPublicOrigin,
+  isKnownAppPath,
+  renderSeoHead,
+  renderSeoNoscript,
+  renderSitemap,
+} from "./seo";
 
 async function initStripe() {
   const databaseUrl = process.env.DATABASE_URL;
@@ -129,12 +138,83 @@ async function createServer() {
   app.use("/api/admin", adminRouter);
   app.use("/api/contact", contactRouter);
 
-  // ── 5. Static / Vite ───────────────────────────────────────────────────────
+  // ── 5. Crawlability ────────────────────────────────────────────────────────
+  app.get("/robots.txt", (req, res) => {
+    const origin = getPublicOrigin(req);
+    res.type("text/plain").send(
+      [
+        "User-agent: *",
+        "Allow: /",
+        "Disallow: /admin",
+        "Disallow: /dashboard",
+        "Disallow: /signIn",
+        "Disallow: /reset-password",
+        "Disallow: /checkout",
+        "Disallow: /payment/",
+        "Disallow: /api/",
+        `Sitemap: ${origin}/sitemap.xml`,
+        "",
+      ].join("\n")
+    );
+  });
+
+  app.get("/sitemap.xml", async (req, res) => {
+    try {
+      const result = await pool.query(
+        "SELECT id FROM properties WHERE is_available = true ORDER BY id"
+      );
+      res.type("application/xml").send(
+        renderSitemap(
+          getPublicOrigin(req),
+          result.rows.map((row: { id: number }) => Number(row.id))
+        )
+      );
+    } catch (err) {
+      console.error("Sitemap generation error:", err);
+      res.type("application/xml").send(renderSitemap(getPublicOrigin(req), []));
+    }
+  });
+
+  // ── 6. Static / Vite ───────────────────────────────────────────────────────
   if (process.env.NODE_ENV === "production") {
     const distPath = path.resolve("dist");
-    app.use(express.static(distPath));
-    app.use((_req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
+    app.use(
+      express.static(distPath, {
+        index: false,
+        setHeaders: (res, filePath) => {
+          if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+            res.setHeader(
+              "Cache-Control",
+              "public, max-age=31536000, immutable"
+            );
+          }
+        },
+      })
+    );
+    app.use(async (req, res, next) => {
+      try {
+        const html = await readFile(path.join(distPath, "index.html"), "utf8");
+        const pathname = req.path;
+        const search = req.originalUrl.includes("?")
+          ? req.originalUrl.slice(req.originalUrl.indexOf("?"))
+          : "";
+        const seoHtml = html
+          .replace(
+            /<!-- SEO_HEAD_START -->[\s\S]*?<!-- SEO_HEAD_END -->/,
+            `<!-- SEO_HEAD_START -->${renderSeoHead(req, pathname, search)}<!-- SEO_HEAD_END -->`
+          )
+          .replace(
+            /<!-- SEO_NOSCRIPT -->/,
+            `<noscript id="seo-noscript">${renderSeoNoscript(pathname)}</noscript>`
+          );
+        if (!isKnownAppPath(pathname)) {
+          res.status(404);
+        }
+        res.setHeader("Cache-Control", "no-cache");
+        res.send(seoHtml);
+      } catch (err) {
+        next(err);
+      }
     });
   } else {
     const { createServer: createViteServer } = await import("vite");

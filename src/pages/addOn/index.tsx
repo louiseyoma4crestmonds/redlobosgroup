@@ -11,11 +11,9 @@ export function AddOnService(): JSX.Element {
   const [introPage, setIntroPage] = useState<boolean>(true);
 
   useEffect(() => {
-    if (introPage) {
-      setIntroPage(true);
-      setTimeout(() => setIntroPage(false), 5000);
-    }
-  });
+    const introTimer = setTimeout(() => setIntroPage(false), 700);
+    return () => clearTimeout(introTimer);
+  }, []);
 
   return (
     <div>

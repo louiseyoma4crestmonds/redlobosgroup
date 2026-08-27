@@ -20,11 +20,14 @@ import PropertyEdit from "./pages/admin/PropertyEdit";
 import AdminLogin from "./pages/admin/login";
 import PrivacyPolicy from "./pages/legal/privacyPolicy";
 import TermsAndConditions from "./pages/legal/termsAndConditions";
+import SEO from "./components/SEO";
+import NotFound from "./pages/notFound";
 
 function App() {
   return (
     <BrowserRouter>
       <SessionProvider>
+        <SEO />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
@@ -46,6 +49,7 @@ function App() {
           <Route path="/admin/properties/:id" element={<PropertyEdit />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </SessionProvider>
     </BrowserRouter>

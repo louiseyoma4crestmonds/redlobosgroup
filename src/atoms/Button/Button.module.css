@@ -22,7 +22,7 @@
 
 /* Button Variants */
 .btnPrimary {
-  @apply bg-black border border-black text-gold hover:bg-black hover:text-gold;
+  @apply bg-black border border-black text-black hover:bg-black hover:text-gold;
 }
 
 .btnGold {

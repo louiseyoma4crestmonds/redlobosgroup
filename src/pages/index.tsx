@@ -36,7 +36,7 @@ function Home(): JSX.Element {
       setIntroPage(true);
       const introTimer = setTimeout(() => {
         setIntroPage(false);
-      }, 3000);
+      }, 700);
 
       return () => clearTimeout(introTimer);
     }
@@ -112,13 +112,17 @@ function Home(): JSX.Element {
       <button
         type="button"
         onClick={toggleAudio}
-        aria-label={isAudioPlaying ? "Mute landing page audio" : "Enable landing page audio"}
+        aria-label={
+          isAudioPlaying
+            ? "Mute landing page audio"
+            : "Enable landing page audio"
+        }
         title={
           audioBlocked && !isAudioPlaying
             ? "Click to enable sound"
             : isAudioPlaying
-            ? "Mute sound"
-            : "Play sound"
+              ? "Mute sound"
+              : "Play sound"
         }
         className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-gold px-4 py-3 text-sm font-semibold text-white shadow-lg transition-colors hover:bg-black"
       >
@@ -159,8 +163,10 @@ function Home(): JSX.Element {
                 <SlideInLeftDiv>
                   <img
                     className="rounded-lg"
-                    src="/firstImage.jpg"
-                    alt="First"
+                    src="/firstImage-optimized.webp"
+                    alt="Premium Red Lobos shortlet accommodation"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </SlideInLeftDiv>
               </div>
@@ -196,7 +202,7 @@ function Home(): JSX.Element {
                       }}
                     >
                       <span
-                        className="w-full text-center"
+                        className="w-full text-gold text-center"
                         tabIndex={0}
                         role="button"
                         onKeyDown={() => {}}
@@ -214,8 +220,10 @@ function Home(): JSX.Element {
                 <SlideInRightDiv>
                   <img
                     className="rounded-lg"
-                    src="/secondImage.jpg"
-                    alt="Second"
+                    src="/secondImage-optimized.webp"
+                    alt="Modern serviced accommodation living space"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </SlideInRightDiv>
               </div>
@@ -227,7 +235,7 @@ function Home(): JSX.Element {
                   <div className="w-full space-y-4 tablet:w-8/12">
                     <div>OUR ADD-ON SERVICES</div>
                     <div>
-                      <Heading Tag="h1" variant="lg">
+                      <Heading Tag="h2" variant="lg">
                         <span className="text-center">
                           ENHANCE YOUR EXPERIENCE WITH OUR SPECIAL SERVICES
                         </span>

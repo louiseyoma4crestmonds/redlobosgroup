@@ -50,7 +50,7 @@ function About(): JSX.Element {
   const [introPage, setIntroPage] = useState<boolean>(true);
 
   useEffect(() => {
-    const t = setTimeout(() => setIntroPage(false), 5000);
+    const t = setTimeout(() => setIntroPage(false), 700);
     return () => clearTimeout(t);
   }, []);
 
@@ -72,8 +72,8 @@ function About(): JSX.Element {
         {/* ── Hero banner ──────────────────────────────────────────────────── */}
         <section className="relative h-[420px] tablet:h-[520px] overflow-hidden">
           <img
-            src="/firstImage.jpg"
-            alt="Red Lobos luxury property"
+            src="/firstImage-optimized.webp"
+            alt="Luxury Red Lobos shortlet property interior"
             className="absolute inset-0 w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-black/50" />
@@ -116,7 +116,7 @@ function About(): JSX.Element {
             <div className="basis-1/2">
               <div className="relative">
                 <img
-                  src="/mission.jpg"
+                  src="/mission-optimized.webp"
                   alt="Our story"
                   className="rounded-2xl w-full object-cover shadow-lg"
                 />
@@ -178,7 +178,9 @@ function About(): JSX.Element {
               </div>
               <div className="basis-1/2 order-1 tablet:order-2">
                 <img
-                  src="/mission.jpg"
+                  src="/mission-optimized.webp"
+                  loading="lazy"
+                  decoding="async"
                   alt="Our mission"
                   className="rounded-2xl w-full object-cover shadow-md"
                 />
@@ -192,7 +194,9 @@ function About(): JSX.Element {
             <div className="flex flex-col tablet:flex-row items-center gap-12 tablet:gap-20">
               <div className="basis-1/2">
                 <img
-                  src="/vision.jpg"
+                  src="/vision-optimized.webp"
+                  loading="lazy"
+                  decoding="async"
                   alt="Our vision"
                   className="rounded-2xl w-full object-cover shadow-md"
                 />
@@ -236,7 +240,9 @@ function About(): JSX.Element {
               <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                 <div className="h-52 overflow-hidden">
                   <img
-                    src="/secondImage.jpg"
+                    src="/secondImage-optimized.webp"
+                    loading="lazy"
+                    decoding="async"
                     alt="Premium properties"
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                   />

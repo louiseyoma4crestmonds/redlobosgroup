@@ -57,7 +57,7 @@ function Contacts(): JSX.Element {
   const successRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const t = setTimeout(() => setIntroPage(false), 5000);
+    const t = setTimeout(() => setIntroPage(false), 700);
     return () => clearTimeout(t);
   }, []);
 
@@ -124,7 +124,7 @@ function Contacts(): JSX.Element {
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
         <section className="relative h-80 tablet:h-96 overflow-hidden">
           <img
-            src="/secondImage.jpg"
+            src="/secondImage-optimized.webp"
             alt="Contact Red Lobos Group"
             className="absolute inset-0 w-full h-full object-cover"
           />
