@@ -14,6 +14,7 @@ import AddOnService from "./pages/addOn/index";
 import AddOnDetailsPage from "./pages/addOn/AddOnDetail";
 import PaymentSuccess from "./pages/payment/success";
 import PaymentCancel from "./pages/payment/cancel";
+import Checkout from "./pages/checkout";
 import AdminPanel from "./pages/admin/index";
 import PropertyEdit from "./pages/admin/PropertyEdit";
 import AdminLogin from "./pages/admin/login";
@@ -37,6 +38,7 @@ function App() {
           <Route path="/addOn/:id" element={<AddOnDetailsPage />} />
           <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/payment/cancel" element={<PaymentCancel />} />
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/properties/:id" element={<PropertyEdit />} />

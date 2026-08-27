@@ -144,55 +144,31 @@ function PropertyDetails(): JSX.Element {
     setBookingError("");
   };
 
-  const handleMakeReservation = async () => {
+  const handleMakeReservation = () => {
     if (!checkInDate || !checkOutDate) {
       setBookingError("Please select check-in and check-out dates.");
       return;
     }
-    setBookingLoading(true);
-    setBookingError("");
-    try {
-      const nights = differenceInCalendarDays(
-        parseISO(checkOutDate),
-        parseISO(checkInDate)
-      );
-      const pricePerNight = Number(property?.price_per_night ?? 0);
-      const subtotal = nights * pricePerNight;
-      const serviceFee = Math.round(subtotal * 0.12);
-      const totalAmount = subtotal + serviceFee;
 
-      const response = await fetch("/api/stripe/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          propertyId: id,
-          propertyName: property?.name ?? "Property Reservation",
-          checkIn: checkInDate,
-          checkOut: checkOutDate,
-          guests: guestCount,
-          totalAmount,
-        }),
-      });
-      const responseText = await response.text();
-      let data: { url?: string; message?: string } = {};
-      try {
-        data = JSON.parse(responseText);
-      } catch {
-        data = {};
-      }
-      if (response.ok && data.url) {
-        window.location.assign(data.url);
-      } else {
-        setBookingError(
-          data.message ?? "Checkout could not be started. Please try again."
-        );
-      }
-    } catch (error: any) {
-      setBookingError(error?.message || "Checkout could not be started. Please try again.");
-    } finally {
-      setBookingLoading(false);
-    }
+    const nights = differenceInCalendarDays(
+      parseISO(checkOutDate),
+      parseISO(checkInDate)
+    );
+    const pricePerNight = Number(property?.price_per_night ?? 0);
+    const subtotal = nights * pricePerNight;
+    const serviceFee = Math.round(subtotal * 0.12);
+    const totalAmount = subtotal + serviceFee;
+    const checkoutParams = new URLSearchParams({
+      propertyId: id ?? "",
+      propertyName: property?.name ?? "Property Reservation",
+      checkIn: checkInDate,
+      checkOut: checkOutDate,
+      guests: guestCount,
+      totalAmount: String(totalAmount),
+    });
+
+    setBookingLoading(true);
+    navigate(`/checkout?${checkoutParams.toString()}`);
   };
 
   const images: PropertyImage[] = Array.isArray(property?.images) ? property.images : [];

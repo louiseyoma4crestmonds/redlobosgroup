@@ -193,45 +193,22 @@ function Properties(): JSX.Element {
     setBookingError("");
   };
 
-  const handleMakeReservation = async () => {
+  const handleMakeReservation = () => {
     if (!checkInDate || !checkOutDate) {
       setBookingError("Please select check-in and check-out dates.");
       return;
     }
+
+    const checkoutParams = new URLSearchParams({
+      propertyId: String(selectedProperty?.id ?? ""),
+      propertyName: selectedProperty?.name ?? "Property Reservation",
+      checkIn: checkInDate,
+      checkOut: checkOutDate,
+      guests: guestCount,
+    });
+
     setBookingLoading(true);
-    setBookingError("");
-    try {
-      const response = await fetch("/api/stripe/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          propertyId: selectedProperty?.id,
-          propertyName: selectedProperty?.name ?? "Property Reservation",
-          checkIn: checkInDate,
-          checkOut: checkOutDate,
-          guests: guestCount,
-        }),
-      });
-      const responseText = await response.text();
-      let data: { url?: string; message?: string } = {};
-      try {
-        data = JSON.parse(responseText);
-      } catch {
-        data = {};
-      }
-      if (response.ok && data.url) {
-        window.location.assign(data.url);
-      } else {
-        setBookingError(
-          data.message ?? "Checkout could not be started. Please try again."
-        );
-      }
-    } catch (error: any) {
-      setBookingError(error?.message || "Checkout could not be started. Please try again.");
-    } finally {
-      setBookingLoading(false);
-    }
+    navigate(`/checkout?${checkoutParams.toString()}`);
   };
 
   return (
