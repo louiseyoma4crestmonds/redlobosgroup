@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSession, signOut } from "../context/AuthContext";
 import UtilityBar from "@/organisms/UtilityBar";
 import Footer from "@/organisms/Footer";
@@ -32,6 +32,10 @@ function SignIn(): JSX.Element {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { data: session, status } = useSession();
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminError, setAdminError] = useState("");
+  const [adminLoading, setAdminLoading] = useState(false);
 
   // The redirect destination — where to go after sign-in
   const redirectTo = searchParams.get("redirect") || "/dashboard";
@@ -46,6 +50,28 @@ function SignIn(): JSX.Element {
   // Kick off Google OAuth, preserving the redirect target through the round-trip
   const handleGoogleSignIn = () => {
     window.location.href = `/api/auth/google?redirect=${encodeURIComponent(redirectTo)}`;
+  };
+
+  const handleAdminSignIn = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setAdminError("");
+    setAdminLoading(true);
+
+    try {
+      const response = await fetch("/api/auth/admin-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email: adminEmail, password: adminPassword }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "Unable to sign in.");
+      navigate("/admin");
+    } catch (error: any) {
+      setAdminError(error.message || "Unable to sign in.");
+    } finally {
+      setAdminLoading(false);
+    }
   };
 
   return (
@@ -144,6 +170,42 @@ function SignIn(): JSX.Element {
                   <GoogleIcon />
                   <span>Continue with Google</span>
                 </button>
+
+                <div className="pt-5 border-t border-gray-100">
+                  <p className="text-center text-xs font-bold tracking-[0.12em] text-gold uppercase mb-4">
+                    Admin portal
+                  </p>
+                  <form onSubmit={handleAdminSignIn} className="space-y-3">
+                    <input
+                      type="email"
+                      required
+                      value={adminEmail}
+                      onChange={(event) => setAdminEmail(event.target.value)}
+                      placeholder="Admin email"
+                      autoComplete="username"
+                      className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all"
+                    />
+                    <input
+                      type="password"
+                      required
+                      value={adminPassword}
+                      onChange={(event) => setAdminPassword(event.target.value)}
+                      placeholder="Admin password"
+                      autoComplete="current-password"
+                      className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all"
+                    />
+                    {adminError && (
+                      <p className="text-xs text-red-500 text-center">{adminError}</p>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={adminLoading}
+                      className="w-full py-3 rounded-lg border border-gold text-gold font-semibold tracking-wide hover:bg-gold hover:text-gold transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {adminLoading ? "SIGNING IN…" : "SIGN IN TO ADMIN PORTAL"}
+                    </button>
+                  </form>
+                </div>
 
                 <p className="text-center text-xs text-gray1 leading-relaxed">
                   By signing in you agree to our{" "}

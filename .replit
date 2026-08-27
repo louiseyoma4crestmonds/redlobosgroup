@@ -41,3 +41,8 @@ externalPort = 3000
 deploymentTarget = "autoscale"
 run = ["yarn", "start"]
 build = ["yarn", "build"]
+
+[userenv]
+
+[userenv.shared]
+ADMIN_LOGIN_EMAIL = "eyomao@gmail.com"

@@ -10,10 +10,11 @@ function requireAdmin(req: Request, res: Response, next: NextFunction) {
     return;
   }
   const user = req.user as Record<string, unknown>;
-  const adminEmail = process.env.ADMIN_EMAIL?.trim().match(
+  const configuredEmail = process.env.ADMIN_LOGIN_EMAIL || process.env.ADMIN_EMAIL;
+  const adminEmail = configuredEmail?.trim().match(
     /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/
-  )?.[0];
-  if (!adminEmail || user.email !== adminEmail) {
+  )?.[0]?.toLowerCase();
+  if (!adminEmail || String(user.email).toLowerCase() !== adminEmail) {
     res.status(403).json({ message: "Admin access required" });
     return;
   }
