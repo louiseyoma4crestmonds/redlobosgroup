@@ -28,7 +28,7 @@ export default function AdminPanel() {
   useEffect(() => {
     if (status === "loading") return;
     if (status === "unauthenticated" || !isAdmin) {
-      navigate("/");
+      navigate(status === "unauthenticated" ? "/admin/login" : "/");
       return;
     }
     fetchProperties();

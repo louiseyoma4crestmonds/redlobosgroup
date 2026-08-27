@@ -210,3 +210,81 @@ export async function sendContactEnquiryEmail(opts: ContactEnquiryEmailOptions) 
 
   console.log(`✅ Contact enquiry email sent via Resend — id: ${data?.id}`);
 }
+
+// ── Password-reset email ───────────────────────────────────────────────────
+
+interface PasswordResetEmailOptions {
+  recipientEmail: string;
+  recipientName?: string | null;
+  resetUrl: string;
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(
+    /[&<>"']/g,
+    (character) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;",
+      })[character] || character
+  );
+}
+
+export async function sendPasswordResetEmail(opts: PasswordResetEmailOptions) {
+  const apiKey = process.env.RESEND_API_KEY;
+
+  if (!apiKey) {
+    console.warn(
+      "⚠️  Password reset email not sent — RESEND_API_KEY is not configured."
+    );
+    return;
+  }
+
+  const resend = new Resend(apiKey.trim());
+  const safeName = escapeHtml(opts.recipientName?.trim() || "there");
+  const from = process.env.RESEND_FROM_EMAIL || "Red Lobos Group <onboarding@resend.dev>";
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #111827;">
+      <div style="background: #BD9A68; padding: 24px 32px; border-radius: 12px 12px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 22px; letter-spacing: 2px;">
+          RESET YOUR PASSWORD
+        </h1>
+        <p style="color: rgba(255,255,255,0.85); margin: 6px 0 0; font-size: 14px;">
+          Red Lobos Group
+        </p>
+      </div>
+      <div style="background: white; padding: 32px; border: 1px solid #e5e7eb; border-radius: 0 0 12px 12px;">
+        <p style="margin: 0 0 16px;">Hello ${safeName},</p>
+        <p style="line-height: 1.6; color: #4b5563;">
+          We received a request to reset your Red Lobos Group password. This link
+          will expire in one hour and can only be used once.
+        </p>
+        <p style="margin: 28px 0;">
+          <a href="${opts.resetUrl}" style="display: inline-block; background: #BD9A68; color: white; padding: 13px 22px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+            Reset password
+          </a>
+        </p>
+        <p style="line-height: 1.6; color: #6b7280; font-size: 13px;">
+          If you did not request this, you can safely ignore this email.
+        </p>
+      </div>
+    </div>
+  `;
+
+  const { data, error } = await resend.emails.send({
+    from,
+    to: [opts.recipientEmail],
+    subject: "Reset your Red Lobos Group password",
+    html,
+  });
+
+  if (error) {
+    throw new Error(`Resend error: ${JSON.stringify(error)}`);
+  }
+
+  console.log(`✅ Password reset email sent via Resend — id: ${data?.id}`);
+}

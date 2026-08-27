@@ -5,7 +5,7 @@ A property and venue booking web application for Red Lobos Group. Built with a R
 
 ## Stack
 - **Frontend**: React 18 + TypeScript, React Router v7, Tailwind CSS, styled-components
-- **Backend**: Express 5 (Node.js 20), Passport.js (Google OAuth), Stripe checkout
+- **Backend**: Express 5 (Node.js 20), Passport.js (Google OAuth + email/password accounts), Stripe checkout
 - **Build tool**: Vite 8
 - **Runtime**: tsx (TypeScript execution for the Express server)
 
@@ -28,7 +28,7 @@ yarn start   # Serves built app via Express
 server/
   index.ts              # Express server entry point (serves API + Vite frontend)
   routes/
-    auth.ts             # Google OAuth via Passport.js
+    auth.ts             # Google OAuth, customer accounts, password reset, admin login
     stripe.ts           # Stripe checkout session creation
 src/
   App.tsx               # React Router routes
@@ -58,6 +58,8 @@ vite.config.ts          # Vite configuration
 | `GOOGLE_CLIENT_ID` | Google OAuth client ID | For sign-in |
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret | For sign-in |
 | `STRIPE_SECRET_KEY` | Stripe secret key | For payments |
+| `RESEND_API_KEY` | Sends customer password-reset and admin notification emails | For email delivery |
+| `PRODUCTION_URL` | Trusted public app origin used in production password-reset links | Production |
 
 Google OAuth callback URL to register: `https://<your-domain>/api/auth/google/callback`
 

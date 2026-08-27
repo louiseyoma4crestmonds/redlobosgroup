@@ -5,7 +5,7 @@ import cors from "cors";
 import passport from "passport";
 import path from "path";
 import { runMigrations } from "stripe-replit-sync";
-import authRouter from "./routes/auth";
+import authRouter, { ensureAuthTables } from "./routes/auth";
 import stripeRouter from "./routes/stripe";
 import propertiesRouter from "./routes/properties";
 import bookingsRouter from "./routes/bookings";
@@ -42,6 +42,17 @@ async function initStripe() {
 
 async function createServer() {
   const app = express();
+
+  if (process.env.NODE_ENV === "production" && !process.env.SESSION_SECRET) {
+    throw new Error("SESSION_SECRET must be configured in production.");
+  }
+
+  try {
+    await ensureAuthTables();
+    console.log("✅ Authentication tables ready");
+  } catch (err: any) {
+    console.error("⚠️  Authentication table setup failed:", err.message);
+  }
 
   // Replit terminates HTTPS before forwarding requests to Express. Trust the
   // proxy so OAuth callback URLs use https:// on Replit while remaining
@@ -98,8 +109,9 @@ async function createServer() {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: false,
+        secure: process.env.NODE_ENV === "production",
         httpOnly: true,
+        sameSite: "lax",
         maxAge: 24 * 60 * 60 * 1000,
       },
     })

@@ -14,7 +14,11 @@ function requireAdmin(req: Request, res: Response, next: NextFunction) {
   const adminEmail = configuredEmail?.trim().match(
     /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/
   )?.[0]?.toLowerCase();
-  if (!adminEmail || String(user.email).toLowerCase() !== adminEmail) {
+  if (
+    user.isAdmin !== true ||
+    !adminEmail ||
+    String(user.email).toLowerCase() !== adminEmail
+  ) {
     res.status(403).json({ message: "Admin access required" });
     return;
   }
