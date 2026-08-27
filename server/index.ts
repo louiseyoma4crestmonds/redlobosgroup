@@ -43,6 +43,11 @@ async function initStripe() {
 async function createServer() {
   const app = express();
 
+  // Replit terminates HTTPS before forwarding requests to Express. Trust the
+  // proxy so OAuth callback URLs use https:// on Replit while remaining
+  // http://localhost during local development.
+  app.set("trust proxy", 1);
+
   // ── 1. Stripe webhook — must be BEFORE express.json() ─────────────────────
   app.post(
     "/api/stripe/webhook",

@@ -60,7 +60,11 @@ function Home(): JSX.Element {
             <div className="tablet:flex place-content-center ">
               <div className="hidden tablet:block tablet:h-[100px] w-3/12  absolute left-0">
                 <SlideInLeftDiv>
-                  <img className="rounded-lg" src="/firstImage.jpg" alt="First" />
+                  <img
+                    className="rounded-lg"
+                    src="/firstImage.jpg"
+                    alt="First"
+                  />
                 </SlideInLeftDiv>
               </div>
 
@@ -108,13 +112,14 @@ function Home(): JSX.Element {
                     </Button>
                   </div>
                 </div>
-                <div className="cursor-pointer">
-                  <img width={50} height={70} src="/arrowDown.gif" alt="scroll down" />
-                </div>
               </div>
               <div className="hidden tablet:block h-[100px] w-3/12   absolute right-0 mt-[100px]">
                 <SlideInRightDiv>
-                  <img className="rounded-lg" src="/secondImage.jpg" alt="Second" />
+                  <img
+                    className="rounded-lg"
+                    src="/secondImage.jpg"
+                    alt="Second"
+                  />
                 </SlideInRightDiv>
               </div>
             </div>
