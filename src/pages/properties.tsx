@@ -144,6 +144,7 @@ function Properties(): JSX.Element {
   const [guestCount, setGuestCount] = useState("1");
   const [propertyEvents, setPropertyEvents] = useState<any[]>([]);
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [calendarDate, setCalendarDate] = useState(new Date());
 
   const fetchProperties = useCallback(() => {
     setLoading(true);
@@ -317,6 +318,8 @@ function Properties(): JSX.Element {
                 checkOutDate={checkOutDate}
                 onCheckInSelect={(date) => setCheckInDate(date)}
                 onCheckOutSelect={(date) => setCheckOutDate(date)}
+                currentDate={calendarDate}
+                onMonthChange={setCalendarDate}
               />
             </div>
 
