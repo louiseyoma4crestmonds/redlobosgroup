@@ -80,6 +80,7 @@ function PropertyDetails(): JSX.Element {
   const [guestCount, setGuestCount] = useState("1");
   const [propertyEvents, setPropertyEvents] = useState<CalendarEvent[]>([]);
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingError, setBookingError] = useState("");
   const [calendarDate, setCalendarDate] = useState(new Date());
 
   // Geocode address via Nominatim (no API key required)
@@ -140,14 +141,16 @@ function PropertyDetails(): JSX.Element {
     setCheckOutDate(null);
     setGuestCount("1");
     setPropertyEvents([]);
+    setBookingError("");
   };
 
   const handleMakeReservation = async () => {
     if (!checkInDate || !checkOutDate) {
-      alert("Please select check-in and check-out dates.");
+      setBookingError("Please select check-in and check-out dates.");
       return;
     }
     setBookingLoading(true);
+    setBookingError("");
     try {
       const nights = differenceInCalendarDays(
         parseISO(checkOutDate),
@@ -161,6 +164,7 @@ function PropertyDetails(): JSX.Element {
       const response = await fetch("/api/stripe/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           propertyId: id,
           propertyName: property?.name ?? "Property Reservation",
@@ -170,14 +174,22 @@ function PropertyDetails(): JSX.Element {
           totalAmount,
         }),
       });
-      const data = await response.json();
-      if (response.ok && data.url) {
-        window.location.href = data.url;
-      } else {
-        alert(data.message ?? "Failed to create checkout session. Please try again.");
+      const responseText = await response.text();
+      let data: { url?: string; message?: string } = {};
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        data = {};
       }
-    } catch {
-      alert("An error occurred. Please try again.");
+      if (response.ok && data.url) {
+        window.location.assign(data.url);
+      } else {
+        setBookingError(
+          data.message ?? "Checkout could not be started. Please try again."
+        );
+      }
+    } catch (error: any) {
+      setBookingError(error?.message || "Checkout could not be started. Please try again.");
     } finally {
       setBookingLoading(false);
     }
@@ -604,6 +616,12 @@ function PropertyDetails(): JSX.Element {
                   ? "Select your dates above"
                   : `Proceed to Checkout · £${total.toFixed(0)}`}
               </button>
+
+              {bookingError && (
+                <p role="alert" className="text-center text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                  {bookingError}
+                </p>
+              )}
 
               {step !== "summary" && (
                 <p className="text-center text-xs text-gray-400">

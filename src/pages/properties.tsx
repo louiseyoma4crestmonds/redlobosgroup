@@ -144,6 +144,7 @@ function Properties(): JSX.Element {
   const [guestCount, setGuestCount] = useState("1");
   const [propertyEvents, setPropertyEvents] = useState<any[]>([]);
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingError, setBookingError] = useState("");
   const [calendarDate, setCalendarDate] = useState(new Date());
 
   const fetchProperties = useCallback(() => {
@@ -189,18 +190,21 @@ function Properties(): JSX.Element {
     setCheckOutDate(null);
     setGuestCount("1");
     setPropertyEvents([]);
+    setBookingError("");
   };
 
   const handleMakeReservation = async () => {
     if (!checkInDate || !checkOutDate) {
-      alert("Please select check-in and check-out dates.");
+      setBookingError("Please select check-in and check-out dates.");
       return;
     }
     setBookingLoading(true);
+    setBookingError("");
     try {
       const response = await fetch("/api/stripe/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           propertyId: selectedProperty?.id,
           propertyName: selectedProperty?.name ?? "Property Reservation",
@@ -209,14 +213,22 @@ function Properties(): JSX.Element {
           guests: guestCount,
         }),
       });
-      const data = await response.json();
-      if (response.ok && data.url) {
-        window.location.href = data.url;
-      } else {
-        alert(data.message ?? "Failed to create checkout session. Please try again.");
+      const responseText = await response.text();
+      let data: { url?: string; message?: string } = {};
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        data = {};
       }
-    } catch {
-      alert("An error occurred. Please try again.");
+      if (response.ok && data.url) {
+        window.location.assign(data.url);
+      } else {
+        setBookingError(
+          data.message ?? "Checkout could not be started. Please try again."
+        );
+      }
+    } catch (error: any) {
+      setBookingError(error?.message || "Checkout could not be started. Please try again.");
     } finally {
       setBookingLoading(false);
     }
@@ -364,6 +376,11 @@ function Properties(): JSX.Element {
             >
               {bookingLoading ? "Processing…" : "MAKE RESERVATION"}
             </button>
+            {bookingError && (
+              <p role="alert" className="text-center text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                {bookingError}
+              </p>
+            )}
           </div>
         </div>
       </Modal>
