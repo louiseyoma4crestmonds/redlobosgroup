@@ -136,11 +136,11 @@ function Footer(): JSX.Element {
               Experiences
             </h4>
             <ul className="space-y-4">
-              <FooterLink label="Romantic Dinner Setup" onClick={() => navigate("/properties")} />
-              <FooterLink label="Proposal Arrangement" onClick={() => navigate("/properties")} />
-              <FooterLink label="Paint &amp; Sip Evening" onClick={() => navigate("/properties")} />
-              <FooterLink label="Podcast Studio Session" onClick={() => navigate("/properties")} />
-              <FooterLink label="Home Studio Hire" onClick={() => navigate("/properties")} />
+              <FooterLink label="Romantic Dinner Setup" onClick={() => navigate("/addOn/1")} />
+              <FooterLink label="Proposal Arrangement" onClick={() => navigate("/addOn/3")} />
+              <FooterLink label="Paint &amp; Sip Evening" onClick={() => navigate("/addOn/4")} />
+              <FooterLink label="Podcast Studio Session" onClick={() => navigate("/addOn/2")} />
+              <FooterLink label="Home Studio Hire" onClick={() => navigate("/addOn/2")} />
             </ul>
           </div>
 
