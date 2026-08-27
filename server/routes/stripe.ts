@@ -32,6 +32,44 @@ router.post("/create-checkout-session", async (req: Request, res: Response) => {
   }
 
   try {
+    const numericPropertyId = Number.parseInt(String(propertyId), 10);
+    const checkInDate = new Date(`${checkIn}T00:00:00Z`);
+    const checkOutDate = new Date(`${checkOut}T00:00:00Z`);
+
+    if (
+      !Number.isInteger(numericPropertyId) ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(String(checkIn)) ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(String(checkOut)) ||
+      Number.isNaN(checkInDate.getTime()) ||
+      Number.isNaN(checkOutDate.getTime()) ||
+      checkOutDate <= checkInDate
+    ) {
+      res.status(400).json({ message: "Please select a valid date range." });
+      return;
+    }
+
+    // Keep the checkout flow safe when a calendar was opened before another
+    // guest completed payment. Dates are inclusive because the calendar blocks
+    // both check-in and checkout days.
+    const overlappingBooking = await pool.query(
+      `SELECT 1
+       FROM bookings
+       WHERE property_id = $1
+         AND LOWER(COALESCE(payment_status, '')) IN
+           ('paid', 'succeeded', 'complete', 'completed')
+         AND check_in::date <= $3::date
+         AND check_out::date >= $2::date
+       LIMIT 1`,
+      [numericPropertyId, checkIn, checkOut]
+    );
+
+    if (overlappingBooking.rows.length > 0) {
+      res.status(409).json({
+        message: "One or more selected dates are no longer available. Please choose different dates.",
+      });
+      return;
+    }
+
     // Resolve amount: prefer pre-calculated total from client, else compute from DB
     let unitAmountPence: number;
 
@@ -40,7 +78,7 @@ router.post("/create-checkout-session", async (req: Request, res: Response) => {
     } else {
       const result = await pool.query(
         "SELECT price_per_night FROM properties WHERE id = $1",
-        [parseInt(propertyId, 10)]
+        [numericPropertyId]
       );
       if (result.rows.length === 0) {
         res.status(404).json({ message: "Property not found." });

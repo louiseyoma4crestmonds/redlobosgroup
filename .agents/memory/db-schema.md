@@ -39,9 +39,6 @@ description: Tables created in the Replit PostgreSQL database for the Red Lobos 
 | property_id | INTEGER FK → properties | |
 | name | TEXT | e.g. "Free Wi-Fi" |
 
-### `property_events` (referenced but not yet created)
-Would hold booked dates per property for the calendar. Routes return `[]` gracefully if table absent.
-
 ## How to apply
 - Add properties: `INSERT INTO properties (name, address, ...) VALUES (...)`
 - Add images: `INSERT INTO property_images (property_id, image_url, is_primary) VALUES (...)`

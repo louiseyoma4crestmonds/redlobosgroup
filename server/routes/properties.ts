@@ -106,17 +106,30 @@ router.get("/:id/events", async (req: Request, res: Response) => {
   if (isNaN(id)) return res.status(400).json({ message: "Invalid property id" });
 
   try {
-    // Events table may not exist yet; return empty array gracefully
+    // Bookings are the source of truth. Expand each confirmed stay into one
+    // blocked calendar event per day, including the checkout day.
     const result = await pool.query(
-      `SELECT id, date, is_booked, price
-       FROM property_events
-       WHERE property_id = $1
-       ORDER BY date`,
+      `SELECT
+         TO_CHAR(booked_day, 'YYYY-MM-DD') AS id,
+         TO_CHAR(booked_day, 'YYYY-MM-DD') AS date,
+         true AS is_booked
+       FROM bookings b
+       CROSS JOIN LATERAL generate_series(
+         b.check_in::date,
+         b.check_out::date,
+         INTERVAL '1 day'
+       ) AS booked_day
+       WHERE b.property_id = $1
+         AND LOWER(COALESCE(b.payment_status, '')) IN
+           ('paid', 'succeeded', 'complete', 'completed')
+       GROUP BY booked_day
+       ORDER BY booked_day`,
       [id]
-    ).catch(() => ({ rows: [] }));
+    );
     res.json({ data: result.rows });
   } catch (err) {
-    res.json({ data: [] });
+    console.error(`DB error [GET /api/properties/${id}/events]:`, err);
+    res.status(500).json({ message: "Failed to fetch property availability" });
   }
 });
 
