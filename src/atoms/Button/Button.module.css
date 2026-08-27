@@ -26,9 +26,9 @@
 }
 
 .btnGold {
-  @apply bg-gold border border-gold text-gold hover:bg-black hover:border-black hover:text-gold;
+  @apply bg-gold border border-gold text-white hover:bg-black hover:border-black hover:text-gold;
 }
 
 .btnSecondary {
-  @apply bg-green1 text-gold border border-gold hover:bg-gold hover:text-gold;
+  @apply bg-green1 text-gold border border-gold hover:bg-gold hover:text-white;
 }
