@@ -27,6 +27,58 @@ function requireAdmin(req: Request, res: Response, next: NextFunction) {
 
 router.use(requireAdmin);
 
+type BookingDateRange = {
+  check_in: string | Date;
+  check_out: string | Date;
+};
+
+const confirmedPaymentStatuses = new Set([
+  "paid",
+  "succeeded",
+  "complete",
+  "completed",
+]);
+
+function toUtcDate(value: string | Date): Date {
+  const dateText = String(value).slice(0, 10);
+  const [year, month, day] = dateText.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
+function toDateKey(value: Date): string {
+  return value.toISOString().slice(0, 10);
+}
+
+function addDays(value: Date, days: number): Date {
+  const result = new Date(value);
+  result.setUTCDate(result.getUTCDate() + days);
+  return result;
+}
+
+function nextAvailableDate(bookings: BookingDateRange[]): string {
+  let availableFrom = toUtcDate(new Date());
+
+  const sortedBookings = [...bookings].sort(
+    (a, b) => toUtcDate(a.check_in).getTime() - toUtcDate(b.check_in).getTime()
+  );
+
+  for (const booking of sortedBookings) {
+    const checkIn = toUtcDate(booking.check_in);
+    const checkOut = toUtcDate(booking.check_out);
+
+    if (checkOut < availableFrom) continue;
+    if (checkIn > availableFrom) break;
+
+    // Checkout day remains blocked; a new stay can begin the following day.
+    const bookingAvailableFrom = addDays(checkOut, 1);
+    if (bookingAvailableFrom > availableFrom) {
+      availableFrom = bookingAvailableFrom;
+    }
+  }
+
+  return toDateKey(availableFrom);
+}
+
 // ── Properties ────────────────────────────────────────────────────────────────
 
 // GET /api/admin/properties — all properties (including unavailable) + primary image
@@ -47,6 +99,62 @@ router.get("/properties", async (_req: Request, res: Response) => {
   } catch (err) {
     console.error("Admin GET /properties:", err);
     res.status(500).json({ message: "Failed to fetch properties" });
+  }
+});
+
+// GET /api/admin/bookings — paid reservations with property availability
+router.get("/bookings", async (_req: Request, res: Response) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        b.id,
+        b.user_email,
+        b.property_id,
+        b.property_name,
+        b.check_in,
+        b.check_out,
+        b.guests,
+        b.amount_total,
+        b.currency,
+        b.payment_status,
+        b.stripe_session_id,
+        b.created_at,
+        p.address,
+        pi.image_url AS property_image
+      FROM bookings b
+      LEFT JOIN properties p ON p.id = b.property_id
+      LEFT JOIN property_images pi
+        ON pi.property_id = b.property_id AND pi.is_primary = true
+      ORDER BY b.check_in ASC, b.created_at DESC
+    `);
+
+    const bookingsByProperty = new Map<string, BookingDateRange[]>();
+    for (const booking of result.rows) {
+      const status = String(booking.payment_status ?? "").toLowerCase();
+      if (!confirmedPaymentStatuses.has(status)) continue;
+
+      const propertyKey = String(booking.property_id ?? booking.property_name ?? booking.id);
+      const propertyBookings = bookingsByProperty.get(propertyKey) ?? [];
+      propertyBookings.push(booking);
+      bookingsByProperty.set(propertyKey, propertyBookings);
+    }
+
+    const data = result.rows.map((booking) => {
+      const propertyKey = String(booking.property_id ?? booking.property_name ?? booking.id);
+      return {
+        ...booking,
+        amount_total:
+          booking.amount_total == null ? null : Number(booking.amount_total),
+        next_available_date: nextAvailableDate(
+          bookingsByProperty.get(propertyKey) ?? []
+        ),
+      };
+    });
+
+    res.json({ data });
+  } catch (err) {
+    console.error("Admin GET /bookings:", err);
+    res.status(500).json({ message: "Failed to fetch bookings" });
   }
 });
 

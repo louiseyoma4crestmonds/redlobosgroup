@@ -15,6 +15,36 @@ interface Property {
   primary_image: string | null;
 }
 
+interface AdminBooking {
+  id: number;
+  user_email: string;
+  property_name: string | null;
+  check_in: string;
+  check_out: string;
+  guests: number;
+  amount_total: number | null;
+  currency: string | null;
+  payment_status: string | null;
+  next_available_date: string;
+}
+
+function formatBookingDate(date: string) {
+  return new Date(`${date.slice(0, 10)}T00:00:00`).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function formatBookingAmount(amount: number | null, currency: string | null) {
+  if (amount == null) return "—";
+  const code = (currency ?? "gbp").toUpperCase();
+  return new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: code,
+  }).format(amount / 100);
+}
+
 export default function AdminPanel() {
   const { data: session, status } = useSession();
   const navigate = useNavigate();
@@ -22,6 +52,9 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [bookings, setBookings] = useState<AdminBooking[]>([]);
+  const [loadingBookings, setLoadingBookings] = useState(true);
+  const [bookingError, setBookingError] = useState("");
 
   const isAdmin = !!(session?.isAdmin);
 
@@ -32,6 +65,7 @@ export default function AdminPanel() {
       return;
     }
     fetchProperties();
+    fetchBookings();
   }, [status, isAdmin]);
 
   async function fetchProperties() {
@@ -46,6 +80,23 @@ export default function AdminPanel() {
       setError("Could not load properties. Check your connection.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchBookings() {
+    setLoadingBookings(true);
+    setBookingError("");
+    try {
+      const res = await fetch("/api/admin/bookings", {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to load bookings");
+      const json = await res.json();
+      setBookings(json.data ?? []);
+    } catch {
+      setBookingError("Could not load reservations. Check your connection.");
+    } finally {
+      setLoadingBookings(false);
     }
   }
 
@@ -101,6 +152,92 @@ export default function AdminPanel() {
             {error}
           </div>
         )}
+
+        {/* Reservations */}
+        <section className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Reservations</h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Paid bookings, guest details and property availability
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={fetchBookings}
+              disabled={loadingBookings}
+              className="px-3 py-1.5 text-sm font-medium text-[#c9a96e] border border-[#c9a96e] rounded-lg hover:bg-[#c9a96e] hover:text-white transition-colors disabled:opacity-50"
+            >
+              {loadingBookings ? "Refreshing…" : "Refresh"}
+            </button>
+          </div>
+
+          {bookingError && (
+            <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+              {bookingError}
+            </div>
+          )}
+
+          {loadingBookings ? (
+            <div className="bg-white rounded-xl h-32 animate-pulse border border-gray-100" />
+          ) : bookings.length === 0 ? (
+            <div className="bg-white rounded-xl border border-dashed border-gray-300 py-10 text-center">
+              <p className="text-gray-400">No paid reservations yet.</p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl shadow-sm overflow-x-auto border border-gray-100">
+              <table className="w-full min-w-[860px]">
+                <thead>
+                  <tr className="border-b border-gray-100 bg-gray-50">
+                    <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-5 py-4">Property</th>
+                    <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-4">Booked by</th>
+                    <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-4">Stay dates</th>
+                    <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-4">Cost</th>
+                    <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-4">Next available</th>
+                    <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-4">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {bookings.map((booking) => (
+                    <tr key={booking.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-5 py-4">
+                        <span className="font-semibold text-gray-900 text-sm">
+                          {booking.property_name ?? "Property reservation"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className="text-sm text-gray-700">{booking.user_email}</span>
+                        <span className="block text-xs text-gray-400 mt-0.5">
+                          {booking.guests} {booking.guests === 1 ? "guest" : "guests"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className="text-sm text-gray-700">
+                          {formatBookingDate(booking.check_in)} — {formatBookingDate(booking.check_out)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className="font-semibold text-gray-900 text-sm">
+                          {formatBookingAmount(booking.amount_total, booking.currency)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className="text-sm font-medium text-green-700">
+                          {formatBookingDate(booking.next_available_date)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 capitalize">
+                          {booking.payment_status ?? "paid"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
 
         {/* Loading */}
         {loading ? (
