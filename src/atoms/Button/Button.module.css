@@ -4,7 +4,7 @@
 
 .btn:disabled,
 .btn:disabled:hover {
-  @apply cursor-not-allowed bg-gray-50 text-gray-200;
+  @apply cursor-not-allowed bg-gray-50 text-gold;
 }
 
 .btn:disabled:hover {
@@ -22,13 +22,13 @@
 
 /* Button Variants */
 .btnPrimary {
-  @apply bg-black border border-black text-black text-white hover:bg-black hover:text-white;
+  @apply bg-black border border-black text-gold hover:bg-black hover:text-gold;
 }
 
 .btnGold {
-  @apply bg-gold border border-gold text-white hover:bg-black hover:border-black hover:text-white;
+  @apply bg-gold border border-gold text-gold hover:bg-black hover:border-black hover:text-gold;
 }
 
 .btnSecondary {
-  @apply bg-green1 text-gold border border-gold hover:bg-gold hover:text-white;
+  @apply bg-green1 text-gold border border-gold hover:bg-gold hover:text-gold;
 }

@@ -15,3 +15,8 @@
     font-family: Montserrat;
   }
 }
+
+/* Keep button labels gold in every state, including hover and focus. */
+button {
+  color: #BD9A68 !important;
+}
