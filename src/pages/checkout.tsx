@@ -7,6 +7,7 @@ function Checkout(): JSX.Element {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [error, setError] = useState("");
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
   const startedRef = useRef(false);
 
   useEffect(() => {
@@ -49,7 +50,12 @@ function Checkout(): JSX.Element {
         }
 
         if (response.ok && data.url) {
-          window.location.assign(data.url);
+          setCheckoutUrl(data.url);
+          // Stripe Checkout should be top-level. In the Replit preview the app
+          // is embedded, so let the visitor open it in a full browser tab.
+          if (window.top === window.self) {
+            window.location.assign(data.url);
+          }
           return;
         }
 
@@ -84,6 +90,30 @@ function Checkout(): JSX.Element {
                 className="mt-6 rounded-lg bg-gold px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-black"
               >
                 RETURN TO PROPERTIES
+              </button>
+            </>
+          ) : checkoutUrl ? (
+            <>
+              <h1 className="text-2xl font-semibold text-gray-900">
+                Your secure checkout is ready
+              </h1>
+              <p className="mt-3 text-sm text-gray-500">
+                Open Stripe Checkout in a new tab to complete your reservation.
+              </p>
+              <a
+                href={checkoutUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-6 inline-flex rounded-lg bg-gold px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-black"
+              >
+                CONTINUE TO PAYMENT
+              </a>
+              <button
+                type="button"
+                onClick={() => navigate("/properties")}
+                className="mt-4 block w-full text-sm text-gray-500 underline underline-offset-4 hover:text-gray-900"
+              >
+                Return to properties
               </button>
             </>
           ) : (
