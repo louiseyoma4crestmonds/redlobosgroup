@@ -18,6 +18,8 @@ import Checkout from "./pages/checkout";
 import AdminPanel from "./pages/admin/index";
 import PropertyEdit from "./pages/admin/PropertyEdit";
 import AdminLogin from "./pages/admin/login";
+import PrivacyPolicy from "./pages/legal/privacyPolicy";
+import TermsAndConditions from "./pages/legal/termsAndConditions";
 
 function App() {
   return (
@@ -42,6 +44,8 @@ function App() {
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/properties/:id" element={<PropertyEdit />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
         </Routes>
       </SessionProvider>
     </BrowserRouter>

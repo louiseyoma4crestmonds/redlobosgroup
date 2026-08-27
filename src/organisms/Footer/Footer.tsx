@@ -198,11 +198,19 @@ function Footer(): JSX.Element {
           </p>
           <span className="hidden tablet:block text-white/15">·</span>
           <div className="flex items-center gap-4">
-            <button className="text-white/30 text-xs hover:text-gold transition-colors">
+            <button
+              type="button"
+              onClick={() => navigate("/privacy-policy")}
+              className="text-white/30 text-xs hover:text-gold transition-colors"
+            >
               Privacy Policy
             </button>
             <span className="text-white/15">·</span>
-            <button className="text-white/30 text-xs hover:text-gold transition-colors">
+            <button
+              type="button"
+              onClick={() => navigate("/terms-and-conditions")}
+              className="text-white/30 text-xs hover:text-gold transition-colors"
+            >
               Terms &amp; Conditions
             </button>
           </div>
