@@ -1,7 +1,8 @@
 import styled, { keyframes } from "styled-components";
 import { slideInRight, slideInLeft, zoomIn } from "react-animations";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { Volume2, VolumeX } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import UtilityBar from "@/organisms/UtilityBar";
 import Heading from "@/atoms/Heading";
 import Button from "@/atoms/Button";
@@ -12,6 +13,9 @@ import { addOnBrief } from "../data/addOnData";
 function Home(): JSX.Element {
   const navigate = useNavigate();
   const [introPage, setIntroPage] = useState<boolean>(true);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [audioBlocked, setAudioBlocked] = useState(false);
 
   const slideInRightAnimation = keyframes`${slideInRight}`;
   const slideInLeftAnimation = keyframes`${slideInLeft}`;
@@ -30,14 +34,107 @@ function Home(): JSX.Element {
   useEffect(() => {
     if (introPage) {
       setIntroPage(true);
-      setTimeout(() => {
+      const introTimer = setTimeout(() => {
         setIntroPage(false);
       }, 3000);
+
+      return () => clearTimeout(introTimer);
     }
   }, [introPage]);
 
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.volume = 0.35;
+
+    const removeInteractionListeners = () => {
+      window.removeEventListener("pointerdown", handleInteraction);
+      window.removeEventListener("keydown", handleInteraction);
+    };
+
+    const attemptPlay = async () => {
+      try {
+        await audio.play();
+        setIsAudioPlaying(true);
+        setAudioBlocked(false);
+        removeInteractionListeners();
+      } catch {
+        // Browsers may block unmuted autoplay until the visitor interacts.
+        setAudioBlocked(true);
+      }
+    };
+
+    const handleInteraction = () => {
+      void attemptPlay();
+    };
+
+    void attemptPlay();
+    window.addEventListener("pointerdown", handleInteraction);
+    window.addEventListener("keydown", handleInteraction);
+
+    return () => {
+      removeInteractionListeners();
+      audio.pause();
+      audio.currentTime = 0;
+    };
+  }, []);
+
+  const toggleAudio = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (audio.paused) {
+      audio
+        .play()
+        .then(() => {
+          setIsAudioPlaying(true);
+          setAudioBlocked(false);
+        })
+        .catch(() => setAudioBlocked(true));
+    } else {
+      audio.pause();
+      setIsAudioPlaying(false);
+    }
+  };
+
   return (
     <div>
+      <audio
+        ref={audioRef}
+        src="/landing-audio.mp3"
+        autoPlay
+        loop
+        preload="auto"
+        aria-hidden="true"
+      />
+
+      <button
+        type="button"
+        onClick={toggleAudio}
+        aria-label={isAudioPlaying ? "Mute landing page audio" : "Enable landing page audio"}
+        title={
+          audioBlocked && !isAudioPlaying
+            ? "Click to enable sound"
+            : isAudioPlaying
+            ? "Mute sound"
+            : "Play sound"
+        }
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-gold px-4 py-3 text-sm font-semibold text-white shadow-lg transition-colors hover:bg-black"
+      >
+        {isAudioPlaying ? (
+          <>
+            <VolumeX className="h-4 w-4" aria-hidden="true" />
+            <span>Mute</span>
+          </>
+        ) : (
+          <>
+            <Volume2 className="h-4 w-4" aria-hidden="true" />
+            <span>{audioBlocked ? "Enable sound" : "Play sound"}</span>
+          </>
+        )}
+      </button>
+
       {/* LOGO LOADING SCREEN */}
       <div className={!introPage ? "hidden" : ""}>
         <div className="w-screen h-screen flex place-content-center bg-green1">
