@@ -4,6 +4,7 @@ export type ButtonVariant =
   | "muted"
   | "accent"
   | "black"
+  | "gold"
   | "none"
   | "pink";
 

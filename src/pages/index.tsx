@@ -88,7 +88,7 @@ function Home(): JSX.Element {
                 <div className="w-full flex place-content-center">
                   <div className="w-3/5">
                     <Button
-                      variant="primary"
+                      variant="gold"
                       width="full"
                       onClick={() => {
                         navigate("/properties");

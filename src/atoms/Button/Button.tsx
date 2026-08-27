@@ -21,6 +21,7 @@ function Button(props: ButtonProps) {
     [styles.btnMuted]: variant === "muted",
     [styles.btnAccent]: variant === "accent",
     [styles.btnBlack]: variant === "black",
+    [styles.btnGold]: variant === "gold",
   });
 
   const handleOnClick = () => onClick;
