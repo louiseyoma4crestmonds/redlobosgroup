@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from "express";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import {
+  createHmac,
   createHash,
   randomBytes,
   scrypt as scryptCallback,
@@ -21,13 +22,15 @@ type AuthUser = {
   email: string;
   image?: string | null;
   isAdmin?: boolean;
+  adminUserId?: number;
+  ownerAuthVersion?: string;
 };
 
-function normalizeEmail(value: unknown): string {
+export function normalizeEmail(value: unknown): string {
   return String(value || "").trim().toLowerCase();
 }
 
-function validEmail(email: string): boolean {
+export function validEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
@@ -38,7 +41,7 @@ function safeTimingEqual(left: Buffer, right: Buffer): boolean {
   );
 }
 
-async function hashPassword(password: string): Promise<string> {
+export async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16).toString("hex");
   const derivedKey = (await scrypt(password, salt, 64)) as Buffer;
   return `scrypt$${salt}$${derivedKey.toString("hex")}`;
@@ -111,13 +114,51 @@ export async function ensureAuthTables() {
   await pool.query(
     "CREATE INDEX IF NOT EXISTS password_reset_tokens_user_idx ON password_reset_tokens(user_id)"
   );
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS admin_users (
+      id SERIAL PRIMARY KEY,
+      email TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      is_active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      revoked_at TIMESTAMPTZ
+    )
+  `);
 }
 
-function getConfiguredAdminEmail(): string | undefined {
+export function getConfiguredAdminEmail(): string | undefined {
   const configuredEmail = process.env.ADMIN_LOGIN_EMAIL || process.env.ADMIN_EMAIL;
   return configuredEmail?.trim().match(
     /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/
   )?.[0]?.toLowerCase();
+}
+
+function getOwnerCredentialVersion(): string | undefined {
+  const adminEmail = getConfiguredAdminEmail();
+  const password = process.env.ADMIN_PASSWORD;
+  const sessionSecret = process.env.SESSION_SECRET || "dev-secret-change-me";
+  if (!adminEmail || !password) return undefined;
+
+  return createHmac("sha256", sessionSecret)
+    .update(`${adminEmail}\0${password}`)
+    .digest("hex");
+}
+
+export function isOwnerSessionUser(user: Record<string, unknown>): boolean {
+  const adminEmail = getConfiguredAdminEmail();
+  const expectedVersion = getOwnerCredentialVersion();
+  const actualVersion =
+    typeof user.ownerAuthVersion === "string" ? user.ownerAuthVersion : "";
+
+  return (
+    user.isAdmin === true &&
+    !user.adminUserId &&
+    !!adminEmail &&
+    String(user.email).toLowerCase() === adminEmail &&
+    !!expectedVersion &&
+    safeTimingEqual(Buffer.from(actualVersion), Buffer.from(expectedVersion))
+  );
 }
 
 // Configure Google OAuth only if credentials are available
@@ -394,58 +435,137 @@ router.post("/reset-password", async (req: Request, res: Response) => {
   }
 });
 
-// Admin login for local/admin portal access. The password is read only from
-// Replit Secrets / .env and is never returned to the client or logged.
+// The environment-backed owner and database-backed admin accounts share the
+// same session shape, but only the owner can manage admin accounts.
 router.post("/admin-login", (req: Request, res: Response, next: NextFunction) => {
   const email = String(req.body?.email || "").trim().toLowerCase();
   const password = String(req.body?.password || "");
   const adminEmail = getConfiguredAdminEmail();
   const configuredPassword = process.env.ADMIN_PASSWORD;
 
-  if (!adminEmail || !configuredPassword) {
-    res.status(503).json({ message: "Admin login is not configured." });
+  if (
+    adminEmail &&
+    configuredPassword &&
+    email === adminEmail &&
+    safeTimingEqual(Buffer.from(password), Buffer.from(configuredPassword))
+  ) {
+    const ownerAuthVersion = getOwnerCredentialVersion();
+    req.login(
+      {
+        name: "Admin",
+        email: adminEmail,
+        image: null,
+        isAdmin: true,
+        ownerAuthVersion,
+      },
+      (err) => {
+        if (err) {
+          next(err);
+          return;
+        }
+        res.json({
+          ok: true,
+          user: { name: "Admin", email: adminEmail },
+          isAdmin: true,
+          isOwner: true,
+        });
+      }
+    );
     return;
   }
 
-  const passwordBuffer = Buffer.from(password);
-  const configuredPasswordBuffer = Buffer.from(configuredPassword);
-  const passwordMatches = safeTimingEqual(passwordBuffer, configuredPasswordBuffer);
+  pool
+    .query(
+      "SELECT id, email, password_hash FROM admin_users WHERE email = $1 AND is_active = TRUE",
+      [email]
+    )
+    .then(async (result) => {
+      const account = result.rows[0] as
+        | { id: number; email: string; password_hash: string }
+        | undefined;
+      const passwordMatches =
+        !!account && (await verifyPassword(password, account.password_hash));
 
-  if (email !== adminEmail || !passwordMatches) {
-    res.status(401).json({ message: "Invalid admin credentials." });
-    return;
-  }
-
-  req.login(
-    { name: "Admin", email: adminEmail, image: null, isAdmin: true },
-    (err) => {
-      if (err) {
-        next(err);
+      if (!account || !passwordMatches) {
+        if (!adminEmail || !configuredPassword) {
+          res.status(503).json({ message: "Admin login is not configured." });
+        } else {
+          res.status(401).json({ message: "Invalid admin credentials." });
+        }
         return;
       }
-      res.json({
-        ok: true,
-        user: { name: "Admin", email: adminEmail },
-        isAdmin: true,
-      });
-    }
-  );
+
+      req.login(
+        {
+          name: "Admin",
+          email: account.email,
+          image: null,
+          isAdmin: true,
+          adminUserId: account.id,
+        },
+        (err) => {
+          if (err) {
+            next(err);
+            return;
+          }
+          res.json({
+            ok: true,
+            user: { name: "Admin", email: account.email },
+            isAdmin: true,
+            isOwner: false,
+          });
+        }
+      );
+    })
+    .catch((error) => {
+      console.error("Admin account login error:", error?.message || error);
+      res.status(500).json({ message: "Could not sign you in. Please try again." });
+    });
 });
 
-router.get("/session", (req: Request, res: Response) => {
+function invalidateAuthSession(req: Request, res: Response) {
+  req.session.destroy(() => {
+    res.clearCookie("connect.sid", { path: "/" });
+    res.status(401).json(null);
+  });
+}
+
+router.get("/session", async (req: Request, res: Response) => {
   if (req.isAuthenticated && req.isAuthenticated()) {
     const user = req.user as Record<string, unknown>;
-    const adminEmail = getConfiguredAdminEmail();
+    let isActiveAdmin = user.isAdmin === true;
+
+    if (user.adminUserId) {
+      try {
+        const result = await pool.query(
+          "SELECT 1 FROM admin_users WHERE id = $1 AND is_active = TRUE",
+          [user.adminUserId]
+        );
+        isActiveAdmin = result.rowCount === 1;
+        if (!isActiveAdmin) {
+          invalidateAuthSession(req, res);
+          return;
+        }
+      } catch (error: any) {
+        console.error("Admin session validation error:", error?.message || error);
+        res.status(500).json({ message: "Could not validate your session." });
+        return;
+      }
+    } else if (user.isAdmin === true && !isOwnerSessionUser(user)) {
+      invalidateAuthSession(req, res);
+      return;
+    }
+
+    const isOwner = isOwnerSessionUser(user);
+
     res.json({
       user: {
         name: user.name,
         email: user.email,
         image: user.image,
       },
-      isAdmin:
-        user.isAdmin === true &&
-        !!adminEmail &&
-        String(user.email).toLowerCase() === adminEmail,
+      isAdmin: isActiveAdmin,
+      isOwner,
     });
   } else {
     res.json(null);

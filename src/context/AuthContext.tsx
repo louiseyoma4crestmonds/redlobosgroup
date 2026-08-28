@@ -9,6 +9,7 @@ export interface SessionUser {
 export interface Session {
   user: SessionUser;
   isAdmin?: boolean;
+  isOwner?: boolean;
 }
 
 interface AuthContextType {

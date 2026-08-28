@@ -176,6 +176,7 @@ export function isKnownAppPath(pathname: string): boolean {
     "/checkout",
     "/admin",
     "/admin/login",
+    "/admin/accounts",
     "/privacy-policy",
     "/terms-and-conditions",
   ]);

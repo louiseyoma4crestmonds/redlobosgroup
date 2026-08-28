@@ -1,31 +1,156 @@
 import { Router, Request, Response, NextFunction } from "express";
 import pool from "../db";
+import {
+  getConfiguredAdminEmail,
+  hashPassword,
+  isOwnerSessionUser,
+  normalizeEmail,
+  validEmail,
+} from "./auth";
 
 const router = Router();
 
 // ── Admin guard middleware ────────────────────────────────────────────────────
-function requireAdmin(req: Request, res: Response, next: NextFunction) {
+async function requireAdmin(req: Request, res: Response, next: NextFunction) {
   if (!req.isAuthenticated || !req.isAuthenticated()) {
     res.status(401).json({ message: "Authentication required" });
     return;
   }
   const user = req.user as Record<string, unknown>;
-  const configuredEmail = process.env.ADMIN_LOGIN_EMAIL || process.env.ADMIN_EMAIL;
-  const adminEmail = configuredEmail?.trim().match(
-    /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/
-  )?.[0]?.toLowerCase();
-  if (
-    user.isAdmin !== true ||
-    !adminEmail ||
-    String(user.email).toLowerCase() !== adminEmail
-  ) {
+  if (user.isAdmin !== true) {
     res.status(403).json({ message: "Admin access required" });
+    return;
+  }
+
+  if (user.adminUserId) {
+    try {
+      const result = await pool.query(
+        "SELECT 1 FROM admin_users WHERE id = $1 AND is_active = TRUE",
+        [user.adminUserId]
+      );
+      if (result.rowCount !== 1) {
+        req.session.destroy(() => {
+          res.clearCookie("connect.sid", { path: "/" });
+          res.status(401).json({ message: "Admin access has been revoked." });
+        });
+        return;
+      }
+    } catch (error) {
+      console.error("Admin authorization check:", error);
+      res.status(500).json({ message: "Could not validate admin access." });
+      return;
+    }
+  } else if (!isOwnerSessionUser(user)) {
+    res.status(403).json({ message: "Admin access required" });
+    return;
+  }
+
+  next();
+}
+
+router.use(requireAdmin);
+
+async function requireOwner(req: Request, res: Response, next: NextFunction) {
+  const user = req.user as Record<string, unknown>;
+  if (!isOwnerSessionUser(user)) {
+    res.status(403).json({ message: "Owner access required." });
     return;
   }
   next();
 }
 
-router.use(requireAdmin);
+router.get("/accounts", requireOwner, async (_req: Request, res: Response) => {
+  try {
+    const result = await pool.query(`
+      SELECT id, email, is_active, created_at, revoked_at
+      FROM admin_users
+      ORDER BY created_at DESC
+    `);
+    res.json({ data: result.rows });
+  } catch (error) {
+    console.error("Admin GET /accounts:", error);
+    res.status(500).json({ message: "Could not load admin accounts." });
+  }
+});
+
+router.post("/accounts", requireOwner, async (req: Request, res: Response) => {
+  const email = normalizeEmail(req.body?.email);
+  const password = String(req.body?.password || "");
+  const ownerEmail = getConfiguredAdminEmail();
+
+  if (!validEmail(email)) {
+    res.status(400).json({ message: "Please enter a valid admin email." });
+    return;
+  }
+  if (password.length < 8) {
+    res.status(400).json({ message: "Admin passwords must be at least 8 characters." });
+    return;
+  }
+  if (email === ownerEmail) {
+    res.status(409).json({ message: "The owner account is already configured." });
+    return;
+  }
+
+  try {
+    const passwordHash = await hashPassword(password);
+    const result = await pool.query(
+      `INSERT INTO admin_users (email, password_hash)
+       VALUES ($1, $2)
+       RETURNING id, email, is_active, created_at, revoked_at`,
+      [email, passwordHash]
+    );
+    res.status(201).json({ data: result.rows[0] });
+  } catch (error: any) {
+    if (error?.code === "23505") {
+      res.status(409).json({ message: "An admin account with that email already exists." });
+      return;
+    }
+    console.error("Admin POST /accounts:", error);
+    res.status(500).json({ message: "Could not create the admin account." });
+  }
+});
+
+router.post(
+  "/accounts/:id/revoke",
+  requireOwner,
+  async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id < 1) {
+      res.status(400).json({ message: "Invalid admin account." });
+      return;
+    }
+
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const result = await client.query(
+        `UPDATE admin_users
+         SET is_active = FALSE, revoked_at = NOW(), updated_at = NOW()
+         WHERE id = $1 AND is_active = TRUE
+         RETURNING id, email, is_active, created_at, revoked_at`,
+        [id]
+      );
+      if (result.rowCount !== 1) {
+        await client.query("ROLLBACK");
+        res.status(404).json({ message: "Active admin account not found." });
+        return;
+      }
+      await client.query(
+        `DELETE FROM user_sessions
+         WHERE sess -> 'passport' -> 'user' ->> 'adminUserId' = $1`,
+        [String(id)]
+      );
+      await client.query("COMMIT");
+      res.json({ data: result.rows[0] });
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => {});
+      console.error("Admin POST /accounts/:id/revoke:", error);
+      res.status(500).json({ message: "Could not revoke the admin account." });
+    } finally {
+      client.release();
+    }
+  }
+);
 
 type BookingDateRange = {
   check_in: string | Date;

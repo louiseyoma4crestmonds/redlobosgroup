@@ -138,12 +138,23 @@ export default function AdminPanel() {
             <h1 className="text-3xl font-bold text-gray-900">Admin Panel</h1>
             <p className="text-gray-500 mt-1">Manage properties, amenities and images</p>
           </div>
-          <button
-            onClick={() => navigate("/admin/properties/new")}
-            className="bg-[#c9a96e] hover:bg-[#b8945a] text-white font-bold px-6 py-3 rounded-lg transition-colors flex items-center gap-2"
-          >
-            <span className="text-xl leading-none">+</span> Add Property
-          </button>
+          <div className="flex flex-wrap items-center gap-3">
+            {session?.isOwner && (
+              <button
+                type="button"
+                onClick={() => navigate("/admin/accounts")}
+                className="rounded-lg border border-[#c9a96e] px-4 py-3 font-semibold text-[#927344] transition-colors hover:bg-[#c9a96e] hover:text-white"
+              >
+                Manage Admins
+              </button>
+            )}
+            <button
+              onClick={() => navigate("/admin/properties/new")}
+              className="bg-[#c9a96e] hover:bg-[#b8945a] text-white font-bold px-6 py-3 rounded-lg transition-colors flex items-center gap-2"
+            >
+              <span className="text-xl leading-none">+</span> Add Property
+            </button>
+          </div>
         </div>
 
         {/* Error */}
