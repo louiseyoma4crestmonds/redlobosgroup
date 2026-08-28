@@ -7,7 +7,7 @@ import passport from "passport";
 import path from "path";
 import { readFile } from "fs/promises";
 import { runMigrations } from "stripe-replit-sync";
-import authRouter, { ensureAuthTables } from "./routes/auth";
+import authRouter from "./routes/auth";
 import stripeRouter from "./routes/stripe";
 import propertiesRouter from "./routes/properties";
 import bookingsRouter from "./routes/bookings";
@@ -17,6 +17,7 @@ import contactRouter from "./routes/contact";
 import { WebhookHandlers } from "./webhookHandlers";
 import { getStripeSync } from "./stripeClient";
 import pool from "./db";
+import { runAppMigrations } from "./migrations";
 import {
   getPublicOrigin,
   isKnownAppPath,
@@ -54,14 +55,16 @@ function normalizeOrigin(value: string | null | undefined): string | null {
 async function initStripe() {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
-    console.warn("⚠️  DATABASE_URL not set — skipping Stripe init");
-    return;
+    throw new Error(
+      "DATABASE_URL is required. Stripe and application migrations cannot run."
+    );
   }
-  try {
-    console.log("Initializing Stripe schema...");
-    await runMigrations({ databaseUrl });
-    console.log("✅ Stripe schema ready");
 
+  console.log("Initializing Stripe schema...");
+  await runMigrations({ databaseUrl });
+  console.log("✅ Stripe schema ready");
+
+  try {
     const stripeSync = await getStripeSync();
     const webhookBaseUrl = `https://${
       process.env.REPLIT_DOMAINS?.split(",")[0]
@@ -80,7 +83,7 @@ async function initStripe() {
       );
   } catch (err: any) {
     console.error(
-      "⚠️  Stripe init failed (payments will be unavailable):",
+      "⚠️  Stripe webhook setup failed (payments may be unavailable):",
       err.message
     );
   }
@@ -93,12 +96,8 @@ async function createServer() {
     throw new Error("SESSION_SECRET must be configured in production.");
   }
 
-  try {
-    await ensureAuthTables();
-    console.log("✅ Authentication tables ready");
-  } catch (err: any) {
-    console.error("⚠️  Authentication table setup failed:", err.message);
-  }
+  await runAppMigrations();
+  console.log("✅ Application database schema ready");
 
   // Replit and Nginx terminate HTTPS before forwarding requests to Express.
   // Set TRUST_PROXY=false when Node is directly exposed without a proxy.
@@ -298,5 +297,12 @@ async function createServer() {
   });
 }
 
-// Initialise Stripe (non-blocking on failure) then start the HTTP server
-initStripe().finally(() => createServer().catch(console.error));
+// Schema migrations must succeed before the HTTP server starts. Optional Stripe
+// webhook registration remains best-effort so a transient API issue does not
+// prevent non-payment areas of the site from loading.
+initStripe()
+  .then(() => createServer())
+  .catch((error) => {
+    console.error("❌ Server startup failed:", error);
+    process.exitCode = 1;
+  });

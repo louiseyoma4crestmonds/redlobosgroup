@@ -28,6 +28,11 @@ yarn build   # Builds React app to dist/
 yarn start   # Serves built app via Express
 ```
 
+The server automatically applies pending versioned PostgreSQL migrations before
+it starts accepting requests. This initializes a fresh database and upgrades an
+existing one without a separate production SQL step. Migration files live in
+`migrations/`; do not delete or edit an already-applied migration.
+
 ## Project Structure
 
 ```

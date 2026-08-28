@@ -2,3 +2,4 @@
 - [Stripe credentials](stripe-credentials.md) — Replit connector uses `settings.secret` not `settings.secret_key`; template is wrong.
 - [Email sending](email-sending.md) — switched from Gmail SMTP (nodemailer) to Resend SDK; Gmail rejected App Passwords with BadCredentials; ADMIN_EMAIL must be a plain address.
 - [Owner admin sessions](owner-admin-sessions.md) — owner authority tracks current environment credentials; additional-admin revocation must invalidate persisted sessions.
+- [Automatic database migrations](automatic-database-migrations.md) — immutable, fail-fast migrations must cover every route table and SQL conflict constraint.

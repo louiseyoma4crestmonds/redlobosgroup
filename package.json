@@ -10,6 +10,7 @@
   },
   "scripts": {
     "dev": "tsx server/index.ts",
+    "migrate": "tsx scripts/migrate.ts",
     "build": "vite build",
     "start": "NODE_ENV=production tsx server/index.ts",
     "lint": "eslint . --ext ts --ext tsx --ext js",
