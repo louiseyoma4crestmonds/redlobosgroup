@@ -50,3 +50,7 @@ build = ["yarn", "build"]
 
 [userenv.shared]
 ADMIN_LOGIN_EMAIL = "eyomao@gmail.com"
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 180000
