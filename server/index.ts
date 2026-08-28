@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
 import cors from "cors";
 import passport from "passport";
 import path from "path";
@@ -23,6 +24,30 @@ import {
   renderSeoNoscript,
   renderSitemap,
 } from "./seo";
+
+const PgSession = connectPgSimple(session);
+
+function parseTrustProxy(): number {
+  const configured = process.env.TRUST_PROXY?.trim().toLowerCase();
+  if (!configured) return process.env.NODE_ENV === "production" ? 1 : 0;
+  if (configured === "true") return 1;
+  if (configured === "false") return 0;
+
+  const proxyCount = Number(configured);
+  if (!Number.isInteger(proxyCount) || proxyCount < 0) {
+    throw new Error("TRUST_PROXY must be true, false, or a non-negative integer.");
+  }
+  return proxyCount;
+}
+
+function normalizeOrigin(value: string | null | undefined): string | null {
+  if (!value) return null;
+  try {
+    return new URL(value).origin;
+  } catch {
+    return value.replace(/\/+$/, "");
+  }
+}
 
 async function initStripe() {
   const databaseUrl = process.env.DATABASE_URL;
@@ -63,10 +88,10 @@ async function createServer() {
     console.error("⚠️  Authentication table setup failed:", err.message);
   }
 
-  // Replit terminates HTTPS before forwarding requests to Express. Trust the
-  // proxy so OAuth callback URLs use https:// on Replit while remaining
-  // http://localhost during local development.
-  app.set("trust proxy", 1);
+  // Replit and Nginx terminate HTTPS before forwarding requests to Express.
+  // Set TRUST_PROXY=false when Node is directly exposed without a proxy.
+  const trustProxy = parseTrustProxy();
+  app.set("trust proxy", trustProxy);
 
   // ── 1. Stripe webhook — must be BEFORE express.json() ─────────────────────
   app.post(
@@ -91,8 +116,12 @@ async function createServer() {
 
   // ── 2. CORS ────────────────────────────────────────────────────────────────
   const allowedOrigins = [
-    process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : null,
-    process.env.PRODUCTION_URL ?? null,
+    normalizeOrigin(
+      process.env.REPLIT_DEV_DOMAIN
+        ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+        : null
+    ),
+    normalizeOrigin(process.env.PRODUCTION_URL),
     "http://localhost:5000",
     "http://127.0.0.1:5000",
   ].filter(Boolean) as string[];
@@ -112,13 +141,29 @@ async function createServer() {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
+  const sessionCookieSecure =
+    process.env.SESSION_COOKIE_SECURE !== undefined
+      ? process.env.SESSION_COOKIE_SECURE === "true"
+      : process.env.NODE_ENV === "production";
+  const sessionStore = process.env.DATABASE_URL
+    ? new PgSession({
+        pool,
+        tableName: "user_sessions",
+        createTableIfMissing: true,
+      })
+    : undefined;
+  console.log(
+    `Session configuration: store=${sessionStore ? "postgres" : "memory"}, secureCookie=${sessionCookieSecure}, trustProxy=${trustProxy}`
+  );
+
   app.use(
     session({
       secret: process.env.SESSION_SECRET || "dev-secret-change-me",
       resave: false,
       saveUninitialized: false,
+      store: sessionStore,
       cookie: {
-        secure: process.env.NODE_ENV === "production",
+        secure: sessionCookieSecure,
         httpOnly: true,
         sameSite: "lax",
         maxAge: 24 * 60 * 60 * 1000,

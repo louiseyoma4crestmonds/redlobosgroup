@@ -1554,6 +1554,15 @@
     "@types/connect" "*"
     "@types/node" "*"
 
+"@types/connect-pg-simple@^7.0.3":
+  version "7.0.3"
+  resolved "http://package-firewall.replit.local/npm/@types/connect-pg-simple/-/connect-pg-simple-7.0.3.tgz#05b4bdbccbba333787b01730bacd202f15afa480"
+  integrity sha512-NGCy9WBlW2bw+J/QlLnFZ9WjoGs6tMo3LAut6mY4kK+XHzue//lpNVpAvYRpIwM969vBRAM2Re0izUvV6kt+NA==
+  dependencies:
+    "@types/express" "*"
+    "@types/express-session" "*"
+    "@types/pg" "*"
+
 "@types/connect@*":
   version "3.4.38"
   resolved "http://package-firewall.replit.local/npm/@types/connect/-/connect-3.4.38.tgz#5ba7f3bc4fbbdeaff8dded952e5ff2cc53f8d858"
@@ -1578,7 +1587,7 @@
     "@types/range-parser" "*"
     "@types/send" "*"
 
-"@types/express-session@^1.19.0":
+"@types/express-session@*", "@types/express-session@^1.19.0":
   version "1.19.0"
   resolved "http://package-firewall.replit.local/npm/@types/express-session/-/express-session-1.19.0.tgz#571b48bd3c7b8176a9280d0d3533e239f74f4e26"
   integrity sha512-GbypG0bog68UbOq2tSAp7SclvCUm3ha1uDi58OPRGK1NfRvCIu7Gz0M7fTGtpNG1T9a29GpuurQj9zEcT/lMXQ==
@@ -1672,10 +1681,10 @@
   dependencies:
     "@types/express" "*"
 
-"@types/pg@^8.21.0":
-  version "8.21.0"
-  resolved "http://package-firewall.replit.local/npm/@types/pg/-/pg-8.21.0.tgz#338b10ccdce0cc0ca811bc7d7936268a61ac1ec8"
-  integrity sha512-AYdtudzabjLZgVgRZmAnU8bAnVUXzuJX2IYHeSIiIHm68olD+LgQYCGWdtcNYnP0uq9c4S4NibVG3Ni7VbKW7Q==
+"@types/pg@*", "@types/pg@^8.23.1":
+  version "8.23.1"
+  resolved "http://package-firewall.replit.local/npm/@types/pg/-/pg-8.23.1.tgz#7e712ce02cf44ad100862127f10f52e9c6b9d227"
+  integrity sha512-fKVHpikPdg4GKks3JuLEhvwSyvwzF23hnabPy6DD8ljVbC7+6J5dQzdv4arV6jqq57djnMgs1HKBxX4P8aBI3A==
   dependencies:
     "@types/node" "*"
     pg-protocol "*"
@@ -2371,6 +2380,13 @@ confusing-browser-globals@^1.0.10:
   version "1.0.11"
   resolved "https://registry.npmjs.org/confusing-browser-globals/-/confusing-browser-globals-1.0.11.tgz"
   integrity sha512-JsPKdmh8ZkmnHxDk55FZ1TqVLvEQTvoByJZRN9jzI0UjxK/QgAmsphz7PGtqgPieQZ/CQcHWXCR7ATDNhGe+YA==
+
+connect-pg-simple@^10.0.0:
+  version "10.0.0"
+  resolved "http://package-firewall.replit.local/npm/connect-pg-simple/-/connect-pg-simple-10.0.0.tgz#972b08d9fc6a1861c523a6c9166240a24b4bc3ca"
+  integrity sha512-pBGVazlqiMrackzCr0eKhn4LO5trJXsOX0nQoey9wCOayh80MYtThCbq8eoLsjpiWgiok/h+1/uti9/2/Una8A==
+  dependencies:
+    pg "^8.12.0"
 
 content-disposition@^1.0.0:
   version "1.1.0"
@@ -4899,7 +4915,7 @@ pg-types@2.2.0, pg-types@^2.2.0:
     postgres-date "~1.0.4"
     postgres-interval "^1.1.0"
 
-pg@^8.16.3, pg@^8.23.0, pg@^8.6.0:
+pg@^8.12.0, pg@^8.16.3, pg@^8.23.0, pg@^8.6.0:
   version "8.23.0"
   resolved "http://package-firewall.replit.local/npm/pg/-/pg-8.23.0.tgz#5c2026d32bd0cb4fbd9196bac1ecf5ae66607180"
   integrity sha512-Ip2EQCngowJLGOfCwkFhPXU7/ljlhn6Rxlmy4XYfL2Y+vyRM59+8uR2xqRWKdYmbXmxCFOAmKxBuSUCdF34qLg==

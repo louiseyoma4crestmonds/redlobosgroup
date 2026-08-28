@@ -60,8 +60,32 @@ vite.config.ts          # Vite configuration
 | `STRIPE_SECRET_KEY` | Stripe secret key | For payments |
 | `RESEND_API_KEY` | Sends customer password-reset and admin notification emails | For email delivery |
 | `PRODUCTION_URL` | Trusted public app origin used in production password-reset links | Production |
+| `DATABASE_URL` | PostgreSQL connection used for users, bookings, and persistent sessions | Production |
+| `DATABASE_SSL` | Use `true` for hosted PostgreSQL requiring SSL; use `false` for a local non-SSL PostgreSQL server | Ubuntu deployment |
+| `TRUST_PROXY` | Number of trusted reverse proxies; use `1` behind Nginx, `false` when Node is directly exposed | Ubuntu deployment |
+| `SESSION_COOKIE_SECURE` | Override secure session cookies; keep `true` behind HTTPS, use `false` only for HTTP testing | Optional |
 
 Google OAuth callback URL to register: `https://<your-domain>/api/auth/google/callback`
+
+### Ubuntu reverse-proxy authentication
+
+The production server uses secure cookies and a PostgreSQL session store. When running
+behind Nginx, forward the original protocol and host, set `TRUST_PROXY=1`, and serve
+the site over HTTPS:
+
+```nginx
+location / {
+    proxy_pass http://127.0.0.1:5000;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
+Run one production server process or use the shared PostgreSQL session store when
+using PM2 or another process manager. Do not use `SESSION_COOKIE_SECURE=false`
+on a public HTTP deployment.
 
 ## External API
 Property data is fetched client-side from `https://properties.redlobosgroup.com`.
