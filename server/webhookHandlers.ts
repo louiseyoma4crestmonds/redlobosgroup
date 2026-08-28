@@ -1,5 +1,5 @@
-import { getStripeSync } from './stripeClient';
-import pool from './db';
+import { getStripeSync } from "./stripeClient";
+import pool from "./db";
 
 async function upsertBookingFromSession(session: {
   id: string;
@@ -26,32 +26,42 @@ async function upsertBookingFromSession(session: {
       meta.checkOut,
       meta.guests ? parseInt(meta.guests, 10) : 1,
       session.amount_total ?? null,
-      session.currency ?? 'gbp',
+      session.currency ?? "gbp",
       session.id,
-      session.payment_status ?? 'paid',
+      session.payment_status ?? "paid",
     ]
   );
 }
 
 export class WebhookHandlers {
-  static async processWebhook(payload: Buffer, signature: string): Promise<void> {
+  static async processWebhook(
+    payload: Buffer,
+    signature: string
+  ): Promise<void> {
     if (!Buffer.isBuffer(payload)) {
       throw new Error(
-        'STRIPE WEBHOOK ERROR: Payload must be a Buffer. ' +
-        'Received type: ' + typeof payload + '. ' +
-        'Ensure webhook route is registered BEFORE app.use(express.json()).'
+        "STRIPE WEBHOOK ERROR: Payload must be a Buffer. " +
+          "Received type: " +
+          typeof payload +
+          ". " +
+          "Ensure webhook route is registered BEFORE app.use(express.json())."
       );
     }
 
     const sync = await getStripeSync();
-    const event = await sync.processWebhook(payload, signature);
+    const event = await (
+      sync.processWebhook as unknown as (
+        webhookPayload: Buffer,
+        webhookSignature: string
+      ) => Promise<unknown>
+    )(payload, signature);
 
     // Store confirmed bookings in our own DB
-    if (event && (event as any).type === 'checkout.session.completed') {
+    if (event && (event as any).type === "checkout.session.completed") {
       const session = (event as any).data?.object;
       if (session) {
         await upsertBookingFromSession(session).catch((err: Error) =>
-          console.error('Failed to store booking from webhook:', err.message)
+          console.error("Failed to store booking from webhook:", err.message)
         );
       }
     }

@@ -50,7 +50,10 @@ function App() {
           <Route path="/admin/accounts" element={<AdminAccounts />} />
           <Route path="/admin/properties/:id" element={<PropertyEdit />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+          <Route
+            path="/terms-and-conditions"
+            element={<TermsAndConditions />}
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </SessionProvider>

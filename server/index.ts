@@ -35,7 +35,9 @@ function parseTrustProxy(): number {
 
   const proxyCount = Number(configured);
   if (!Number.isInteger(proxyCount) || proxyCount < 0) {
-    throw new Error("TRUST_PROXY must be true, false, or a non-negative integer.");
+    throw new Error(
+      "TRUST_PROXY must be true, false, or a non-negative integer."
+    );
   }
   return proxyCount;
 }
@@ -57,20 +59,30 @@ async function initStripe() {
   }
   try {
     console.log("Initializing Stripe schema...");
-    await runMigrations({ databaseUrl, schema: "stripe" });
+    await runMigrations({ databaseUrl });
     console.log("✅ Stripe schema ready");
 
     const stripeSync = await getStripeSync();
-    const webhookBaseUrl = `https://${process.env.REPLIT_DOMAINS?.split(",")[0]}`;
-    await stripeSync.findOrCreateManagedWebhook(`${webhookBaseUrl}/api/stripe/webhook`);
+    const webhookBaseUrl = `https://${
+      process.env.REPLIT_DOMAINS?.split(",")[0]
+    }`;
+    await stripeSync.findOrCreateManagedWebhook(
+      `${webhookBaseUrl}/api/stripe/webhook`
+    );
     console.log("✅ Stripe webhook configured");
 
     // Backfill runs in background — don't block server startup
-    stripeSync.syncBackfill()
+    stripeSync
+      .syncBackfill()
       .then(() => console.log("✅ Stripe backfill complete"))
-      .catch((err: Error) => console.error("Stripe backfill error:", err.message));
+      .catch((err: Error) =>
+        console.error("Stripe backfill error:", err.message)
+      );
   } catch (err: any) {
-    console.error("⚠️  Stripe init failed (payments will be unavailable):", err.message);
+    console.error(
+      "⚠️  Stripe init failed (payments will be unavailable):",
+      err.message
+    );
   }
 }
 
@@ -153,7 +165,9 @@ async function createServer() {
       })
     : undefined;
   console.log(
-    `Session configuration: store=${sessionStore ? "postgres" : "memory"}, secureCookie=${sessionCookieSecure}, trustProxy=${trustProxy}`
+    `Session configuration: store=${
+      sessionStore ? "postgres" : "memory"
+    }, secureCookie=${sessionCookieSecure}, trustProxy=${trustProxy}`
   );
 
   app.use(
@@ -186,21 +200,23 @@ async function createServer() {
   // ── 5. Crawlability ────────────────────────────────────────────────────────
   app.get("/robots.txt", (req, res) => {
     const origin = getPublicOrigin(req);
-    res.type("text/plain").send(
-      [
-        "User-agent: *",
-        "Allow: /",
-        "Disallow: /admin",
-        "Disallow: /dashboard",
-        "Disallow: /signIn",
-        "Disallow: /reset-password",
-        "Disallow: /checkout",
-        "Disallow: /payment/",
-        "Disallow: /api/",
-        `Sitemap: ${origin}/sitemap.xml`,
-        "",
-      ].join("\n")
-    );
+    res
+      .type("text/plain")
+      .send(
+        [
+          "User-agent: *",
+          "Allow: /",
+          "Disallow: /admin",
+          "Disallow: /dashboard",
+          "Disallow: /signIn",
+          "Disallow: /reset-password",
+          "Disallow: /checkout",
+          "Disallow: /payment/",
+          "Disallow: /api/",
+          `Sitemap: ${origin}/sitemap.xml`,
+          "",
+        ].join("\n")
+      );
   });
 
   app.get("/sitemap.xml", async (req, res) => {
@@ -246,11 +262,17 @@ async function createServer() {
         const seoHtml = html
           .replace(
             /<!-- SEO_HEAD_START -->[\s\S]*?<!-- SEO_HEAD_END -->/,
-            `<!-- SEO_HEAD_START -->${renderSeoHead(req, pathname, search)}<!-- SEO_HEAD_END -->`
+            `<!-- SEO_HEAD_START -->${renderSeoHead(
+              req,
+              pathname,
+              search
+            )}<!-- SEO_HEAD_END -->`
           )
           .replace(
             /<!-- SEO_NOSCRIPT -->/,
-            `<noscript id="seo-noscript">${renderSeoNoscript(pathname)}</noscript>`
+            `<noscript id="seo-noscript">${renderSeoNoscript(
+              pathname
+            )}</noscript>`
           );
         if (!isKnownAppPath(pathname)) {
           res.status(404);

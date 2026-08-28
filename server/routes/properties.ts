@@ -33,8 +33,9 @@ router.get("/", async (_req: Request, res: Response) => {
 
 // GET /api/properties/:id — single property with amenities and images
 router.get("/:id", async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id, 10);
-  if (isNaN(id)) return res.status(400).json({ message: "Invalid property id" });
+  const id = parseInt(String(req.params.id), 10);
+  if (isNaN(id))
+    return res.status(400).json({ message: "Invalid property id" });
 
   try {
     const [propResult, amenitiesResult, imagesResult] = await Promise.all([
@@ -68,8 +69,9 @@ router.get("/:id", async (req: Request, res: Response) => {
 
 // GET /api/properties/:id/images
 router.get("/:id/images", async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id, 10);
-  if (isNaN(id)) return res.status(400).json({ message: "Invalid property id" });
+  const id = parseInt(String(req.params.id), 10);
+  if (isNaN(id))
+    return res.status(400).json({ message: "Invalid property id" });
 
   try {
     const result = await pool.query(
@@ -85,8 +87,9 @@ router.get("/:id/images", async (req: Request, res: Response) => {
 
 // GET /api/properties/:id/amenities
 router.get("/:id/amenities", async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id, 10);
-  if (isNaN(id)) return res.status(400).json({ message: "Invalid property id" });
+  const id = parseInt(String(req.params.id), 10);
+  if (isNaN(id))
+    return res.status(400).json({ message: "Invalid property id" });
 
   try {
     const result = await pool.query(
@@ -102,8 +105,9 @@ router.get("/:id/amenities", async (req: Request, res: Response) => {
 
 // GET /api/properties/:id/events — booked dates for the calendar
 router.get("/:id/events", async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id, 10);
-  if (isNaN(id)) return res.status(400).json({ message: "Invalid property id" });
+  const id = parseInt(String(req.params.id), 10);
+  if (isNaN(id))
+    return res.status(400).json({ message: "Invalid property id" });
 
   try {
     // Bookings are the source of truth. Expand each confirmed stay into one

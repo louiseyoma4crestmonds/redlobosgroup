@@ -125,6 +125,10 @@ export async function ensureAuthTables() {
       revoked_at TIMESTAMPTZ
     )
   `);
+  await pool.query(`
+    ALTER TABLE admin_users
+    ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  `);
 }
 
 export function getConfiguredAdminEmail(): string | undefined {

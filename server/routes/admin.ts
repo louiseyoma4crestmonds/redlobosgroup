@@ -285,7 +285,7 @@ router.get("/bookings", async (_req: Request, res: Response) => {
 
 // GET /api/admin/properties/:id — single property with amenities + images
 router.get("/properties/:id", async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) return res.status(400).json({ message: "Invalid id" });
 
   try {
@@ -334,7 +334,7 @@ router.post("/properties", async (req: Request, res: Response) => {
 
 // PUT /api/admin/properties/:id — update property details
 router.put("/properties/:id", async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) return res.status(400).json({ message: "Invalid id" });
 
   const { name, address, description, bedrooms, bathrooms, max_guests, price_per_night, is_available } = req.body;
@@ -358,7 +358,7 @@ router.put("/properties/:id", async (req: Request, res: Response) => {
 
 // DELETE /api/admin/properties/:id — delete property and all related data
 router.delete("/properties/:id", async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) return res.status(400).json({ message: "Invalid id" });
 
   try {
@@ -378,7 +378,7 @@ router.delete("/properties/:id", async (req: Request, res: Response) => {
 
 // POST /api/admin/properties/:id/amenities
 router.post("/properties/:id/amenities", async (req: Request, res: Response) => {
-  const propertyId = parseInt(req.params.id, 10);
+  const propertyId = parseInt(String(req.params.id), 10);
   const { name } = req.body;
   if (isNaN(propertyId) || !name) return res.status(400).json({ message: "Property id and name required" });
 
@@ -396,7 +396,7 @@ router.post("/properties/:id/amenities", async (req: Request, res: Response) => 
 
 // PUT /api/admin/properties/:id/amenities/:amenityId
 router.put("/properties/:id/amenities/:amenityId", async (req: Request, res: Response) => {
-  const amenityId = parseInt(req.params.amenityId, 10);
+  const amenityId = parseInt(String(req.params.amenityId), 10);
   const { name } = req.body;
   if (isNaN(amenityId) || !name) return res.status(400).json({ message: "Amenity id and name required" });
 
@@ -415,7 +415,7 @@ router.put("/properties/:id/amenities/:amenityId", async (req: Request, res: Res
 
 // DELETE /api/admin/properties/:id/amenities/:amenityId
 router.delete("/properties/:id/amenities/:amenityId", async (req: Request, res: Response) => {
-  const amenityId = parseInt(req.params.amenityId, 10);
+  const amenityId = parseInt(String(req.params.amenityId), 10);
   if (isNaN(amenityId)) return res.status(400).json({ message: "Invalid amenity id" });
 
   try {
@@ -431,7 +431,7 @@ router.delete("/properties/:id/amenities/:amenityId", async (req: Request, res: 
 
 // POST /api/admin/properties/:id/images
 router.post("/properties/:id/images", async (req: Request, res: Response) => {
-  const propertyId = parseInt(req.params.id, 10);
+  const propertyId = parseInt(String(req.params.id), 10);
   const { image_url, is_primary } = req.body;
   if (isNaN(propertyId) || !image_url) return res.status(400).json({ message: "Property id and image_url required" });
 
@@ -452,8 +452,8 @@ router.post("/properties/:id/images", async (req: Request, res: Response) => {
 
 // PUT /api/admin/properties/:id/images/:imageId — set as primary
 router.put("/properties/:id/images/:imageId", async (req: Request, res: Response) => {
-  const propertyId = parseInt(req.params.id, 10);
-  const imageId = parseInt(req.params.imageId, 10);
+  const propertyId = parseInt(String(req.params.id), 10);
+  const imageId = parseInt(String(req.params.imageId), 10);
   if (isNaN(propertyId) || isNaN(imageId)) return res.status(400).json({ message: "Invalid id" });
 
   try {
@@ -468,7 +468,7 @@ router.put("/properties/:id/images/:imageId", async (req: Request, res: Response
 
 // DELETE /api/admin/properties/:id/images/:imageId
 router.delete("/properties/:id/images/:imageId", async (req: Request, res: Response) => {
-  const imageId = parseInt(req.params.imageId, 10);
+  const imageId = parseInt(String(req.params.imageId), 10);
   if (isNaN(imageId)) return res.status(400).json({ message: "Invalid image id" });
 
   try {

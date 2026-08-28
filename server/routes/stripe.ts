@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import { getUncachableStripeClient } from "../stripeClient";
+import { upsertBookingFromSession } from "../webhookHandlers";
 import pool from "../db";
 
 const router = Router();
@@ -11,7 +12,12 @@ router.post("/create-checkout-session", async (req: Request, res: Response) => {
   try {
     stripe = await getUncachableStripeClient();
   } catch {
-    res.status(503).json({ message: "Stripe is not configured. Please connect Stripe via the Integrations tab." });
+    res
+      .status(503)
+      .json({
+        message:
+          "Stripe is not configured. Please connect Stripe via the Integrations tab.",
+      });
     return;
   }
 
@@ -24,7 +30,8 @@ router.post("/create-checkout-session", async (req: Request, res: Response) => {
   const currentUser = req.user as Record<string, unknown>;
   const userEmail = currentUser.email as string;
 
-  const { propertyId, propertyName, checkIn, checkOut, guests, totalAmount } = req.body;
+  const { propertyId, propertyName, checkIn, checkOut, guests, totalAmount } =
+    req.body;
 
   if (!propertyId || !checkIn || !checkOut || !guests) {
     res.status(400).json({ message: "Missing required fields." });
@@ -65,7 +72,8 @@ router.post("/create-checkout-session", async (req: Request, res: Response) => {
 
     if (overlappingBooking.rows.length > 0) {
       res.status(409).json({
-        message: "One or more selected dates are no longer available. Please choose different dates.",
+        message:
+          "One or more selected dates are no longer available. Please choose different dates.",
       });
       return;
     }
@@ -93,7 +101,9 @@ router.post("/create-checkout-session", async (req: Request, res: Response) => {
         )
       );
       const subtotal = pricePerNight * nights;
-      unitAmountPence = Math.round((subtotal + Math.round(subtotal * 0.12)) * 100);
+      unitAmountPence = Math.round(
+        (subtotal + Math.round(subtotal * 0.12)) * 100
+      );
     }
 
     const host = req.headers.origin || `${req.protocol}://${req.get("host")}`;
@@ -113,7 +123,9 @@ router.post("/create-checkout-session", async (req: Request, res: Response) => {
             currency: "gbp",
             product_data: {
               name: propertyName || "Property Reservation",
-              description: `${guests} guest${Number(guests) > 1 ? "s" : ""} · ${fmt(checkIn)} → ${fmt(checkOut)}`,
+              description: `${guests} guest${
+                Number(guests) > 1 ? "s" : ""
+              } · ${fmt(checkIn)} → ${fmt(checkOut)}`,
             },
             unit_amount: unitAmountPence,
           },
@@ -164,7 +176,6 @@ router.get("/checkout-session", async (req: Request, res: Response) => {
 
     // Persist booking to DB (idempotent — covers dev where webhooks may not fire)
     if (session.payment_status === "paid") {
-      const { upsertBookingFromSession } = await import("../webhookHandlers");
       await upsertBookingFromSession({
         id: session.id,
         metadata: session.metadata as Record<string, string> | null,
