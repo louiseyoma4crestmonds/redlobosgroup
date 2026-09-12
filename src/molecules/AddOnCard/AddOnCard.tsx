@@ -5,6 +5,7 @@ import Heading from "@/atoms/Heading";
 
 interface AddOnCardProps {
   id: number;
+  title:string;
   src: string;
   des: string;
   btnText: string;
@@ -12,7 +13,7 @@ interface AddOnCardProps {
 
 function AddOnCard(props: AddOnCardProps): JSX.Element {
   const navigate = useNavigate();
-  const { src, des, btnText, id } = props;
+  const { src, des, btnText, id, title } = props;
 
   return (
     <div className="grid gap-5 tablet:gap-20 justify-center items-center tablet:grid-cols-2">
@@ -24,13 +25,16 @@ function AddOnCard(props: AddOnCardProps): JSX.Element {
         className="w-full h-auto object-cover rounded-2xl shadow-md hover:rounded-2xl transition-transform duration-500"
       />
 
-      <div className="space-y-6 text-center tablet:text-left">
+      <div className="space-y-6 text-center">
         <Heading Tag="h2" variant="xl" mode="light">
+          {title}
+        </Heading>
+        <Heading Tag="h2" variant="md" mode="light">
           {des}
         </Heading>
 
         <Button
-          variant="primary"
+          variant="secondary"
           width="full"
           onClick={() => navigate(`/addOn/${id}`)}
         >

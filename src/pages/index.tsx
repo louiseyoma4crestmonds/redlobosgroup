@@ -176,7 +176,7 @@ function Home(): JSX.Element {
                   <ZoomInDiv>
                     <Heading Tag="h1" variant="lg">
                       <span className="text-center">
-                        SERVICE ACCOMMODATION &amp; PROPERTY DEVELOPMENT
+                        HOSPITALITY, PROPERTY & LIFESTYLE SERVICES
                       </span>
                     </Heading>
                   </ZoomInDiv>
@@ -185,24 +185,23 @@ function Home(): JSX.Element {
                 <div>
                   <ZoomInDiv>
                     <p className="text-gray1 leading-8">
-                      Red Lobos group ltd provides accommodation for long and
-                      short business trips, tourist, families, English Summer
-                      holiday school for students, tailored holiday experience,
-                      relocators.
+                      Red Lobos Group Ltd provides tailored hospitality and property solutions, 
+                      from short and long-stay accommodation and property management to interior 
+                      styling, curated experiences and creative spaces.
                     </p>
                   </ZoomInDiv>
                 </div>
                 <div className="w-full flex place-content-center">
                   <div className="w-3/5">
                     <Button
-                      variant="gold"
+                      variant="secondary"
                       width="full"
                       onClick={() => {
                         navigate("/properties");
                       }}
                     >
                       <span
-                        className="w-full text-gold text-center"
+                        className="w-full text-center"
                         tabIndex={0}
                         role="button"
                         onKeyDown={() => {}}
@@ -233,7 +232,7 @@ function Home(): JSX.Element {
               <div className="py-8 space-y-6">
                 <div className="tablet:flex tablet:place-content-center">
                   <div className="w-full space-y-4 tablet:w-8/12">
-                    <div>OUR ADD-ON SERVICES</div>
+                    <div />
                     <div>
                       <Heading Tag="h2" variant="lg">
                         <span className="text-center">
@@ -245,10 +244,11 @@ function Home(): JSX.Element {
                 </div>
 
                 <div className="py-16 space-y-16">
-                  {addOnBrief?.map(({ image, description, btn_text, id }) => (
+                  {addOnBrief?.map(({ image, description, btn_text, id, title }) => (
                     <div key={id}>
                       <AddOnCard
                         src={image}
+                        title={title}
                         des={description}
                         id={id}
                         btnText={btn_text}
